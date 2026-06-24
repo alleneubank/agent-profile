@@ -6,9 +6,8 @@
     "name": "Allen Eubank",
     "email": "bigboss@metalrodeo.xyz"
   },
-  "repository": "https://github.com/0xBigBoss/agent-profile",
+  "repository": "https://github.com/alleneubank/agent-profile",
   "skills": "./skills",
   "license": "MIT",
   "keywords": ["skills", "workflow", "agents", "codex", "claude"]
 }
-

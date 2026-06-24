@@ -19,6 +19,13 @@ Private notes do not belong in this repo. Use `~/.codex/AGENTS.override.md`,
 
 ## Install
 
+Clone the profile repo from GitHub:
+
+```bash
+git clone https://github.com/alleneubank/agent-profile.git ~/.agent-profile
+cd ~/.agent-profile
+```
+
 Check current runtime state:
 
 ```bash
@@ -40,19 +47,19 @@ refuses to replace it. To back it up and replace it with the repo symlink:
 
 ## Marketplace Commands
 
-The installer registers local marketplaces during `--fix` only when doing so
-will not mutate a config file owned by another git worktree. On this machine,
-Codex stores plugin state in a config symlinked into the old dotfiles repo, so
-Codex marketplace registration is intentionally left as a manual boundary.
+The installer registers local marketplaces during `--fix` only when doing so will
+not mutate a config file owned by another git worktree. Manual marketplace
+commands are useful when installing directly from GitHub or when you want plugin
+installation separate from instruction-file setup.
 
-Manual commands are useful for smoke testing or remote installs:
+Install plugins from GitHub:
 
 ```bash
-codex plugin marketplace add /home/ae/0xbigboss/agent-profile
+codex plugin marketplace add alleneubank/agent-profile
 codex plugin add engineering-practices@agent-profile
 codex plugin add agent-workflows@agent-profile
 
-claude plugin marketplace add /home/ae/0xbigboss/agent-profile
+claude plugin marketplace add alleneubank/agent-profile
 claude plugin install engineering-practices@agent-profile
 claude plugin install agent-workflows@agent-profile
 ```

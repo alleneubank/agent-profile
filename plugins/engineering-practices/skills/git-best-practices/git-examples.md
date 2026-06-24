@@ -58,12 +58,12 @@ Fixes SEND-718
 Submodule update with downstream commit info:
 
 ```
-chore(submodule): update claude-code
+chore(submodule): update shared-docs
 
-Bump claude-code to 88d0c75 (feat(skills): add tiltup, specalign, and e2e skills).
+Bump shared-docs to 88d0c75 (docs(api): document webhook retries).
 ```
 
-For trivial bumps, `bump` or `bump claude-code submodule` is acceptable.
+For trivial bumps, `bump` or `bump shared-docs submodule` is acceptable.
 </example>
 
 <example name="breaking-change">

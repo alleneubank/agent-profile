@@ -125,7 +125,7 @@ Note: `config.allowUnfree` in flake.nix doesn't work with `nix develop` - use ni
 
 When nixpkgs builds a community version lacking features (common with open-core tools), create an overlay that fetches official binaries.
 
-### Pattern (see 0xBigBoss/atlas-overlay, 0xBigBoss/bun-overlay)
+### Pattern
 
 ```nix
 {
