@@ -1,0 +1,33 @@
+{
+  "name": "agent-profile",
+  "interface": {
+    "displayName": "Agent Profile"
+  },
+  "plugins": [
+    {
+      "name": "engineering-practices",
+      "source": {
+        "source": "local",
+        "path": "./plugins/engineering-practices"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "agent-workflows",
+      "source": {
+        "source": "local",
+        "path": "./plugins/agent-workflows"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
+

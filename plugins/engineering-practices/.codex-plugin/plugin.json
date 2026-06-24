@@ -1,0 +1,27 @@
+{
+  "name": "engineering-practices",
+  "version": "1.0.0",
+  "description": "Language, tooling, and delivery-practice skills for agentic coding.",
+  "author": {
+    "name": "Allen Eubank",
+    "email": "bigboss@metalrodeo.xyz"
+  },
+  "repository": "https://github.com/0xBigBoss/agent-profile",
+  "skills": "./skills",
+  "license": "MIT",
+  "keywords": ["skills", "engineering", "codex", "claude"],
+  "interface": {
+    "displayName": "Engineering Practices",
+    "shortDescription": "Language and tooling skills for coding agents",
+    "longDescription": "Reusable engineering-practice skills for language idioms, tests, git, specs, briefs, and tool-specific workflows.",
+    "developerName": "Allen Eubank",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Apply the right language best-practice skill",
+      "Use spec and brief guidance for this change",
+      "Review git workflow constraints before committing"
+    ]
+  }
+}
+

@@ -1,0 +1,14 @@
+{
+  "name": "engineering-practices",
+  "version": "1.0.0",
+  "description": "Language, tooling, and delivery-practice skills for agentic coding.",
+  "author": {
+    "name": "Allen Eubank",
+    "email": "bigboss@metalrodeo.xyz"
+  },
+  "repository": "https://github.com/0xBigBoss/agent-profile",
+  "skills": "./skills",
+  "license": "MIT",
+  "keywords": ["skills", "engineering", "codex", "claude"]
+}
+

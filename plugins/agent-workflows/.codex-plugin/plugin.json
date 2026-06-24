@@ -1,0 +1,27 @@
+{
+  "name": "agent-workflows",
+  "version": "1.0.0",
+  "description": "Reusable planning, handoff, verification, and workflow skills for agents.",
+  "author": {
+    "name": "Allen Eubank",
+    "email": "bigboss@metalrodeo.xyz"
+  },
+  "repository": "https://github.com/0xBigBoss/agent-profile",
+  "skills": "./skills",
+  "license": "MIT",
+  "keywords": ["skills", "workflow", "agents", "codex", "claude"],
+  "interface": {
+    "displayName": "Agent Workflows",
+    "shortDescription": "Reusable workflow skills for coding agents",
+    "longDescription": "Workflow skills for handoffs, planning, review routing, issue triage, e2e improvement, and safe autonomous execution.",
+    "developerName": "Allen Eubank",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Write a self-contained handoff",
+      "Plan this work before implementation",
+      "Improve the e2e baseline with a verified loop"
+    ]
+  }
+}
+

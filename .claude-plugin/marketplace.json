@@ -1,0 +1,34 @@
+{
+  "name": "agent-profile",
+  "description": "Shared agent instructions and installable workflow/practice skills for Claude Code and Codex CLI.",
+  "owner": {
+    "name": "Allen Eubank",
+    "email": "bigboss@metalrodeo.xyz"
+  },
+  "plugins": [
+    {
+      "name": "engineering-practices",
+      "source": "./plugins/engineering-practices",
+      "description": "Language, tooling, and delivery-practice skills for agentic coding.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Allen Eubank",
+        "email": "bigboss@metalrodeo.xyz"
+      },
+      "keywords": ["skills", "engineering", "codex", "claude"],
+      "category": "developer-tools"
+    },
+    {
+      "name": "agent-workflows",
+      "source": "./plugins/agent-workflows",
+      "description": "Reusable planning, handoff, verification, and workflow skills for agents.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Allen Eubank",
+        "email": "bigboss@metalrodeo.xyz"
+      },
+      "keywords": ["skills", "workflow", "agents", "codex", "claude"],
+      "category": "workflow"
+    }
+  ]
+}
