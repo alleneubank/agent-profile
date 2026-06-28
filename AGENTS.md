@@ -189,6 +189,7 @@ Load the relevant best-practices skill when working with a supported language or
 | React (`.tsx`, `.jsx`, `@react` imports) | react-best-practices |
 | Go (`.go`, `go.mod`) | go-best-practices |
 | Zig (`.zig`, `build.zig`) | zig-best-practices |
+| Rust (`.rs`, `Cargo.toml`) | rust-best-practices |
 | Playwright (`.spec.ts`, `.test.ts` with `@playwright/test`) | playwright-best-practices |
 | Tilt (`Tiltfile`, tilt commands) | tilt |
 | Tamagui (`tamagui.config.ts`, `@tamagui` imports) | tamagui-best-practices |
