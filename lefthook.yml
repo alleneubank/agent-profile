@@ -1,0 +1,21 @@
+# https://github.com/evilmartians/lefthook
+#
+# Installed into this submodule's git dir (.git/modules/agent-profile/hooks) by
+# the superproject install.sh (init_lefthook). pre-push is the gate: it runs the
+# full manifest validation (including the claude<->codex parity check) so a push
+# can't ship mismatched plugin manifests. Hooks are bypassable with --no-verify;
+# CI is the real backstop.
+#
+# `validate` has no glob, so on a real push (non-empty push file set) it always
+# runs and checks the whole manifest tree; `shellcheck` only fires on pushed
+# *.sh. To exercise the gate manually use `lefthook run pre-push --all-files`
+# (the bare `lefthook run pre-push` skips both when there is nothing to push).
+
+pre-push:
+  parallel: true
+  commands:
+    validate:
+      run: scripts/validate.sh
+    shellcheck:
+      glob: "*.sh"
+      run: shellcheck --severity=error {push_files}
