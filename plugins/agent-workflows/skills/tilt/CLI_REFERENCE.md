@@ -148,11 +148,28 @@ tilt disable --labels=frontend    # Disable by label
 
 ### Change Tiltfile Args
 
+`tilt args` sets the running Tiltfile's argument list — `config.parse()` values and the
+default set of enabled resources. Documented shape: enabled resources before `--`,
+`config.parse()` flags after it — `tilt args [resources] -- [--flag=value ...]`.
+
 ```bash
-tilt args -- --env=staging
+# Read current args (non-interactive)
+tilt get tiltfiles -o json | jq -r '.items[].spec.args'
+
+# Set args — REPLACES the whole set, does not append. Resources before `--`, flags after.
+tilt args frontend backend -- --env=staging
+
+# Clear all args
+tilt args --clear
 ```
 
-Updates args for running Tilt instance.
+**Never run bare `tilt args`** (no arguments): it opens `$TILT_EDITOR`/`$EDITOR` (or an OS
+default editor) and blocks until that editor exits — hanging non-interactive/agent shells.
+Because `tilt args` replaces the full set, read the current args first and re-apply them
+plus your change. The `--` only protects `--flags` from the CLI's own parser; a
+`config.parse()` Tiltfile parses flags vs positionals regardless of order, so re-applying
+the tokens you read back round-trips. Optionally `export TILT_EDITOR=true` as a guard
+against accidental bare invocations.
 
 ## Wait Conditions
 

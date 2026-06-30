@@ -72,6 +72,37 @@ tilt up                             # Start
 tilt down                           # Stop and clean up
 ```
 
+## Tiltfile Args — Never Open the Editor
+
+`tilt args` controls the running Tiltfile's argument list: `config.parse()` values
+(e.g. `--with-data-api=true`) and, by default, which resources are enabled.
+
+**Bare `tilt args` opens `$TILT_EDITOR`/`$EDITOR` (or an OS default like VS Code) and
+blocks** — the command hangs waiting for the editor to close, stranding the agent.
+Always pass args explicitly.
+
+`tilt args` **replaces the entire arg set — it does not append.** Read the current
+args first, then set the full new set, following the documented shape — enabled
+resources before `--`, `config.parse()` flags (`--flag=value`) after it:
+
+```bash
+# 1. Read current args (non-interactive — editor is never opened)
+tilt get tiltfiles -o json | jq -r '.items[].spec.args'
+
+# 2. Set the FULL replacement set: resources before `--`, flags after
+tilt args playwright:deps -- --with-data-api=true --data-api-path=../canton-data-api
+
+# Clear all args (back to defaults)
+tilt args --clear
+```
+
+The `--` only stops the CLI from reading `--flags` as `tilt args`'s own flags; a
+`config.parse()` Tiltfile parses flags/positionals regardless of order, so re-applying
+the tokens you read back round-trips. To toggle a single resource without rewriting
+config values, prefer `tilt enable <r>` / `tilt disable <r>` over editing the args list.
+
+Guard: `export TILT_EDITOR=true` so a stray bare `tilt args` exits instead of hanging.
+
 ## Running tilt up
 
 Follow `zmx` skill patterns — check for existing sessions, derive name from git root, use `zmx run` (not attach):
