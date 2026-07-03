@@ -53,7 +53,7 @@ The harness is the mechanism that runs the brief's floors and emits pass/fail **
 - **Faithful** — measures the real goal, not a gameable proxy. The deepest trap: a loop optimizes its verifier, so a verifier that isn't the goal yields a polished *wrong* thing.
 - **Cheap and fast** — seconds-per-look. Slow verification starves the loop and you fall back to guessing.
 - **Independent** — the maker never grades its own work. Objective floors run in the harness; subjective dimensions go to the brief's **oracle** — a fresh, disinterested judge that may wrap the harness where a check can't decide.
-- **Fail-closed** — a verifier that silently passes when it could not actually check manufactures false confidence; that is worse than none.
+- **Fail-closed** — a verifier that silently passes when it could not actually check manufactures false confidence; that is worse than none. This binds the oracle too: if the independent verifier is unavailable, broken, or bypassed (broker down, gate disabled, review skipped), the loop is `blocked`, not `done`. Self-review may inform the work but is never reported as independent — disabling the gate to declare success is the fail-open this rule forbids.
 
 Discipline:
 
@@ -82,6 +82,7 @@ The **interior/boundary partition** is what makes "autonomous" real. Maximize th
 
 - **A mid-loop `AskUserQuestion` is a brief defect, not a normal pause.** Attended: answer it, then write the answer into the brief's Decisions so it never recurs. Unattended: never freeze on one question — *accumulate* questions and terminate as `blocked: needs N decisions` with the list. Batch, don't block on question #1.
 - **Publish is always the human's** — push, PR, merge, deploy, and anything irreversible or outward-facing. Running verification is the loop's job (red CI is just the loop continuing); shipping is not. The loop should be structurally incapable of tripping a biometric, a live-secret unlock, or a publish mid-flight.
+- **Publish authorization is per-artifact and literal.** An approval to push/merge/release covers only the named artifact; a follow-up PR — even in the same fix chain — resets the boundary. Before executing a publish, restate the concrete artifact list (branch, PR, tag, release) about to be acted on. The converse binds equally: when the request itself names a publish outcome ("open the PR", "cut the release"), that request *is* the authorization — carry the interior straight through to it; do not re-refuse a publish the human already ordered.
 - **Provision the interior up front** — deterministic harness, decisions pre-made in the brief, scoped read-credentials if genuinely needed — so the loop can run start-to-terminal without needing the human mid-flight.
 
 ## Agentic delivery flow
@@ -96,7 +97,7 @@ The ADF is the macro verified loop. Agent owns `SPEC → PLAN → TDD → DEV �
 - Gates:
   - SPEC: IDs, invariants, non-goals, acceptance criteria. Risk tags when high-risk items exist. Load `spec-best-practices`. File named `SPEC.md`, colocated.
   - PLAN: task graph with files/types/tests and risk classification.
-  - TDD: failing tests first.
+  - TDD: a new test is observed red against the pre-fix tree before the fix lands — run it and cite the red output; a test first seen green proves nothing about what it guards.
   - DEV: local environment boots; health checks pass.
   - E2E: happy path and failure modes pass against live dev environment.
 
@@ -129,6 +130,7 @@ Treat secret safety as a hard requirement. Secrets are part of the Boundary — 
 - Pipe from secret manager to stdin: `op read <ref> | <command-that-reads-stdin>`.
 - If a tool only accepts argv/env/file plaintext, stop and ask for an approved alternative.
 - Redact suspected secrets immediately if they appear in output.
+- Never resolve a push or auth failure by mutating global credential config — no `gh auth setup-git`, no added https credential helper, no widened agent cache. A hung ssh-agent, an unmet biometric, or a pending 1Password approval is a Boundary event: surface it and stop, never reroute around it.
 
 ## Type-first development
 
@@ -145,7 +147,7 @@ Types are the cheapest verifier: the compiler is free, instant, and always on. P
 
 ## Test integrity
 
-This is harness faithfulness in practice. Tests verify correctness — they do not define the solution. When tests fail, investigate root cause and fix the underlying issue. Do not hard-code values, weaken assertions, or game around tests. If a test appears incorrect, report the issue.
+This is harness faithfulness in practice. Tests verify correctness — they do not define the solution. When tests fail, investigate root cause and fix the underlying issue. Do not hard-code values, weaken assertions, or game around tests. If a test appears incorrect, report the issue. A fix that closes an independent-review finding still owes an observed red: the reviewer's code-level judgment locates the bug but does not reproduce it, and a green-only test can hide a fix that never touched the real failure.
 
 ## Test realism
 
