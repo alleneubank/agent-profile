@@ -130,6 +130,15 @@ Sometimes useful data isn't on the typed commands. Examples:
   any) is being honored.
 - `gh auth status --json` is supported.
 
+## Outward text discipline
+
+Issue bodies, PR descriptions, review comments, and release notes are published
+claims. Every factual statement in them — counts, "CI is green", "fixed X",
+file/line references, benchmark deltas — must come from a source verified this
+session (command output, file read, API response) or be explicitly labeled as
+inference ("likely", "appears to"). Verify referenced identifiers (issue/PR
+numbers, commit SHAs) resolve before linking them.
+
 ## Other notes
 
 - `gh pr checkout <n>` switches branches. Use `gh pr diff <n>` or
