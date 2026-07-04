@@ -49,6 +49,14 @@ Every e2e failure is exactly one of:
 
 E2e test fixes must not change application logic, API contracts, database schemas, or configuration defaults. The only exception: bug fixes where a spec explicitly defines the correct behavior and unit tests cover the fix.
 
+## Human Retest Ladder
+
+The human is the most expensive verifier — spend them last, and once.
+
+1. Trace a reported failure downstream with tooling first: API probes (curl/grpcurl), database reads, service logs, targeted test runs.
+2. Fix everything tooling can find before asking the human to manually retest; each retest round costs their attention and a context switch.
+3. When a manual pass is genuinely needed (visual, UX, device-specific), batch every open check into one request with concrete steps — never serial one-fix-one-retest rounds.
+
 ## Workflow
 
 ### Step 1: Discover Test Infrastructure

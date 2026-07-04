@@ -21,6 +21,17 @@ interactive approval.
 - Commands that trigger 1Password, SSH agent, Touch ID, sudo, browser prompts, or new auth flows.
 - Secret reads unless a safe noninteractive path was already provisioned.
 
+## Missing Directive
+
+When the directive artifact (task file, handoff, brief) is missing, or a
+decision arises that it does not cover:
+
+- Derive scope from committed artifacts first: handoffs, specs, the task list,
+  recent commit messages.
+- If scope still cannot be derived, terminate blocked with the accumulated
+  questions listed. Never fire interactive questions mid-loop, and never
+  invent scope.
+
 ## Done State
 
 End with either passing local checks and only publish/push remaining, a clear
