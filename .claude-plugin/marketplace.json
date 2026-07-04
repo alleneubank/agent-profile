@@ -10,7 +10,7 @@
       "name": "engineering-practices",
       "source": "./plugins/engineering-practices",
       "description": "Language, tooling, and delivery-practice skills for agentic coding.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Allen Eubank",
         "email": "bigboss@metalrodeo.xyz"
