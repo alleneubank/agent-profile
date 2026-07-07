@@ -8,6 +8,11 @@ description: Use when preserving enough task context for another agent or future
 Create a concise, standalone handoff in `~/.handoffs/` when work is incomplete,
 blocked, or ready for another agent to pick up.
 
+A ship/pivot/wait moment is a session boundary: right after a merge, release,
+or prod-verify, or when work is blocked upstream, prefer minting a handoff and
+starting fresh over compacting — the next session opens with this artifact
+instead of inherited sprawl.
+
 ## Workflow
 
 1. Gather only the facts needed to continue:
@@ -34,9 +39,13 @@ blocked, or ready for another agent to pick up.
 
 1. ...
 
-## Verification
+## Acceptance / Verification
 
-- ...
+- <every check that counts as done: flows to drive, Tiltfile bumps, e2e floors>
+
+## Decisions
+
+- <pre-made calls so the next session never re-asks>
 
 ## Blockers or boundaries
 
@@ -45,6 +54,12 @@ blocked, or ready for another agent to pick up.
 
 ## Rules
 
+- **"Acceptance / Verification" and "Decisions" are mandatory.** A handoff
+  missing either fails this skill's own gate — do not write it without them.
+  Acceptance lists every check that counts as done (flows to drive, Tiltfile
+  bumps, e2e floors), stated as evidence to show, not activities to perform.
+  Decisions carries the calls already made so the receiving session inherits
+  them instead of re-asking.
 - Link to specs and docs instead of paraphrasing long context.
 - Keep the handoff short enough to scan; target 60-100 lines.
 - Do not include secrets or pasted secret values.

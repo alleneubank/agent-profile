@@ -51,6 +51,13 @@ tilt get uiresource/<name> -o json
 tilt wait --for=condition=Ready uiresource/<name> --timeout=120s
 ```
 
+**One bounded wait, not a poll loop.** When waiting for a resource to
+converge, use a single blocking `tilt wait --for=<condition> --timeout=<t>`
+per resource — never a series of `tilt get` status polls. A second identical
+status check that returned no new information is a defect; the only re-check
+that earns its keep is the `in_progress` re-poll above, which exists to catch
+the transition to `error`.
+
 **Status values:**
 - RuntimeStatus: `ok`, `error`, `pending`, `none`, `not_applicable`
 - UpdateStatus: `ok`, `error`, `pending`, `in_progress`, `none`, `not_applicable`

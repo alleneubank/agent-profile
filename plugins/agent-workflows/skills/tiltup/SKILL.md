@@ -71,20 +71,26 @@ For silo projects: `silo up` instead of `tilt up`.
 
 ### Step 3: Monitor Bootstrap
 
-Poll for convergence:
+Block on convergence — one bounded wait, not a foreground poll loop
+(a repeated status check that returns no new information is a defect):
 1. Wait 10s for initial resource registration
-2. Poll every 15s, up to 20 iterations. Include docker-compose container health
-   (`composeResourceInfo.healthStatus`) — an `Up (unhealthy)` compose container
-   keeps `runtimeStatus=ok` and is otherwise invisible, so bootstrap can look
-   "done" while canton/splice/postgres are silently failing their HEALTHCHECK:
+2. Issue one blocking bounded wait per resource:
+   ```bash
+   tilt get uiresources -o json | jq -r '.items[].metadata.name' | \
+     xargs -I{} tilt wait --for=condition=Ready 'uiresource/{}' --timeout=300s
+   ```
+3. `tilt wait` does not see docker-compose HEALTHCHECK state — an
+   `Up (unhealthy)` compose container keeps `runtimeStatus=ok` and is otherwise
+   invisible, so bootstrap can look "done" while canton/splice/postgres are
+   silently failing their HEALTHCHECK. Follow the wait with ONE health sweep:
    ```bash
    tilt get uiresources -o json | jq -r '.items[] | select(.status.runtimeStatus == "error" or .status.updateStatus == "error" or .status.updateStatus == "pending" or .status.composeResourceInfo.healthStatus == "unhealthy") | "\(.metadata.name): runtime=\(.status.runtimeStatus) update=\(.status.updateStatus) compose=\(.status.composeResourceInfo.healthStatus // "-")"'
    ```
-3. Track resources: `pending` -> `in_progress` -> `ok`
-4. Success: all resources reach `runtime=ok, update=ok` (or `not_applicable`)
-   AND no docker-compose resource is `composeResourceInfo.healthStatus == "unhealthy"`
-5. If resources stabilize in `error`, OR a compose resource stays `unhealthy`,
-   proceed to Step 4. For an unhealthy compose probe, read the real cause with
+4. Success: every wait returned Ready AND the sweep reports no `error`,
+   stuck-`pending`, or `unhealthy` compose resource
+5. If a wait times out, a resource stabilizes in `error`, OR a compose resource
+   stays `unhealthy`, proceed to Step 4. For an unhealthy compose probe, read
+   the real cause with
    `docker inspect <compose-project>-<svc> --format '{{json .State.Health}}'` —
    often the mounted healthcheck script calls a CLI the image lacks (the service
    is up; fix the probe script, don't disable the check)
