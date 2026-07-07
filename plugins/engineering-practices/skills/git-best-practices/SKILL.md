@@ -161,6 +161,16 @@ Use repo-native PR tooling (`gh pr create`, GitLab CLI, or web UI) with:
 - Summary section with 1-3 bullet points
 - Test plan as a bulleted checklist
 
+### Merge Readiness
+
+- A PR is "mergeable" only with zero unresolved review threads; query them via
+  the API before claiming it (see the `gh` skill for mechanics) — green checks
+  alone do not clear it.
+- Never volunteer an admin/bypass merge; branch protection is the human's gate.
+- PR description edits are destructive by default (`gh pr edit --body`
+  replaces wholesale): fetch the current body, merge additively, show the
+  proposed body before writing.
+
 ### History Rewriting Before PR
 
 For branches with messy WIP history, use `/rewrite-history` to:

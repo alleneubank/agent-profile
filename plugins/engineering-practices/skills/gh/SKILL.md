@@ -130,6 +130,27 @@ Sometimes useful data isn't on the typed commands. Examples:
   any) is being honored.
 - `gh auth status --json` is supported.
 
+## PR state and destructive edits
+
+- A PR is not mergeable while unresolved review threads remain, whatever the
+  checks say. `gh pr view --json` does not expose thread resolution — query it
+  before claiming a PR is ready:
+
+  ```bash
+  gh api graphql -F owner='{owner}' -F repo='{repo}' -F pr=<n> -f query='
+    query($owner:String!,$repo:String!,$pr:Int!){
+      repository(owner:$owner,name:$repo){
+        pullRequest(number:$pr){
+          reviewThreads(first:100){nodes{isResolved}}}}}' \
+    --jq '[.data.repository.pullRequest.reviewThreads.nodes[]|select(.isResolved|not)]|length'
+  ```
+- Never volunteer `gh pr merge --admin` (or any protection bypass) as a way
+  past failing checks or branch rules; use it only when the human explicitly
+  orders the bypass.
+- `gh pr edit --body` replaces the description wholesale — treat it as
+  destructive. Fetch the current body (`gh pr view --json body`), merge your
+  change additively, and show the proposed body before writing.
+
 ## Outward text discipline
 
 Issue bodies, PR descriptions, review comments, and release notes are published

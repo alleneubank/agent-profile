@@ -13,6 +13,8 @@ It is the **BRIEF** rung in the stack `VISION → SPEC → BRIEF → HARNESS →
 
 Author or update a brief when work will **loop** (you'll iterate against it more than once) or when the **cost of being wrong is high**. Trivial, one-shot changes need no brief — do not manufacture ceremony. Build cheap verifiers freely; *propose* an expensive brief+harness before investing in it.
 
+Subjective surfaces (a docs page, a report, a visual artifact) get a **mini-brief** before the first draft: one reference to mirror plus a 3-line never-list. Capture any post-hoc taste correction into that surface's Decisions the same session — an uncodified correction recurs.
+
 ## Naming & placement
 
 Always `BRIEF.md`, colocated with the surface it governs: root for project scope, `apps/foo/BRIEF.md`, `packages/bar/BRIEF.md`, or a docs subtree (e.g. `docs/toys/BRIEF.md`). Dated working memory lives **beside** the brief, never inside it — e.g. `DELTA.md` (per-round gaps, ranked) and `DEVIATIONS.md` (infeasible → nearest-feasible, logged). The brief is present-tense law; git is the changelog.

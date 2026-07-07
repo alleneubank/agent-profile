@@ -50,6 +50,8 @@ Specs are freeform markdown. No rigid template, no YAML frontmatter, no required
 
 **Retroactive specs are first-class**: documenting existing behavior is valid and encouraged. Read the implementation, extract requirements from actual behavior, note inconsistencies as open items (not silent omissions), map traceability to existing tests.
 
+**External-API integrations**: before locking requirements for an integration with an external provider, run a recall sweep for prior findings on that provider/API and fetch the provider's current docs — do not spec against remembered API shapes; deprecations and legacy endpoints invalidate them. Treat unexplained existing config (keys, scopes, endpoints) as an investigation trigger, not dead code.
+
 **Mutation policy**: do not edit a spec without explicit user direction. When spec/implementation drift is found, surface it immediately. Never silently tolerate or fix drift — the user decides whether to update spec or code.
 
 **Spec vs. plan**: specs describe what and why; plans describe how and when. Plans are ephemeral. Absorb durable decisions into the spec; delete the plan doc.
