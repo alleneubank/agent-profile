@@ -62,6 +62,7 @@ Discipline:
 - **Authority.** Build cheap verifiers freely; *propose* an expensive harness before building it.
 - **Run against a deterministic proxy.** The harness stands in for the live system; investigating the live system is a final-gate, human-attended activity (see Test realism), not a loop activity. A loop that needs live secrets to verify is built at the wrong altitude.
 - Discover the project's existing harness first (repo task runner/scripts → repo docs → project defaults → ask), and run it before claiming done.
+- **Done claims carry evidence.** A done/ready claim names the verifier that ran and cites its output. An authored-but-unexecuted verifier is flagged "authored, NOT run" — it is never counted as a pass. A prompt or handoff with a verify/monitor/rollout phase states the gate as evidence shown before "done."
 
 ## The loop — bounded iteration
 
@@ -69,7 +70,8 @@ Act → run the harness → orient on the evidence (where am I vs. the floor? wh
 
 - **Bounded.** Every autonomous loop has a budget (cycles, time, or tokens) and explicit terminal states: `done` (floors pass), `budget-exhausted`, or `blocked`.
 - **Honest blocks.** `blocked` carries what was tried, why it can't converge, what would unblock it, and ideally a proposed alternative. It is never a shrug, and it is not the norm: exhaust the loop honestly before escalating, but detect structural non-convergence (a spin that cannot make progress) and stop rather than burn the budget.
-- A green verifier is **bound to the state it saw.** Mutate the state, re-verify — a pass is not a permanent badge.
+- A green verifier is **bound to the state it saw.** Mutate the state, re-verify — a pass is not a permanent badge. The converse also binds: before re-running a verifier, compare state (HEAD + dirty-hash) to the last green run; unchanged state needs no re-run.
+- **Waits are blocking, single, bounded.** Wait on an async process (review job, tilt convergence, long test) with one bounded blocking wait, not repeated polls; a second identical status check that returned no new information is a defect.
 
 ## Presence axis & the autonomy boundary
 
@@ -77,10 +79,12 @@ How hard to verify is a function of **how far the work runs from the human's eye
 
 - **Attended** (interactive, human present) — the human is a live backstop. Use judgment; skip ceremony on genuinely trivial work. The human may explicitly opt a change out of the loop when it needs none (e.g. "wip", "no-verify", "skip the loop") — judged by intent, not literal word match; a passing "quick question" is not an opt-out. Default is still to verify every feature and fix.
 - **Unattended** (autonomous, `/loop`, detached, overnight) — the harness *is* the only backstop. Rigor is maximal; the opt-out does not apply. The loop runs the **autonomous interior** — everything locally verifiable, with no synchronous-human dependency — to a terminal state.
+- **Fix-shaped work defaults to delegation.** A packetized stream (impl packet → reviewer verdict → fix-up) is the highest-ROI shape; reserve attended driving for live-ops and incidents where the human must hold the pager anyway.
 
 The **interior/boundary partition** is what makes "autonomous" real. Maximize the interior; push the boundary as late and as rare as possible:
 
-- **A mid-loop `AskUserQuestion` is a brief defect, not a normal pause.** Attended: answer it, then write the answer into the brief's Decisions so it never recurs. Unattended: never freeze on one question — *accumulate* questions and terminate as `blocked: needs N decisions` with the list. Batch, don't block on question #1.
+- **A mid-loop `AskUserQuestion` is a brief defect, not a normal pause.** Attended: answer it, then write the answer into the brief's Decisions so it never recurs. Unattended: never freeze on one question — *accumulate* questions and terminate as `blocked: needs N decisions` with the list. Batch, don't block on question #1. Ask in numbered batches, and append every answered batch to the surface's BRIEF/SPEC Decisions so the next session inherits the calls instead of re-asking.
+- **Unattended terminal conditions are interior-verifiable.** Never "until approval" from a generative reviewer — a generative oracle always mints another finding; use severity-floor semantics (e.g. approve-unless-High). Never condition a terminal on a physical device or a synchronous human step. Every unattended loop pairs its terminal with an explicit round budget.
 - **Publish is always the human's** — push, PR, merge, deploy, and anything irreversible or outward-facing. Running verification is the loop's job (red CI is just the loop continuing); shipping is not. The loop should be structurally incapable of tripping a biometric, a live-secret unlock, or a publish mid-flight.
 - **Publish authorization is per-artifact and literal.** An approval to push/merge/release covers only the named artifact; a follow-up PR — even in the same fix chain — resets the boundary. Before executing a publish, restate the concrete artifact list (branch, PR, tag, release) about to be acted on. The converse binds equally: when the request itself names a publish outcome ("open the PR", "cut the release"), that request *is* the authorization — carry the interior straight through to it; do not re-refuse a publish the human already ordered.
 - **Publish is per-ref: what the ref triggers.** Discover which refs deploy pipelines track (CI/CD workflows, Flux/kustomizations, repo CLAUDE.md) before any push or merge. Pushes and PRs against non-deploying refs are proposals — no authorization needed, including a promotion PR aimed at a production ref. Merging into a tracked ref publishes to that environment, and authorization is scoped to it: an order to land work on dev covers the testnet deploy it triggers, never the dev→main promote merge — a separate production publish needing its own order. No pipelines: the default-branch merge is the publish. Direct-push repo: every push is.
@@ -107,6 +111,7 @@ The ADF is the macro verified loop. Agent owns `SPEC → PLAN → TDD → DEV �
 - Work idiomatically and safely; align with project conventions and architecture.
 - Keep changes minimal and focused; implement only what is requested or clearly necessary.
 - Use available tools/documentation before coding; verify assumptions.
+- Live-state first for mutations: before any config-value or state-mutating change, read the current live state — if the change is already applied, no-op and report.
 - Complete implementations or fail explicitly with descriptive errors; partial work masks bugs.
 - Extract configuration immediately; magic numbers, URLs, ports, timeouts, and feature flags belong in config, not code.
 
@@ -150,6 +155,8 @@ Types are the cheapest verifier: the compiler is free, instant, and always on. P
 
 This is harness faithfulness in practice. Tests verify correctness — they do not define the solution. When tests fail, investigate root cause and fix the underlying issue. Do not hard-code values, weaken assertions, or game around tests. If a test appears incorrect, report the issue. A fix that closes an independent-review finding still owes an observed red: the reviewer's code-level judgment locates the bug but does not reproduce it, and a green-only test can hide a fix that never touched the real failure.
 
+Root-cause over route-around: never label a failure "pre-existing" or "unrelated", and never defer a discovered bug, without cited evidence (recall, git log, session history). In bug-bash/dogfood/QA stages, bugs found are fixed in-session.
+
 ## Test realism
 
 The harness is a proxy; the live system is the final gate. Keep the proxy faithful and periodically check it against the gate.
@@ -157,6 +164,7 @@ The harness is a proxy; the live system is the final gate. Keep the proxy faithf
 - Prefer integration tests over mocked unit tests for data flow and permissions.
 - Mocks are acceptable for external services but not for your own data layer.
 - If a test passes with mocks but would fail against the real system, the test is wrong.
+- For visual/UI changes the floor is the change observed on the live surface — a screenshot of the running app or an executed e2e; green unit tests or CI alone never clear it.
 - Before claiming done: "would this survive a manual walkthrough?"
 
 ## Error handling
@@ -169,6 +177,8 @@ The harness is a proxy; the live system is the final gate. Keep the proxy faithf
 - Update all callers when changing interfaces; clean breaks over backward-compatibility shims.
 - Prefer clean, complete migrations over gradual transitions.
 - Commit to one implementation and delete superseded code; trust version control.
+- Supersession is the default: when a directive names a single source of truth ("rely on X, not Y") or a new component replaces an old one, plan Y's removal as part of the change; if replace-vs-add is genuinely ambiguous, confirm in one line.
+- Review findings never restructure a PR or rollout without explicit confirmation.
 
 ## Code comments
 
