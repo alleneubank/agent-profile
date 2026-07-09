@@ -31,11 +31,12 @@ If a resource is `in_progress` when you check, **re-poll** before declaring it h
 
 ## Non-Default Ports
 
-When Tilt runs on a non-default port, add `--port`:
+When Tilt runs on a non-default port, pass the same port to every Tilt API/log
+command. If `TILT_PORT` is unset, omit `--port` and use Tilt's default:
 
 ```bash
-tilt get uiresources --port 37035
-tilt logs <resource> --port 37035
+tilt get uiresources --port "$TILT_PORT" -o json
+tilt logs "$RESOURCE" --port "$TILT_PORT" --since 5m --tail 200
 ```
 
 ## Resource Status
@@ -64,12 +65,21 @@ the transition to `error`.
 
 ## Logs
 
+Default to bounded, resource-specific log reads. Tilt already keeps resource
+logs available through the UI/API; agents should identify the resource first,
+then request the smallest useful slice:
+
 ```bash
-tilt logs <resource>
-tilt logs <resource> --since 5m
-tilt logs <resource> --tail 100
-tilt logs --json                    # JSON Lines output
+# Pick the resource from status output, then read only that resource's recent logs.
+RESOURCE=<resource>
+tilt logs "$RESOURCE" --since 5m --tail 200
+
+# Use JSON Lines only when a script will parse it.
+tilt logs "$RESOURCE" --since 5m --json
 ```
+
+Use full-stream terminal logs only for a short attended repro, not as the durable
+Tilt session.
 
 ## Trigger and Lifecycle
 
@@ -114,6 +124,10 @@ Guard: `export TILT_EDITOR=true` so a stray bare `tilt args` exits instead of ha
 
 Follow `zmx` skill patterns — check for existing sessions, derive name from git root, use `zmx run` (not attach):
 
+Start Tilt quietly and keep the durable session as the UI/API owner. Diagnose
+with `tilt get ...` and bounded `tilt logs "$RESOURCE" ...` commands from the
+agent turn.
+
 ```bash
 PROJECT=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" || basename "$PWD")
 SESSION="${PROJECT}-tilt"
@@ -124,6 +138,8 @@ else
   zmx run "$SESSION" 'tilt up'
   echo "Started tilt in zmx session: $SESSION"
 fi
+
+tilt get uiresources -o json | jq -r '.items[] | "\(.metadata.name): runtime=\(.status.runtimeStatus) update=\(.status.updateStatus)"'
 ```
 
 ## Critical: Never Restart for Code Changes
@@ -134,6 +150,15 @@ Tilt live-reloads automatically. **Never suggest restarting `tilt up`** for:
 - Kubernetes manifest updates
 
 Restart only for: Tilt version upgrades, port/host changes, crashes, cluster context switches.
+
+After editing, verify the existing Tilt run picked up the change:
+
+```bash
+RESOURCE=<resource>
+tilt get uiresource/"$RESOURCE" -o json | jq '.status.updateStatus'
+tilt wait --for=condition=Ready uiresource/"$RESOURCE" --timeout=120s
+tilt logs "$RESOURCE" --since 2m --tail 100
+```
 
 ## References
 

@@ -45,26 +45,42 @@ Restart only for: Tilt version upgrades, port/host config changes, crashes, clus
    ```
    If running, check health via `tilt get uiresources -o json` and skip to Step 3.
 
-2. Check for required env files (`.localnet.env`, `.env.local`, `silo.toml`):
+2. Pick the repo's documented dev-stack command before defaulting to bare
+   `tilt up`. Prefer `silo up`, `yarn localnet:up`, `make tilt-up`, or the
+   README/package script when one exists; these often run gen-env or pass the
+   right Tiltfile args.
+
+3. Check for required env files (`.localnet.env`, `.env.local`, `silo.toml`):
    - If `silo.toml` exists, use `silo up` path
    - If gen-env script exists, run it first
    - If neither, check project README for bootstrap instructions
 
-3. Check for k3d cluster or Docker prerequisites.
+4. Check for k3d cluster or Docker prerequisites.
 
 ### Step 2: Start Tilt in zmx
 
 Follow the `zmx` skill patterns:
+
+Start Tilt quietly and keep the durable session as the UI/API owner. Diagnose
+from the agent turn with `tilt get ...` and bounded `tilt logs "$RESOURCE" ...`
+commands.
+
 ```bash
 PROJECT=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" || basename "$PWD")
 SESSION="${PROJECT}-tilt"
+START_CMD='tilt up'
+# Replace START_CMD with the repo's documented boot command when present, e.g.:
+# START_CMD='yarn localnet:up'
+# START_CMD='silo up'
 
 if zmx list --short 2>/dev/null | grep -q "^${SESSION}$"; then
   echo "Tilt session already exists: $SESSION"
 else
-  zmx run "$SESSION" 'tilt up'
+  zmx run "$SESSION" "$START_CMD"
   echo "Started tilt in zmx session: $SESSION"
 fi
+
+tilt get uiresources -o json | jq -r '.items[] | "\(.metadata.name): runtime=\(.status.runtimeStatus) update=\(.status.updateStatus)"'
 ```
 
 For silo projects: `silo up` instead of `tilt up`.
@@ -98,7 +114,7 @@ Block on convergence — one bounded wait, not a foreground poll loop
 ### Step 4: Diagnose and Fix Errors
 
 For each resource in error state:
-1. Read logs: `tilt logs <resource> --since 2m`
+1. Read bounded logs: `RESOURCE=<resource>; tilt logs "$RESOURCE" --since 5m --tail 200`
 2. Read the Tiltfile and relevant k8s manifests
 3. Identify root cause in the config (not the running process)
 4. Apply fix following the Principles above

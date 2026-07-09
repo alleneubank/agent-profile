@@ -254,11 +254,28 @@ Returns exit code 0 if all ready, 1 otherwise.
 ### Start Tilt
 
 ```bash
-tilt up
-tilt up --stream          # Stream logs to terminal
+tilt up                   # Start UI/API
 tilt up --port=10351      # Custom API port
 tilt up -- --env=dev      # Pass args to Tiltfile
 ```
+
+Agent default for long-lived sessions:
+
+```bash
+tilt up
+tilt get uiresources -o json
+RESOURCE=<resource>
+tilt logs "$RESOURCE" --since 5m --tail 200
+```
+
+When a repo generates `TILT_PORT`, pass it consistently:
+
+```bash
+tilt get uiresources --port "$TILT_PORT" -o json
+tilt logs "$RESOURCE" --port "$TILT_PORT" --since 5m --tail 200
+```
+
+Reserve full terminal log streams for short attended repros.
 
 ### Stop Tilt
 
