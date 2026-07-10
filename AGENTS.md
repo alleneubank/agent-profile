@@ -211,6 +211,7 @@ Load the relevant best-practices skill when working with a supported language or
 | BRIEF.md authoring / defining what "good" means for a surface | brief-best-practices |
 | Test design from specs | testing-best-practices |
 | Git operations | git-best-practices |
+| Changeset ready for human review / user reviewing in hunk | hunk-notes |
 
 ## Implementation checklist
 
@@ -223,3 +224,4 @@ The loop's exit checklist — all must hold at `done`:
 - Edge cases covered; switch/default cases present.
 - Tests/linters/builds run when applicable.
 - Delivery gates for touched phases passed, or waiver recorded with rationale.
+- Non-trivial changeset handed for human review carries a `.hunk/agent-context.json` rationale sidecar (see `hunk-notes`), unless opted out.

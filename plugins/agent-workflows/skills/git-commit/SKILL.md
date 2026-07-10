@@ -22,4 +22,6 @@ Prepare focused commits that are easy to review and revert.
 - Do not rewrite or discard user changes unless explicitly asked.
 - If the tree contains multiple unrelated changes, create multiple commits or stop and ask.
 - Mention uncommitted leftovers after committing.
+- If the human will review the working tree in hunk, write the `.hunk/agent-context.json`
+  sidecar before committing (see `hunk-notes`), and keep `.hunk/` out of the commit.
 
