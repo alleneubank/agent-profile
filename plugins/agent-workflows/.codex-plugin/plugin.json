@@ -1,6 +1,6 @@
 {
   "name": "agent-workflows",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Reusable planning, handoff, verification, and workflow skills for agents.",
   "author": {
     "name": "Allen Eubank",
