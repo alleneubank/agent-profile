@@ -60,6 +60,19 @@ Path: `.hunk/agent-context.json` at the repo root.
 - Keep the sidecar out of commits (add `.hunk/` to gitignore); hunk excludes
   its own sidecar from the rendered diff.
 
+## Use STML when structure helps
+
+For notes that benefit from visual hierarchy — verdicts, risk callouts,
+pipelines, scorecards, or checklists — add optional STML in
+`annotations[].markup`, `comment add --markup`, or a `markup` field on
+`comment apply` items. Keep `summary` a real sentence: it is the plain-text
+fallback and list-view text. Ordinary notes should stay plain.
+
+Run `hunk markup guide` before authoring STML. For a live session, read
+`noteMarkupWidth` from `hunk session context --json`, preview with
+`hunk markup render - --width <that-width>`, and fix any `markupNotes`
+reported by preview or comment responses.
+
 ## Match what the human will view
 
 Ranges only make sense against the diff hunk shows the reviewer:
