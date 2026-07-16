@@ -101,7 +101,7 @@ The ADF is the macro verified loop. Agent owns `SPEC → PLAN → TDD → DEV �
 - If deviating from this flow, record a waiver with rationale.
 - Gates:
   - SPEC: IDs, invariants, non-goals, acceptance criteria. Risk tags when high-risk items exist. Load `spec-best-practices`. File named `SPEC.md`, colocated.
-  - PLAN: task graph with files/types/tests and risk classification.
+  - PLAN: task graph with files/types/tests and risk classification. Data-plane work (per-item/per-request hot paths) includes a back-of-envelope resource sketch; control-plane code may be slow and safe.
   - TDD: a new test is observed red against the pre-fix tree before the fix lands — run it and cite the red output; a test first seen green proves nothing about what it guards.
   - DEV: local environment boots; health checks pass.
   - E2E: happy path and failure modes pass against live dev environment.
@@ -113,6 +113,7 @@ The ADF is the macro verified loop. Agent owns `SPEC → PLAN → TDD → DEV �
 - Use available tools/documentation before coding; verify assumptions.
 - Live-state first for mutations: before any config-value or state-mutating change, read the current live state — if the change is already applied, no-op and report.
 - Complete implementations or fail explicitly with descriptive errors; partial work masks bugs.
+- Declare variables at the smallest scope, computed closest to use — most bugs are a semantic gap opened by distance in time or space.
 - Extract configuration immediately; magic numbers, URLs, ports, timeouts, and feature flags belong in config, not code.
 
 ## Agent context
@@ -147,9 +148,22 @@ Types are the cheapest verifier: the compiler is free, instant, and always on. P
 - When modifying existing code, understand the type signatures first.
 - Schema changes drive implementation; if the types are right, the code follows.
 
+## Assertions and bounds
+
+Assertions are the runtime rung of the verifier ladder — types at compile time, assertions at run time, tests at loop time, the oracle at review time. They ship inside the artifact and stay on duty when nobody is watching, and they make the loop itself converge faster: an assertion failure is loud, located evidence; silent corruption is not.
+
+- Programmer errors and operating errors are different species. Operating errors (bad input, timeouts, full disks) are expected: handle and report. Programmer errors (violated invariants) are impossible-by-design: assert and crash. Never handle the second; never assert the first.
+- Assert the preconditions, postconditions, and invariants a function relies on; code must not operate blindly on data it has not checked.
+- Assert the positive space (what must be true) and the negative space (what must never happen). Bugs live on the valid/invalid boundary — tests exercise the transition across it, not just each side.
+- Pair assertions: enforce one property at two independent points (before write / after read; producer / consumer).
+- Prefer the cheaper rung: compile-time checks (const asserts, exhaustive matches) over runtime asserts over tests.
+- Put a limit on everything: every loop, queue, buffer, cache, and retry has an explicit upper bound; recursion carries an asserted depth bound. Intentionally infinite loops (event loops) assert that they are.
+- A blatantly true assertion is stronger documentation than a comment when the condition is critical and surprising.
+
 ## Functional style
 - Prefer immutability and pure functions; isolate side effects at system boundaries.
 - Compose small functions; prefer pipelines over in-place mutation.
+- Push `if`s up and `for`s down: the parent owns control flow and state; helpers compute changes rather than apply them; leaf functions stay pure.
 
 ## Test integrity
 
@@ -179,6 +193,13 @@ The harness is a proxy; the live system is the final gate. Keep the proxy faithf
 - Commit to one implementation and delete superseded code; trust version control.
 - Supersession is the default: when a directive names a single source of truth ("rely on X, not Y") or a new component replaces an old one, plan Y's removal as part of the change; if replace-vs-add is genuinely ambiguous, confirm in one line.
 - Review findings never restructure a PR or rollout without explicit confirmation.
+
+## Naming
+
+- Get the nouns and verbs just right; a great name is a crisp mental model of what a thing is or does.
+- Do not abbreviate names; long-form flags in scripts (`--force`, not `-f`).
+- Units and qualifiers go last, sorted by descending significance: `latency_ms_max`, not `max_latency_ms` — related names group and line up.
+- Infuse names with the semantics the reader needs to act: `arena` vs `gpa` tells a Zig reader whether `deinit` is owed; a noun (`pipeline`) beats a participle (`preparing`) because it composes into prose and derived identifiers.
 
 ## Code comments
 
