@@ -93,7 +93,7 @@ The one rule is the **library-vs-binary split**, decided by *who handles the err
 - **Library** (callers branch on the failure) → `thiserror` typed enums. Keep `anyhow`/`eyre` out of public signatures.
 - **Binary** (top level just reports and exits) → `anyhow`, or `eyre`/`color-eyre` for pretty diagnostics.
 
-`?` everywhere; `.unwrap()` is a documented invariant (`expect("why this can't fail")`) or a bug, never an error-handling strategy. Full idioms, granularity, `#[non_exhaustive]`, and the workspace bridge: [ERROR-HANDLING.md](ERROR-HANDLING.md).
+`?` everywhere; `.unwrap()` is a documented invariant (`expect("why this can't fail")`) or a bug, never an error-handling strategy. Programmer errors are not `Err`: `assert!` at trust boundaries, `debug_assert!` for internal invariants on hot paths — an invariant violation minted as an error variant is one no caller can meaningfully handle. Full idioms, granularity, `#[non_exhaustive]`, and the workspace bridge: [ERROR-HANDLING.md](ERROR-HANDLING.md).
 
 ## When to Reach Async
 

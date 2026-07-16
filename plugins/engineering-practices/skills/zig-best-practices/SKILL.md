@@ -56,6 +56,15 @@ fn createResource(allocator: std.mem.Allocator) !*Resource {
 }
 ```
 
+## Safety Idioms
+
+Runs on the assertions-and-bounds law from AGENTS.md; these are the Zig-specific levers.
+
+- `std.debug.assert` for invariants; `comptime` asserts check design relationships between constants (type sizes, layout invariants) before the program even runs.
+- Prefer explicitly-sized integers (`u32`, `u64`) where the domain owns the type; keep `usize` at the std-lib seam (slice lengths, indices) instead of propagating it inward through `@intCast` chains.
+- Decide allocation up front: arenas or fixed buffers sized at init for the data plane; every long-lived cache or pool carries an explicit upper bound.
+- Construct large structs in place via an out-pointer (`fn init(target: *T) !void`) for pointer stability and no intermediate copy-moves; in-place init is viral — if a field needs it, the container does too.
+
 ## Key Conventions
 
 - Prefer `const` over `var`; prefer slices over raw pointers.

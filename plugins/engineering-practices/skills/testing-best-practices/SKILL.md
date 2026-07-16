@@ -11,6 +11,7 @@ Purpose: verify individual functions and invariants in isolation.
 
 - **Data-driven**: parameterized tables covering happy path, boundary, error, and edge cases.
 - **Property-based**: fuzz invariants that must hold across all inputs (e.g., idempotency, sort stability, roundtrip serialization).
+- **Cross the boundary**: cover the transition from valid to invalid, not just samples of each — where data moves across the valid/invalid line is where the bugs live.
 - Derive cases from the module's public API surface: input types/constraints, output shape, error modes, invariants.
 
 ### Integration / contract tests
