@@ -104,7 +104,13 @@ done
 | Quick command (<10s) | No |
 | Need stdout directly in conversation | No |
 
-## Polling for Readiness
+## Waiting for Readiness (bounded, last resort)
+
+zmx has no blocking readiness primitive — `zmx wait` blocks on completion,
+not on a "ready" line — so a single bounded loop with an explicit iteration
+cap stands in for the one blocking wait. This is not a license to poll: run
+it once per startup, and if a check returns nothing new twice, stop and
+reassess instead of burning the cap.
 
 ```bash
 for i in {1..30}; do

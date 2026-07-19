@@ -1,8 +1,6 @@
 ---
 name: git-worktree-tidy
 description: Fetch latest from origin, prune remote-tracking refs, delete stale local branches and worktrees, and fast-forward important branches. Use when tidying up a worktree-based repo layout.
-metadata:
-  short-description: Worktree hygiene cleanup
 ---
 
 # git-worktree-tidy
@@ -18,10 +16,12 @@ User asks to "fetch prune", "clean up stale branches/worktrees", or
 
 ## Hard Rules
 
-- All destructive actions (worktree remove, branch delete) require user
-  confirmation. Present the full list and wait.
-- Never force-delete a worktree with uncommitted changes without explicit
-  approval. Flag dirty worktrees separately.
+- Verified-merged branches (merged PR + head == tip, step 3a) and clean
+  worktrees are recoverable interior work: delete them without asking, and
+  report what was removed.
+- At-risk branches and dirty worktrees hold potentially unshipped work: batch
+  them into the single confirmation in step 5. Never force-delete a dirty
+  worktree without explicit approval.
 - Use `--ff-only` when updating branches. If ff-only fails, stop and ask.
 - Operate from the `.bare` directory (or repo root) for branch/worktree
   management commands.
@@ -107,7 +107,7 @@ Categorize:
 - **Dirty + gone**: flag for user review
 - **Prunable metadata**: orphaned worktree entries (directory already gone)
 
-### 5) Confirm deletions
+### 5) Report, then confirm only the at-risk class
 
 Present a summary table:
 
@@ -124,12 +124,14 @@ Prunable worktree metadata:
   <entry>
 ```
 
-Call out the **at risk** branches explicitly so the user is deciding with the
-ship status in front of them. Wait for user confirmation before proceeding.
+Proceed with the verified-merged branches and clean worktrees immediately —
+they are recoverable interior deletions. Batch the **at risk** branches and
+**dirty** worktrees into one confirmation, with the ship-status evidence in
+front of the user; only that class waits.
 
 ### 6) Remove stale worktrees
 
-For each confirmed worktree:
+For each removable worktree:
 
 ```bash
 git worktree remove <name>

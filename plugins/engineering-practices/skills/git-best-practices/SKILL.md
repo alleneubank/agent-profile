@@ -12,7 +12,7 @@ When this skill is loaded, follow these directives for all git operations:
 1. **Discover before acting** — run branch discovery to determine the repo's default and production branches before branching, merging, or opening PRs
 2. **Conventional commits** — every commit uses `type(scope): description` format
 3. **Stage explicitly** — add files by name so only intended changes are committed
-4. **Protect shared history** — use `--force-with-lease` for force pushes; confirm with the user before any force push
+4. **Protect shared history** — use `--force-with-lease` for force pushes, never plain `--force`; a force push is routine only when the ordered work requires it and a backup ref exists — force-pushing a shared or deploy-tracked ref belongs to the user
 
 ## Agent Git Workflow
 
@@ -20,7 +20,7 @@ When this skill is loaded, follow these directives for all git operations:
 2. **Discover branches** — identify default/current/(optional) production branch names (see Branch Discovery)
 3. **Stage by name** — `git add path/to/file` for each file; verify with `git status`
 4. **Write a conventional commit** — `type(scope): description` with optional body
-5. **Push safely** — regular push by default; `git push --force-with-lease origin {branch}` only for rewritten history after user confirmation
+5. **Push safely** — discover which refs deploy pipelines track before pushing (CI/CD config, repo docs). Pushes to non-deploying branches are routine proposals; a push to a deploy-tracked ref — or any push in a direct-push repo — is a publish and belongs to the user (rules of engagement). Use `git push --force-with-lease origin {branch}` only for rewritten history
 
 ### Checkpoint Commits
 
@@ -28,13 +28,13 @@ Agents may create WIP checkpoint commits during long-running tasks, cleaned up b
 
 - Prefix with `wip:` or use standard conventional commit format
 - Keep changes logically grouped even in WIP state
-- Run `/rewrite-history` before opening a PR to craft a clean narrative
+- Run the `rewrite-history` skill before opening a PR to craft a clean narrative
 
 ### Commit Discipline
 
 - Stage files explicitly by name: `git add src/auth.ts src/auth.test.ts`
 - Verify staged content with `git status` before committing
-- Keep secrets, `.env` files, credentials, and large binaries out of commits — warn the user if staged files look sensitive
+- Keep secrets and large binaries out of commits (secret handling: rules of engagement) — warn the user if staged files look sensitive
 - Target one logical change per commit in final PR-ready state
 
 ### Force Push
@@ -45,11 +45,11 @@ Use `--force-with-lease` exclusively to protect against overwriting upstream cha
 git push --force-with-lease origin feat/my-branch
 ```
 
-Always confirm with the user before any force push, regardless of branch.
+Apply per-ref publish semantics: a force-with-lease push to your own non-deploying feature branch, with a backup ref in place, is a proposal — routine when the ordered work (a rebase, a history rewrite) requires it. A ref that is shared (other authors, a collaborative PR) or deploy-tracked is the user's: restate the ref and wait.
 
 ### Rebasing a Stack
 
-When rebasing a branch that other branches are stacked on (e.g. phased `NN-description` chains), use `git rebase --update-refs` so the stacked branches follow the rewrite instead of being orphaned on the old commits. `--update-refs` moves **local** refs only — each moved branch that also exists on the remote still needs its own `--force-with-lease` push (after confirmation), and any branch checked out in another worktree is skipped. For the full conflict-resolution and safety workflow, use the `git-rebase-sync` skill.
+When rebasing a branch that other branches are stacked on (e.g. phased `NN-description` chains), use `git rebase --update-refs` so the stacked branches follow the rewrite instead of being orphaned on the old commits. `--update-refs` moves **local** refs only — each moved branch that also exists on the remote still needs its own `--force-with-lease` push (per-ref publish semantics), and any branch checked out in another worktree is skipped. For the full conflict-resolution and safety workflow, use the `git-rebase-sync` skill.
 
 ## Conventional Commits
 
@@ -136,6 +136,8 @@ Use repository branch flow policy first. If policy is undocumented, a common bas
 - PRs target the default branch unless the repo uses a single-branch flow
 - When default branch and production branch are the same, all PRs target that branch directly
 
+The deploy annotations in the diagram are the publish map: merging into a deploy-tracked ref IS a publish to that environment, and publish is the user's, per-artifact (rules of engagement). Opening a PR against a tracked ref is still a proposal; the merge is the publish.
+
 ### Merge Strategy
 
 Use repository merge policy first (required in many organizations).
@@ -147,6 +149,8 @@ If no policy exists, these defaults are reasonable:
 | Feature → default branch | Squash merge | Clean history, one commit per feature |
 | Default → production | Merge commit | Preserves the release boundary; visible deploy points |
 | Hotfix → production | Squash merge | Single atomic fix on production |
+
+Executing any of these merges into a deploy-tracked ref is a publish: restate the concrete artifact (branch, PR) before acting, and act only on the user's per-artifact order. A promotion merge (default → production) always needs its own explicit order — authorization to land work on the default branch never covers it.
 
 ## PR Workflow
 
@@ -173,12 +177,12 @@ Use repo-native PR tooling (`gh pr create`, GitLab CLI, or web UI) with:
 
 ### History Rewriting Before PR
 
-For branches with messy WIP history, use `/rewrite-history` to:
+For branches with messy WIP history, use the `rewrite-history` skill to:
 1. Backup the branch
 2. Reset to the base branch tip
 3. Recommit changes as a clean narrative sequence
 4. Verify byte-for-byte match with backup
-5. Confirm with the user before force-pushing rewritten history
+5. Force-push the feature branch with `--force-with-lease` (backed up in step 1; your own non-deploying branch is a proposal per the rules of engagement)
 6. Open PR with link to backup branch
 
 Each rewritten commit introduces one coherent idea, building on the previous — like a tutorial teaching the reader how the feature was built.

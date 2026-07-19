@@ -67,22 +67,22 @@ Purpose: verify real user workflows through the full stack.
 
 - **Single infrastructure retry** per test run; if it fails twice, it is not flake.
 - On retry failure, collect diagnostics: screenshots, network logs, service health, timestamps.
-- Classify the failure (flaky / outdated / bug) before attempting a fix.
+- Classify the failure (flaky / outdated / bug) before attempting a fix; a classification that waives or defers anything lands as a dated provisional Decision.
 - Never add arbitrary delays or retry loops as a flake "fix."
 
 ### Failure attribution (before waiving anything)
 
 - **A failure that only reproduces on your branch is yours.** No "pre-existing" or "environmental" waiver without reproducing the failure at the base commit — a control worktree at the merge base is the cheap, decisive check.
-- **Proven-pre-existing failures get recorded, not skipped.** Add the failure to the repo's known-flakes/known-failures note with its repro command and evidence; future waivers cite the entry instead of re-litigating.
+- **Proven-pre-existing failures get recorded, not skipped.** Add the failure to the campaign's LOOP.md "Known pre-existing failures" section when a charter exists (else the repo's known-flakes note), with its repro command and evidence; future waivers cite the entry instead of re-litigating.
 - **An empty or erroring query is not evidence of absence.** Enumerate the namespace first (list the tests, count the files, query totals) and validate the query shape against a known-present row before concluding "not found."
 - **Cross-subsystem changes run every touched side's harness.** A change spanning two toolchains is unverified until both sides' suites ran, no matter how green one side is.
 
 ### When the verifier itself breaks
 
 - **Liveness-check before killing** a slow verifier run: is it progressing (log output, CPU, intermediate artifacts)? Killing a run seconds before completion costs a full rerun.
-- **Cap restarts of a structurally failing verifier at 2.** Then stop retrying, record the failure output as evidence, and substitute the next-cheapest independent gate (targeted suite, isolated file run, control-worktree differential).
-- **Wait event-driven with a timeout** — watch modes, CI wait commands, background completion notifications. Never poll in a loop.
-- **Never bypass a gate silently.** No `--no-verify` in unattended runs, ever; attended only with an explicit, logged waiver.
+- **Cap restarts of a structurally failing verifier at 2.** Then stop retrying and record the failure output as evidence. A next-cheapest independent gate (targeted suite, isolated file run, control-worktree differential) may stand in for the objective harness — but the done claim names the substitution; the substitute is not the named floor. A genuinely unavailable independent oracle is a clean stop plus handoff, never substituted.
+- **Wait event-driven with a timeout** — watch modes, CI wait commands, background completion notifications.
+- **Never bypass a gate.** `--no-verify` and equivalents are never a shortcut (doctrine law); a gate that is wrong gets fixed, or waived by the human at the boundary — never bypassed in-flight.
 
 ## API surface discovery
 
@@ -117,7 +117,7 @@ Full unit + integration + e2e suite with higher property-based iteration counts.
 ## Workflow
 
 1. Spec or code defines the module behavior (types, constraints, API surface).
-2. Agent (with this skill) produces test strategy, matrix, and implementation plan.
-3. test-writer agent translates the plan to runnable code in the target language's idiom.
-4. Developer implements to pass the tests.
+2. This skill produces the test strategy, matrix, and implementation plan.
+3. The driver or a dispatched worker translates the plan to runnable tests, observed red before the implementation lands.
+4. Implementation proceeds to green.
 5. If implementation reveals missing cases, propose them first; append to spec only when explicitly requested.

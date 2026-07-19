@@ -13,6 +13,13 @@ or prod-verify, or when work is blocked upstream, prefer minting a handoff and
 starting fresh over compacting — the next session opens with this artifact
 instead of inherited sprawl.
 
+When a `LOOP.md` charter exists, the charter is the campaign's memory:
+mid-campaign continuation is its State/Decisions write-back, committed with
+the work — an iteration ending is not a handoff moment. Mint a handoff only
+at a terminal state, as the boundary package for the human, or for
+non-campaign sessions; its Decisions reference the charter's rather than
+forking them.
+
 ## Workflow
 
 1. Gather only the facts needed to continue:
@@ -41,11 +48,12 @@ instead of inherited sprawl.
 
 ## Acceptance / Verification
 
-- <every check that counts as done: flows to drive, Tiltfile bumps, e2e floors>
+- <every check that counts as done: flows to drive, deploy bumps, e2e floors>
 
 ## Decisions
 
-- <pre-made calls so the next session never re-asks>
+- <pre-made calls, each marked ratified|provisional, so the next session
+  never re-asks and never inherits an unratified call as fact>
 
 ## Blockers or boundaries
 
@@ -56,10 +64,10 @@ instead of inherited sprawl.
 
 - **"Acceptance / Verification" and "Decisions" are mandatory.** A handoff
   missing either fails this skill's own gate — do not write it without them.
-  Acceptance lists every check that counts as done (flows to drive, Tiltfile
+  Acceptance lists every check that counts as done (flows to drive, deploy
   bumps, e2e floors), stated as evidence to show, not activities to perform.
-  Decisions carries the calls already made so the receiving session inherits
-  them instead of re-asking.
+  Decisions carries the calls already made — each marked ratified or
+  provisional — so the receiving session inherits them instead of re-asking.
 - Link to specs and docs instead of paraphrasing long context.
 - Keep the handoff short enough to scan; target 60-100 lines.
 - Do not include secrets or pasted secret values.

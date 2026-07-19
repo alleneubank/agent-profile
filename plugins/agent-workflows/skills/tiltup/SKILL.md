@@ -87,8 +87,7 @@ For silo projects: `silo up` instead of `tilt up`.
 
 ### Step 3: Monitor Bootstrap
 
-Block on convergence — one bounded wait, not a foreground poll loop
-(a repeated status check that returns no new information is a defect):
+Block on convergence — one bounded wait, not a foreground poll loop:
 1. Wait 10s for initial resource registration
 2. Issue one blocking bounded wait per resource:
    ```bash

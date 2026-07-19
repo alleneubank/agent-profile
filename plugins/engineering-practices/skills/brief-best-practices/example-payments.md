@@ -3,9 +3,10 @@
 > Illustrative filled brief for a money-transfer surface — the seven slots on a non-visual,
 > high-stakes informatics system. Content here is illustrative, not a real system spec.
 
-> Law doc for the transfer flow, present-tense, no narrated history — git is the changelog. Amend
-> Decisions and Boundary only with human confirmation; log the rationale. Dated working memory
-> lives in `DELTA.md` / `DEVIATIONS.md` beside this file.
+> Law doc for the transfer flow, present-tense, no narrated history — git is the changelog. The
+> Boundary and ratified Decisions amend only with human confirmation; the driver appends
+> provisional Decisions, marked and dated. Dated working memory lives in `DELTA.md` /
+> `DEVIATIONS.md` beside this file.
 
 ## Bar
 
@@ -55,8 +56,8 @@ moves funds the sender did not authorize** — or it does not ship.
   may force a redesign; latency may not. Never trade an audit event for speed.
 - **Assumptions:** the ledger is the source of truth, not the cache; the message bus is at-least-once
   (hence idempotency keys are mandatory, not optional).
-- Idempotency key is required on every mutating request; absent key → reject, don't guess. (illustrative)
-- Pending state is shown optimistically only after the request is durably enqueued, never before. (illustrative)
+- Idempotency key is required on every mutating request; absent key → reject, don't guess. (illustrative, ratified)
+- Pending state is shown optimistically only after the request is durably enqueued, never before. (illustrative, provisional)
 
 ## Boundary — requires the human
 

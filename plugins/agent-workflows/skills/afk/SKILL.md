@@ -5,35 +5,33 @@ description: Use when the user says they are stepping away and the agent should 
 
 # AFK Work
 
-When the user is away, continue only through work that can complete without
-interactive approval.
+The user is away: no interactive approval will arrive. Campaign protocol —
+scope derivation, the unblocking ladder, terminal states, budgets — is the
+loop-brief skill's; when a `LOOP.md` charter exists, run its iterations.
+This skill adds the operational constraint: nothing you run may block on a
+prompt.
 
 ## Allowed
 
-- Read and edit files.
-- Run local tests, builds, typechecks, and linters.
+- Read and edit files; run local tests, builds, typechecks, and linters.
 - Commit local changes when commits do not require signing prompts.
-- Use read-only issue, PR, and CI commands that already have noninteractive auth.
+- Read-only issue, PR, and CI commands with noninteractive auth already
+  provisioned.
 
-## Avoid
+## Avoid — anything that can block on a human
 
-- `git push`, force-push, deploy, publish, or merge.
-- Commands that trigger 1Password, SSH agent, Touch ID, sudo, browser prompts, or new auth flows.
-- Secret reads unless a safe noninteractive path was already provisioned.
+- Push, force-push, deploy, publish, merge (the publish boundary,
+  regardless of presence).
+- Commands that trigger credential-manager, biometric, sudo, browser, or
+  new auth flows; secret reads without a provisioned noninteractive path.
+- Unbounded foreground processes.
 
-## Missing Directive
+## No charter?
 
-When the directive artifact (task file, handoff, brief) is missing, or a
-decision arises that it does not cover:
-
-- Derive scope from committed artifacts first: handoffs, specs, the task list,
-  recent commit messages.
-- If scope still cannot be derived, terminate blocked with the accumulated
-  questions listed. Never fire interactive questions mid-loop, and never
-  invent scope.
-
-## Done State
-
-End with either passing local checks and only publish/push remaining, a clear
-decision blocker, or an approval-gate blocker. Write a handoff before stopping.
-
+Derive scope from committed artifacts: `LOOP.md`, handoffs, specs, recent
+commit messages. Uncovered decisions climb the ladder — reversible interior
+calls are made and logged as dated provisional Decisions, not accumulated.
+Terminate per the loop's terminal states (`done`, `blocked: needs N
+decisions` with a numbered evidenced batch, or `budget-exhausted`), and
+write back the charter — or a handoff when no charter exists — before
+stopping.

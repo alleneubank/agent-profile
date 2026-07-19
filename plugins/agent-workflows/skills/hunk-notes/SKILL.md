@@ -16,8 +16,8 @@ never launch the TUI.**
   handoff** for any non-trivial changeset — attended or unattended, not
   on-request. If the human does not review in hunk, skip it.
 - Respect opt-outs: "wip", "no-verify", or an explicit skip means no sidecar.
-- Delegated work: when a worker produced the changeset (e.g. an rl driver
-  supervising Codex), author the sidecar from the packet outputs and reviewer
+- Delegated work: when a worker produced the changeset (e.g. a delegation driver
+  supervising a worker), author the sidecar from the packet outputs and reviewer
   verdicts, not from a re-read of the diff alone.
 
 ## Write the sidecar

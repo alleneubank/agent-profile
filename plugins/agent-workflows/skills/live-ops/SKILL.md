@@ -5,9 +5,8 @@ description: Use when operating on live systems - cutovers, migrations, producti
 
 # Live Ops
 
-Live systems are the final gate. Operations against them are attended,
-human-supervised work — never autonomous-loop work. Loops verify against a
-deterministic proxy; a live system is touched deliberately, step by step.
+The live system is the verifier's final gate: operate on it attended, under
+the rules of engagement, deliberately and step by step.
 
 ## Access floor (before any cutover)
 
@@ -27,5 +26,5 @@ assume — access to every system the operation and its failure modes need:
 - One change at a time; verify each step's effect before the next.
 - Know the abort criteria before starting, so the rollback decision stays
   cheap under pressure.
-- Publish, deploy, and irreversible steps remain the human's call — restate
-  the concrete artifact about to change before acting.
+- Publish, deploy, and irreversible steps are Boundary calls — the rules of
+  engagement govern them.

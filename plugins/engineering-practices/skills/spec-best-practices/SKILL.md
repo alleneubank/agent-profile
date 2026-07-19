@@ -1,6 +1,6 @@
 ---
 name: spec-best-practices
-description: Use when creating, reviewing, or updating SPEC.md files, running /specout, or entering the ADF SPEC gate.
+description: Use when creating, reviewing, or updating SPEC.md files or entering the ADF SPEC gate.
 ---
 
 ## Naming
@@ -31,6 +31,8 @@ Specs are freeform markdown. No rigid template, no YAML frontmatter, no required
 
 **Non-goals** -- explicit scope boundary. What this spec intentionally does not cover.
 
+**Decisions** (conditional) -- ratified calls and tradeoff policy for this surface. Grows as boundary batches are answered and provisional entries are ratified; entries marked ratified|provisional. Gives answered questions a durable home so they are never re-asked.
+
 **Acceptance criteria** -- markdown checklist, not prose:
 
 ```markdown
@@ -52,13 +54,13 @@ Specs are freeform markdown. No rigid template, no YAML frontmatter, no required
 
 **External-API integrations**: before locking requirements for an integration with an external provider, run a recall sweep for prior findings on that provider/API and fetch the provider's current docs — do not spec against remembered API shapes; deprecations and legacy endpoints invalidate them. Treat unexplained existing config (keys, scopes, endpoints) as an investigation trigger, not dead code.
 
-**Mutation policy**: do not edit a spec without explicit user direction. When spec/implementation drift is found, surface it immediately. Never silently tolerate or fix drift — the user decides whether to update spec or code.
+**Mutation policy**: the spec is the human+agent contract — do not reshape it without direction, and a component the spec does not name is a scope change, not an implementation detail. A reversible interior call that refines spec territory may land as a dated provisional Decisions entry, ratified at the boundary. When spec/implementation drift is found, surface it immediately — the user decides whether to update spec or code.
 
 **Spec vs. plan**: specs describe what and why; plans describe how and when. Plans are ephemeral. Absorb durable decisions into the spec; delete the plan doc.
 
 ## Lifecycle
 
-**Creation (SPEC gate)**: see ADF SPEC gate in AGENTS.md for gate requirements. Determine placement, read existing file and identify gaps (or create at the correct colocated path), ensure all required elements are present.
+**Creation (SPEC gate)**: the gate passes when the colocated `SPEC.md` carries `REQ-*` IDs, invariants, non-goals, and acceptance criteria — plus risk tags whenever high-risk items exist. Determine placement, read the existing file and identify gaps (or create at the correct colocated path), and ensure every required element is present before PLAN begins.
 
 **Maintenance**: update spec when behavior changes; append new `REQ-*` IDs, never renumber; add test traceability as tests are written; cross-check spec against implementation whenever both are in context and surface drift.
 

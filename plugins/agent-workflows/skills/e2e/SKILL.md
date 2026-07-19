@@ -40,10 +40,10 @@ Every e2e failure is exactly one of:
 **Bug fixes:**
 - Quote the spec section that defines expected behavior
 - Fix the source code to match the spec
-- **Unit tests MUST exist** before the fix is complete — write them first if missing (TDD)
-- **Never change e2e assertions** to match buggy code
+- The TDD gate applies: the covering unit test is observed red before the fix (verifier law)
+- Verifier integrity applies: never bend an e2e assertion toward buggy code (verifier law)
 - **Never change API contracts or interfaces** without spec backing
-- If no spec exists, ask the user: bug or outdated test?
+- If no spec exists, climb the interior-decision ladder before asking: investigate (git log, linked tests, code intent), check the surface's Decisions and the doctrine, consult an independent model at a genuine fork. Still undecided: classify as unverified failure and batch the bug-vs-outdated question for the human — never block on it
 
 ## Source Code Boundary
 

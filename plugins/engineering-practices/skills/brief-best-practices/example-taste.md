@@ -6,9 +6,10 @@
 > not a real system spec. This example also shows the optional **Final-acceptance coda** — a
 > culminating whole-surface test that restates the Boundary as a gate.
 
-> Law doc for the landing hero, present-tense, no narrated history — git is the changelog. Amend
-> Decisions and Boundary only with human confirmation; log the rationale. Dated working memory
-> lives in `DELTA.md` / `DEVIATIONS.md` beside this file.
+> Law doc for the landing hero, present-tense, no narrated history — git is the changelog. The
+> Boundary and ratified Decisions amend only with human confirmation; the driver appends
+> provisional Decisions, marked and dated. Dated working memory lives in `DELTA.md` /
+> `DEVIATIONS.md` beside this file.
 
 ## Bar
 
@@ -69,8 +70,8 @@ permanently biased (the exact failure the oracle exists to defeat).
   one** — restraint beats spectacle.
 - **Assumptions:** the brand token system is the source of truth, not a local design choice; mobile
   is the primary viewport.
-- Copy is owned by the brand voice guide; the hero never invents claims. (illustrative)
-- One hero, one CTA; secondary actions live below the fold. (illustrative)
+- Copy is owned by the brand voice guide; the hero never invents claims. (illustrative, ratified)
+- One hero, one CTA; secondary actions live below the fold. (illustrative, provisional)
 
 ## Boundary — requires the human
 

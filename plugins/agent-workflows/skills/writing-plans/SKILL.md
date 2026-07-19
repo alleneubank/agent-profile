@@ -19,7 +19,7 @@ Use this skill when:
 - The work benefits from a written execution order
 
 Do not use this skill when:
-- The change is small enough to track directly in `update_plan`
+- The change is small enough to track directly in your harness's plan/progress mechanism, when one exists
 - Requirements are still ambiguous
 - The user asked to implement immediately and the work is trivial
 
@@ -33,7 +33,9 @@ If the request covers multiple independent changes, split it into separate plans
 
 ## Plan Format
 
-Save the plan where the user asked. If they did not specify a location, use:
+When a `LOOP.md` charter exists for the branch, the plan lives in its "Work plan" section, not a separate doc.
+
+Otherwise, save the plan where the user asked. If they did not specify a location, use:
 
 `docs/plans/YYYY-MM-DD-<topic>.md`
 
@@ -77,16 +79,19 @@ Then include:
 - Include commands that can actually be run from the repo.
 - Keep steps concrete: "add parser for X in `foo.ts`", not "improve parsing".
 - Keep unrelated refactors out unless they are required to make the change safe.
+- Give each task a risk class; the ADF law defines the high-risk set and its approval requirement.
+- Include a back-of-envelope resource sketch for data-plane work (per-request/per-item hot paths).
 
 ## Execution Handoff
 
 If the plan will be executed in the same session:
-- Mirror the task list in `update_plan`
-- Keep one task `in_progress`
+- Mirror the task list in your harness's plan/progress mechanism, when one exists
+- Keep one task in progress at a time
 - Revise the plan if implementation reveals real gaps
 
-If the plan has independent sidecar work:
-- Use `dispatching-parallel-agents` for bounded, non-overlapping subtasks
+Independent sidecar work may run as parallel bounded subagents with
+non-overlapping ownership; the critical path defaults to the packetized
+delegation stream (rules of engagement).
 
 ## Red Flags
 

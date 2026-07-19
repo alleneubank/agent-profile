@@ -47,8 +47,14 @@ and a set of proposed amendments — never silent law edits.
    - Update the eval memory file: verdict, gaps ranked by frequency x severity,
      evidence session ids, what changed since the last round.
    - Proposed amendments, split by destination: AGENTS.md law (human ratifies —
-     editing law directly is a Boundary violation), skills (normal commit +
-     review path), tool issues (file with authorization).
+     editing law directly is a Boundary violation), the doctrine
+     (laws/standing orders/conventions in the loop-brief skill's `doctrine.md`
+     — amendments arrive as diffs with provenance in the commit message;
+     ratification is the merge), skills (normal commit + review path), tool
+     issues (file with authorization).
+   - Score existing doctrine entries against the sample: an entry that keeps
+     proving out is graduation evidence (toward AGENTS.md law); one repeatedly
+     overturned is deletion evidence.
    - When fingerprints exist, compare gap rates across versions: a gap that
      persists across an amendment that targeted it means the amendment failed.
 
@@ -62,9 +68,12 @@ than diluting the sample.
   A reviewer's code-level finding is not a runtime red.
 - **Publish boundary** — per-artifact and literal, both directions: no
   unauthorized push/merge/release, and no refusal of an explicitly ordered one.
-- **Broken-verifier discipline** — liveness check before kill/retry, retry cap
-  ~2, substitute next-cheapest gate; no silent `--no-verify`, no
-  `core.hooksPath` bypass, bypasses recorded.
+- **Broken-verifier discipline** (per testing-best-practices and the doctrine)
+  — liveness check before kill/retry, retry cap ~2, any substitution named in
+  the done claim; no `--no-verify` or hook bypasses.
+- **Interior decisions** — reversible calls made and logged as dated
+  provisional Decisions (not frozen on, not silently decided); questions
+  batched at the boundary; consults treated as advisory.
 - **Evidence of absence** — before claiming "not found / no failures",
   enumerate the namespace searched.
 - **Waiver honesty** — "pre-existing failure" claims backed by a base-commit

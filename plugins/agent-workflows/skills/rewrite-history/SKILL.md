@@ -5,8 +5,9 @@ description: Use when the user asks to rebuild a feature branch into a clean, re
 
 # Rewrite History
 
-Rewrite branch history only when the user explicitly asks. History rewriting is
-high-risk and requires confirmation before destructive commands.
+Rewrite branch history only when the user explicitly asks. That invocation
+authorizes the local rewrite: resets and rebases behind the backup tag are
+reversible interior work — print each command as status and proceed.
 
 ## Workflow
 
@@ -21,9 +22,15 @@ high-risk and requires confirmation before destructive commands.
 
 ## Guardrails
 
-- Print exact destructive commands and wait for user confirmation before running them.
+- Print each destructive command as a one-line status before running it; the
+  backup tag keeps every local step reversible.
 - Use a local annotated backup tag and do not push backup refs unless asked.
-- Use `git push --force-with-lease` only after explicit confirmation.
-- If syncing with the default branch conflicts, abort and stop.
+- Push per-ref (rules of engagement): a `--force-with-lease` push to your own
+  non-deploying feature branch is a proposal needing no extra authorization;
+  a shared (other authors, collaborative PR) or deploy-tracked ref is a
+  publish — restate the ref and leave it to the user.
+- If syncing with the default branch conflicts, resolve via the
+  `git-rebase-sync` skill's conflict ladder; if genuinely stuck, stop with an
+  honest block: what was tried, why it cannot converge, and a proposed path.
 - Do not mix unrelated independent changes into the rewritten feature history.
 

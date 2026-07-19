@@ -1,8 +1,9 @@
 # BRIEF — <surface name>
 
-> Law doc for <surface>, present-tense, no narrated history — git is the changelog. Amend
-> Decisions and Boundary only with human confirmation; log the rationale. Dated working memory
-> lives in `DELTA.md` / `DEVIATIONS.md` beside this file.
+> Law doc for <surface>, present-tense, no narrated history — git is the changelog. The Boundary
+> and ratified Decisions amend only with human confirmation; the driver appends provisional
+> Decisions, marked and dated. Dated working memory lives in `DELTA.md` / `DEVIATIONS.md` beside
+> this file.
 
 ## Bar
 
@@ -44,12 +45,14 @@ The independent verifier — what runs, who judges, and **why it can't be gamed*
 ## Decisions
 
 Calls already made, so the agent never re-asks. **This section grows** — every answered question
-becomes a permanent entry. Include the tradeoff/priority policy and standing assumptions.
+becomes a permanent entry. Include the tradeoff/priority policy and standing assumptions. Mark
+each entry `ratified` (human-confirmed) or `provisional` (driver call via the ladder — dated,
+with rationale, ratified or overturned at the boundary).
 
 - **Priority / tradeoffs:** <e.g. "security > latency; security may force a redesign, latency may not">
 - **Assumptions:** <standing assumptions about the environment; revisit if they break>
-- <Decision> — <the call, and one line of rationale> (<date>)
-- <Decision> — <…> (<date>)
+- <Decision> — <the call, and one line of rationale> (<date>, ratified)
+- <Decision> — <…> (<date>, provisional — <consult verdict if one ran>)
 
 ## Boundary — requires the human
 

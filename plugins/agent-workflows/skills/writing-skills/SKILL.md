@@ -60,8 +60,11 @@ Description rules:
 
 ## Authoring Rules
 
-- Keep the workflow native to the target harness.
-- Name real tools and files the agent actually has.
+- Shared skills default to harness-agnostic language: no vendor tool names,
+  no harness-only paths ("your forge CLI" over a bare product name). A
+  harness-specific skill is the marked exception, named as such.
+- Name real tools and files agents actually have — across every harness the
+  skill ships to.
 - Prefer concrete triggers over broad abstractions.
 - Cut repeated explanations aggressively.
 - Include red flags when the failure mode is predictable.
@@ -82,4 +85,6 @@ Use subagents for testing only when they add signal. They are optional, not the 
 - Descriptions that summarize the full workflow
 - Instructions referencing tools unavailable in the target harness
 - Long examples that restate the same rule
-- Skills that duplicate repo-level policy
+- Skills that restate AGENTS.md law or doctrine entries — skills carry
+  mechanics and point at law
+- Vendor tool names or harness-only paths in a shared skill
