@@ -81,7 +81,11 @@ A wrong mission compounds every iteration; get that paragraph right first.
 
 - `done` — the interior-green checklist in LOOP.md holds, every floor cited
   with output. Stop the loop; write the handoff for the human's boundary
-  steps (publish, attended gates).
+  steps (publish, attended gates). Dissolution rides the ship: once the
+  boundary clears, LOOP.md and any campaign narrative/planning docs migrate
+  their authoritative content to VISION/BRIEF/SPEC/README and are deleted —
+  a completed charter left on the branch is a defect (doctrine standing
+  order).
 - `blocked: needs N decisions` — the numbered batch with proposed answers.
   The human's answers get appended to Decisions; the loop resumes.
 - `budget-exhausted` — the charter's hard iteration cap is reached, or —

@@ -66,6 +66,11 @@ one is deleted.
   wiring); the human injects only the secret material.
 - Agreed plan about to execute → restate the scope as a self-contained
   achievable goal first; attended, the restatement awaits the go.
+- Campaign shipped, or a docs cleanup called → dissolve narrative,
+  planning, and loop docs: migrate anything important, necessary, or
+  authoritative into the standing docs (VISION, BRIEF, SPEC, README),
+  delete the rest — the standing-doc surface is the only durable
+  documentation.
 
 ## Conventions
 
