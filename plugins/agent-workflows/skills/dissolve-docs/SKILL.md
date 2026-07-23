@@ -23,7 +23,9 @@ one of three classes:
   docs. Keep, subject to the focus pass.
 - **Candidates** — records how the work got here, what was planned, or
   what was true mid-flight: completed LOOP.md charters (legacy
-  `.claude/loop.md`), PLAN / TODO / NOTES / STATUS / HANDOFF docs, phase
+  `.claude/loop.md`), `DELTA.md` / `DEVIATIONS.md` brief sidecars (a
+  retired pattern — still-active floor waivers migrate to the BRIEF's
+  Decisions, dated), PLAN / TODO / NOTES / STATUS / HANDOFF docs, phase
   and iteration journals, proposals whose decision already landed, design
   explorations, migration narratives.
 
