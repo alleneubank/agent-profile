@@ -85,7 +85,7 @@ A wrong mission compounds every iteration; get that paragraph right first.
   boundary clears, LOOP.md and any campaign narrative/planning docs migrate
   their authoritative content to VISION/BRIEF/SPEC/README and are deleted —
   a completed charter left on the branch is a defect (doctrine standing
-  order).
+  order; mechanics: the dissolve-docs skill).
 - `blocked: needs N decisions` — the numbered batch with proposed answers.
   The human's answers get appended to Decisions; the loop resumes.
 - `budget-exhausted` — the charter's hard iteration cap is reached, or —
