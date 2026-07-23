@@ -8,8 +8,8 @@
 
 > Law doc for the landing hero, present-tense, no narrated history — git is the changelog. The
 > Boundary and ratified Decisions amend only with human confirmation; the driver appends
-> provisional Decisions, marked and dated. Dated working memory lives in `DELTA.md` /
-> `DEVIATIONS.md` beside this file.
+> provisional Decisions, marked and dated. Working memory lives in the campaign's LOOP.md State,
+> not here; floor waivers are dated Decisions below.
 
 ## Bar
 
@@ -45,8 +45,8 @@ permanently biased (the exact failure the oracle exists to defeat).
   panel defeats a single idiosyncratic taste and cannot be talked around.
 - **Objective floors** run in CI (Lighthouse, axe, token-lint) — fail-closed, no human in the path.
 - **Reference-anchored.** Place the captured hero beside the brand's reference frames and the top
-  three admired peers; write `DELTA.md` — the ten most significant gaps ranked by impact; fix the
-  top three; re-capture. The round closes only after the re-capture.
+  three admired peers; rank the ten most significant gaps by impact in the campaign's LOOP.md
+  State; fix the top three; re-capture. The round closes only after the re-capture.
 - **Post-ship (live).** The oracle extends into telemetry: hero bounce rate, scroll-past rate, and
   CTA click-through are the continuing signal that the first impression holds. The judge panel was
   the proxy; the live audience is the final gate.
@@ -60,7 +60,7 @@ permanently biased (the exact failure the oracle exists to defeat).
 - An **off-brand** color, typeface, or spacing value; an improvised token.
 - Text **below AA contrast**, or content that fails keyboard / screen-reader operation.
 - A **claim the product can't back** — a fabricated testimonial or invented metric.
-- Weakening a floor, or shipping a failing element without a `DEVIATIONS.md` entry and a replacement.
+- Weakening a floor, or shipping a failing element without a dated waiver Decision and a replacement.
 - Asking the human to lower the bar.
 
 ## Decisions

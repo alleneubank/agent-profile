@@ -5,8 +5,8 @@
 
 > Law doc for the transfer flow, present-tense, no narrated history — git is the changelog. The
 > Boundary and ratified Decisions amend only with human confirmation; the driver appends
-> provisional Decisions, marked and dated. Dated working memory lives in `DELTA.md` /
-> `DEVIATIONS.md` beside this file.
+> provisional Decisions, marked and dated. Working memory lives in the campaign's LOOP.md State,
+> not here; floor waivers are dated Decisions below.
 
 ## Bar
 
@@ -47,7 +47,7 @@ moves funds the sender did not authorize** — or it does not ship.
 - A state transition that lands without an audit event.
 - An unbounded retry, or a retry without an idempotency key.
 - A secret in a log line, error message, or trace.
-- Weakening a floor, or shipping a failing path without a `DEVIATIONS.md` entry and a replacement.
+- Weakening a floor, or shipping a failing path without a dated waiver Decision and a replacement.
 - Asking the human to lower the bar.
 
 ## Decisions

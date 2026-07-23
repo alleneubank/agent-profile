@@ -2,8 +2,8 @@
 
 > Law doc for <surface>, present-tense, no narrated history — git is the changelog. The Boundary
 > and ratified Decisions amend only with human confirmation; the driver appends provisional
-> Decisions, marked and dated. Dated working memory lives in `DELTA.md` / `DEVIATIONS.md` beside
-> this file.
+> Decisions, marked and dated. Working memory lives in the campaign's LOOP.md State, not here;
+> floor waivers are dated Decisions below.
 
 ## Bar
 
@@ -39,7 +39,7 @@ The independent verifier — what runs, who judges, and **why it can't be gamed*
 
 - <Outcome that is always unacceptable, regardless of everything else>
 - <…>
-- Weakening a floor, or removing a failing item without a `DEVIATIONS.md` entry and a replacement.
+- Weakening a floor, or removing a failing item without a dated waiver Decision and a replacement.
 - Asking the human to lower the bar.
 
 ## Decisions
@@ -53,6 +53,7 @@ with rationale, ratified or overturned at the boundary).
 - **Assumptions:** <standing assumptions about the environment; revisit if they break>
 - <Decision> — <the call, and one line of rationale> (<date>, ratified)
 - <Decision> — <…> (<date>, provisional — <consult verdict if one ran>)
+- <Floor waiver> — <floor, why it is infeasible, the nearest-feasible alternative in force> (<date>, provisional)
 
 ## Boundary — requires the human
 

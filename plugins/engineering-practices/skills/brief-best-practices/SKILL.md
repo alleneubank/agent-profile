@@ -17,7 +17,7 @@ Subjective surfaces (a docs page, a report, a visual artifact) get a **mini-brie
 
 ## Naming & placement
 
-Always `BRIEF.md`, colocated with the surface it governs: root for project scope, `apps/foo/BRIEF.md`, `packages/bar/BRIEF.md`, or a docs subtree (e.g. `docs/toys/BRIEF.md`). Dated working memory lives **beside** the brief, never inside it — e.g. `DELTA.md` (per-round gaps, ranked) and `DEVIATIONS.md` (infeasible → nearest-feasible, logged). The brief is present-tense law; git is the changelog.
+Always `BRIEF.md`, colocated with the surface it governs: root for project scope, `apps/foo/BRIEF.md`, `packages/bar/BRIEF.md`, or a docs subtree (e.g. `docs/toys/BRIEF.md`). Working memory never lives beside the brief as sidecar docs — the `DELTA.md` / `DEVIATIONS.md` pattern is retired: per-round gaps and iteration facts belong to the campaign's LOOP.md State (loop-brief skill), and an infeasible floor's waiver is law, not working memory — it lives in the brief's own Decisions, dated, naming the floor, the blocker, and the nearest-feasible alternative in force. A surviving sidecar dissolves (dissolve-docs skill). The brief is present-tense law; git is the changelog.
 
 ## The seven slots (required concerns, adaptable shape)
 
@@ -37,14 +37,14 @@ The contract is that all seven *concerns* are present, in this order — not a f
 
 Open every brief with a one-line law statement, e.g.:
 
-> Law doc for `<surface>`, present-tense, no narrated history — git is the changelog. The Boundary and ratified Decisions amend only with human confirmation; the driver appends provisional Decisions, marked and dated. Dated working memory lives in `DELTA.md` / `DEVIATIONS.md` beside this file.
+> Law doc for `<surface>`, present-tense, no narrated history — git is the changelog. The Boundary and ratified Decisions amend only with human confirmation; the driver appends provisional Decisions, marked and dated. Working memory lives in the campaign's LOOP.md State, not here; floor waivers are dated Decisions below.
 
 ## Authoring rules
 
 - **Match the house first.** If the repo already has ratified briefs, copy *their* shape — section names, voice, any closing coda — over this skeleton. Consistency across the brief set beats the generic template; the seven concerns are the fallback when no house dialect exists yet. A reviewer judges a brief against the house dialect, and must not reject it for matching the repo's own law.
 - **Evidence-based.** Ground Dimensions and Floors in the real surface; cite reference exemplars. Do not invent thresholds, signals, or behaviors.
 - **The oracle must be independent.** Maker ≠ judge for any subjective dimension. Name *why* it can't be gamed — without independence the gate is theater.
-- **Floors are gates, not ceilings.** A passing artifact may still owe refinement; say so. Never weaken a floor to pass a gate — an infeasible item gets the nearest-feasible alternative plus a `DEVIATIONS.md` entry, and the gap stays on record.
+- **Floors are gates, not ceilings.** A passing artifact may still owe refinement; say so. Never weaken a floor to pass a gate — an infeasible item gets the nearest-feasible alternative plus a dated waiver Decision naming the blocker, and the gap stays on record.
 - **Calibrate claims to enforcement.** Match absolutist words ("never", "cannot") to what the oracle actually proves. Overclaiming invites reject cycles.
 - **Parsimony.** Few, well-crafted floors that cover the cases beat a long brittle list. The brief is read every loop; every line earns its place.
 - **Mutation policy.** The Boundary amends only with explicit human confirmation, and ratified Decisions are never re-litigated. The driver appends provisional Decisions freely — that is the ladder working — marked as such and never silently promoted to ratified. When brief/implementation drift is found, surface it — the human decides.
