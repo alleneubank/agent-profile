@@ -40,7 +40,8 @@ Restart only for: Tilt version upgrades, port/host config changes, crashes, clus
 
 1. Check if tilt is already running:
    ```bash
-   PROJECT=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" || basename "$PWD")
+   ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+   PROJECT="$(basename "$ROOT")"
    zmx list --short 2>/dev/null | grep -q "^${PROJECT}-tilt$"
    ```
    If running, check health via `tilt get uiresources -o json` and skip to Step 3.
@@ -65,19 +66,33 @@ Start Tilt quietly and keep the durable session as the UI/API owner. Diagnose
 from the agent turn with `tilt get ...` and bounded `tilt logs "$RESOURCE" ...`
 commands.
 
+`tilt up` never exits, so it **must** be detached with `-d` (placed after the
+session name) and passed as separate arguments — bare `zmx run` blocks the
+agent forever, and a quoted `'tilt up'` is looked up as a single binary name
+and dies with exit 127. Hold the boot command in an **array**, not a string:
+zsh does not word-split unquoted expansions, so a `START_CMD='tilt up'` string
+arrives as one argument there even though it works in bash.
+
 ```bash
-PROJECT=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" || basename "$PWD")
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+PROJECT="$(basename "$ROOT")"
 SESSION="${PROJECT}-tilt"
-START_CMD='tilt up'
+START_CMD=(tilt up)
 # Replace START_CMD with the repo's documented boot command when present, e.g.:
-# START_CMD='yarn localnet:up'
-# START_CMD='silo up'
+# START_CMD=(yarn localnet:up)
+# START_CMD=(silo up)
 
 if zmx list --short 2>/dev/null | grep -q "^${SESSION}$"; then
   echo "Tilt session already exists: $SESSION"
 else
-  zmx run "$SESSION" "$START_CMD"
-  echo "Started tilt in zmx session: $SESSION"
+  zmx run "$SESSION" -d "${START_CMD[@]}"
+  sleep 2
+  if zmx history "$SESSION" 2>/dev/null | tail -5 | grep -q 'ZMX_TASK_COMPLETED:'; then
+    echo "Boot command exited immediately:"
+    zmx history "$SESSION" | tail -20
+  else
+    echo "Started tilt in zmx session: $SESSION"
+  fi
 fi
 
 tilt get uiresources -o json | jq -r '.items[] | "\(.metadata.name): runtime=\(.status.runtimeStatus) update=\(.status.updateStatus)"'

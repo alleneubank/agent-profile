@@ -121,21 +121,33 @@ Guard: `export TILT_EDITOR=true` so a stray bare `tilt args` exits instead of ha
 
 ## Running tilt up
 
-Follow `zmx` skill patterns — check for existing sessions, derive name from git root, use `zmx run` (not attach):
+Follow `zmx` skill patterns — check for existing sessions, derive name from git root, use detached `zmx run -d` (never `attach`):
 
 Start Tilt quietly and keep the durable session as the UI/API owner. Diagnose
 with `tilt get ...` and bounded `tilt logs "$RESOURCE" ...` commands from the
 agent turn.
 
+`tilt up` never exits, so it **must** be detached with `-d` (placed after the
+session name) and passed unquoted — bare `zmx run` blocks the agent forever,
+and a quoted `'tilt up'` is looked up as a single binary name and dies with
+exit 127.
+
 ```bash
-PROJECT=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" || basename "$PWD")
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+PROJECT="$(basename "$ROOT")"
 SESSION="${PROJECT}-tilt"
 
 if zmx list --short 2>/dev/null | grep -q "^${SESSION}$"; then
   echo "Tilt session already exists: $SESSION"
 else
-  zmx run "$SESSION" 'tilt up'
-  echo "Started tilt in zmx session: $SESSION"
+  zmx run "$SESSION" -d tilt up
+  sleep 2
+  if zmx history "$SESSION" 2>/dev/null | tail -5 | grep -q 'ZMX_TASK_COMPLETED:'; then
+    echo "tilt up exited immediately:"
+    zmx history "$SESSION" | tail -20
+  else
+    echo "Started tilt in zmx session: $SESSION"
+  fi
 fi
 
 tilt get uiresources -o json | jq -r '.items[] | "\(.metadata.name): runtime=\(.status.runtimeStatus) update=\(.status.updateStatus)"'
