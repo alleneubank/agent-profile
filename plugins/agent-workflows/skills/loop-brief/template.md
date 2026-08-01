@@ -18,17 +18,23 @@ ladder; the verifier — not confidence — decides when work is done.
 
 1. <date> — <the call>. Why: <rationale>. <ratified|provisional>
 
-## Work plan (ADF per change)
+## Work plan (ADF per unit; stages mark review boundaries)
 
-1. <ordered, bounded units toward interior-green>
+1. <ordered, bounded units toward interior-green, grouped into stages —
+   a stage is a coherent slice whose diff can settle; the review gate
+   fires at its boundary>
 
 ## Verification floors
 
 - <command → what green means; per-change and whole-branch gates>
-- Review gate: structured review on every substantive diff; severity-floor
+- Review gate — harness first, reviews late: the driver and cooks own
+  verification; do not outsource to a reviewer what a floor can decide.
+  Structured review fires at stage boundaries — the stage's floors green
+  and its diff no longer moving — never per diff; severity-floor
   semantics — floor `<severity, in the reviewer's own scale — e.g. major>`:
   findings at or above it block, a below-floor-only reject does not; max 3
-  review→fixup rounds per change.
+  review→fixup rounds per stage. A finding the harness should have caught
+  earns a new floor, not just a patch.
 
 ## Unblocking ladder
 
@@ -42,8 +48,8 @@ scope-changing / Boundary items only).
 
 The driver edits directly when the fix is finding-sized (≤ ~2 files,
 mechanical, fully understood). After any in-session edit: run the owning
-gates, commit conventionally, route through the same review gate — the
-driver never self-approves. Larger or design-shaped work goes to a cook
+gates and commit conventionally — the edit lands in its stage's review
+scope; the driver never self-approves. Larger or design-shaped work goes to a cook
 packet. Never mix in-session edits with an in-flight worker on the same
 files.
 

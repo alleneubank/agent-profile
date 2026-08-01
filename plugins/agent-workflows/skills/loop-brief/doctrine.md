@@ -42,11 +42,21 @@ one is deleted.
 
 - Reviewer capacity degraded → ration the healthy provider's remainder
   (limits reset; 20% is workable).
-- Independent oracle genuinely unavailable → clean stop plus handoff;
-  never continue unreviewed or under a degraded oracle.
+- Independent oracle genuinely unavailable → interior work continues on
+  floors alone until the stage boundary; the boundary is a clean stop plus
+  handoff — never cross it unreviewed or under a degraded oracle, and
+  never re-dispatch per iteration against a dead broker.
 - Defect escaped a gate → root-cause twice: the bug, and the instruction,
   check, or harness that should have caught it; propose the amendment that
   closes the gap.
+- Review finding the harness could have caught → the fix ships with the
+  new floor that catches its class; a patch without the floor leaves the
+  gap open. This is how the review budget shrinks over time instead of
+  growing.
+- Reviewer re-flags a ratified Decision → do not spend rounds re-arguing;
+  put the override rationale in code the reviewer can see (a comment
+  citing the Decision) and move on — decisions change on the ladder, not
+  in the review loop.
 - Workaround chain growing mid-delivery → stop investing; finish the real
   remaining phase, then remove the kludges in the same effort.
 - Mixed-severity review findings on a PR → fix correctness-class findings

@@ -69,6 +69,11 @@ before claiming done.
 - **Independent** — objective floors run in the harness; subjective
   dimensions go to the brief's oracle. Self-review is never reported as
   independent.
+- **Harness first, reviews late** — floors gate the interior; the oracle
+  fires at stage boundaries, on a diff that has stopped moving — never per
+  diff, and review→fixup rounds are budgeted per stage. A finding the
+  harness should have caught earns a new floor, not just a patch. Later is
+  not fewer: the driver still never approves its own work.
 - **Fail-closed** — silently passing without actually checking manufactures
   false confidence; an unavailable, broken, or bypassed oracle means
   `blocked`, not `done`.
