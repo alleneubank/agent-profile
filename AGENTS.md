@@ -69,11 +69,15 @@ before claiming done.
 - **Independent** — objective floors run in the harness; subjective
   dimensions go to the brief's oracle. Self-review is never reported as
   independent.
-- **Harness first, reviews late** — floors gate the interior; the oracle
-  fires at stage boundaries, on a diff that has stopped moving — never per
-  diff, and review→fixup rounds are budgeted per stage. A finding the
-  harness should have caught earns a new floor, not just a patch. Later is
-  not fewer: the driver still never approves its own work.
+- **Harness first, briefed reviews** — floors gate the interior; never
+  outsource to the oracle what a floor can decide. Every review carries the
+  contract of what it grades: intended outcome, what to judge now, the
+  invariants, acceptance evidence, and the work explicitly deferred to a
+  later unit. A reviewer not told the change is intermediate will reject it
+  for being intermediate. Declared deferred work is not a finding;
+  regressions in the current unit and violations of its stated contract
+  are. A finding the harness should have caught earns a new floor, not just
+  a patch. The driver still never approves its own work.
 - **Fail-closed** — silently passing without actually checking manufactures
   false confidence; an unavailable, broken, or bypassed oracle means
   `blocked`, not `done`.

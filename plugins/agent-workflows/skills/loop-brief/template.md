@@ -18,23 +18,25 @@ ladder; the verifier — not confidence — decides when work is done.
 
 1. <date> — <the call>. Why: <rationale>. <ratified|provisional>
 
-## Work plan (ADF per unit; stages mark review boundaries)
+## Work plan (ADF per unit)
 
-1. <ordered, bounded units toward interior-green, grouped into stages —
-   a stage is a coherent slice whose diff can settle; the review gate
-   fires at its boundary>
+1. <ordered, bounded units toward interior-green; each unit names what it
+   establishes now and what it explicitly defers to a later unit — that
+   pairing is the review contract>
 
 ## Verification floors
 
 - <command → what green means; per-change and whole-branch gates>
-- Review gate — harness first, reviews late: the driver and cooks own
+- Review gate — harness first, briefed reviews: the driver and cooks own
   verification; do not outsource to a reviewer what a floor can decide.
-  Structured review fires at stage boundaries — the stage's floors green
-  and its diff no longer moving — never per diff; severity-floor
-  semantics — floor `<severity, in the reviewer's own scale — e.g. major>`:
-  findings at or above it block, a below-floor-only reject does not; max 3
-  review→fixup rounds per stage. A finding the harness should have caught
-  earns a new floor, not just a patch.
+  Every review carries its unit's contract — intended outcome, what to
+  judge now, invariants, acceptance evidence, and work explicitly deferred
+  to a later unit; declared deferred work is not a finding, current-unit
+  regressions and contract violations are. Severity-floor semantics — floor
+  `<severity, in the reviewer's own scale — e.g. major>`: findings at or
+  above it block, a below-floor-only reject does not; max 3 review→fixup
+  rounds per reviewed unit. A finding the harness should have caught earns
+  a new floor, not just a patch.
 
 ## Unblocking ladder
 
@@ -48,7 +50,7 @@ scope-changing / Boundary items only).
 
 The driver edits directly when the fix is finding-sized (≤ ~2 files,
 mechanical, fully understood). After any in-session edit: run the owning
-gates and commit conventionally — the edit lands in its stage's review
+gates and commit conventionally — the edit lands in its unit's review
 scope; the driver never self-approves. Larger or design-shaped work goes to a cook
 packet. Never mix in-session edits with an in-flight worker on the same
 files.
