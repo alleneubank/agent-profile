@@ -7,8 +7,9 @@ semantics: **laws** — violation is a defect, no context excuses it;
 deviation as a provisional Decision; **conventions** — defaults and
 tie-breakers, yielding only to a law or standing order. Amendments arrive
 as diffs with provenance in the commit message; ratification is the merge.
-An entry that keeps proving out graduates to AGENTS.md law; an overturned
-one is deleted.
+An entry that keeps proving out graduates to AGENTS.md law in its weakest
+proven form — specifics that never recurred stay behind; an overturned one
+is deleted.
 
 ## Laws
 
@@ -49,6 +50,14 @@ one is deleted.
 - Defect escaped a gate → root-cause twice: the bug, and the instruction,
   check, or harness that should have caught it; propose the amendment that
   closes the gap.
+- Codifying a correction into a rule → state it at the weakest level that
+  still excludes every observed instance: it would have blocked each
+  motivating incident (validity), and a neighboring legitimate behavior,
+  named in advance, stays permitted (weakness). Incident detail lives in
+  the provenance, not the rule. A rule accreting exceptions is over-strong
+  — weaken the rule rather than growing the carve-out list. Boundary and
+  secrets law is exempt: where failure is irreversible, deliberate
+  over-strength is the correct choice.
 - Review finding the harness could have caught → the fix ships with the
   new floor that catches its class; a patch without the floor leaves the
   gap open. This is how the review budget shrinks over time instead of

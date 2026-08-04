@@ -37,10 +37,14 @@ and a set of proposed amendments — never silent law edits.
 3. **Depth-audit each session.** `recall show <id>`, read the actual turns, and
    score the rubric below. Record concrete moments (quotes, commands run), not
    impressions.
-4. **Attribute each miss.** Three buckets with different fixes:
+4. **Attribute each miss.** Four buckets with different fixes:
    - *Compliance gap* — instructions already forbid it; the agent did it anyway.
      Fix: sharpen wording, add a red flag, or accept a model limitation.
    - *Coverage gap* — instructions are silent. Fix: propose new law/skill text.
+   - *Over-strength gap* — a rule constrained legitimate behavior: a needless
+     ask or block, wasteful compliance, or a correction in the opposite
+     direction ("no, just do X"). Fix: weaken the rule to the weakest form
+     that still excludes the failures it was written for — never a carve-out.
    - *Tooling gap* — harness breakage (broker hangs, auth death, flaky gates).
      Fix: file issues on the tool; do not write law against broken tooling.
 5. **Output.**
@@ -52,9 +56,13 @@ and a set of proposed amendments — never silent law edits.
      — amendments arrive as diffs with provenance in the commit message;
      ratification is the merge), skills (normal commit + review path), tool
      issues (file with authorization).
+   - Phrase each amendment per the codifying standing order in the doctrine:
+     weakest-valid, incident detail in the provenance, not the rule.
    - Score existing doctrine entries against the sample: an entry that keeps
-     proving out is graduation evidence (toward AGENTS.md law); one repeatedly
-     overturned is deletion evidence.
+     proving out is graduation evidence (toward AGENTS.md law) — graduate the
+     weak form, stripping specifics that never recurred; one that accreted
+     exceptions is weakening evidence; one repeatedly overturned is deletion
+     evidence.
    - When fingerprints exist, compare gap rates across versions: a gap that
      persists across an amendment that targeted it means the amendment failed.
 
@@ -85,6 +93,9 @@ than diluting the sample.
 - **Independence** — subjective verdicts came from a fresh oracle; self-review
   never reported as independent; unavailable oracle handled as blocked, not
   bypassed.
+- **Instruction friction** — did a rule force a needless ask, block, or
+  detour, or draw a correction in the opposite direction? Feeds the
+  over-strength bucket.
 
 ## Red Flags
 
@@ -95,3 +106,6 @@ than diluting the sample.
   (evidence-of-absence applies to the eval itself).
 - Committing AGENTS.md edits as part of the eval — amendments ship only after
   explicit human ratification.
+- Attributing every miss to under-constraint — corrections in the opposite
+  direction are gaps too, and an amendment set that only ever strengthens
+  drifts toward overfit.

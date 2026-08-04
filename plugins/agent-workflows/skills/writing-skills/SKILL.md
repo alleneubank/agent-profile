@@ -9,7 +9,7 @@ description: Use when creating or editing a skill and you need it to be discover
 
 A skill should capture reusable judgment, not a story about one session.
 
-**Core principle:** Write the minimum instructions that reliably change future agent behavior on the right class of tasks.
+**Core principle:** Write the minimum instructions that reliably change future agent behavior on the right class of tasks. What generalizes is weakness, not brevity: state each rule at the weakest level that still excludes the failures it exists to prevent — a terse absolute is often stronger than the failure warrants, and a rule wearing one incident's details won't fire on the next one.
 
 ## Directory Choice
 
@@ -55,7 +55,9 @@ Frontmatter supports only:
 Description rules:
 - Start with `Use when...`
 - Describe triggering conditions, not the workflow
-- Stay specific enough for discovery
+- State the weakest trigger that still excludes wrong contexts: describe the
+  task shape the skill governs, not one incident's surface details — an
+  over-specific description under-triggers
 - Avoid harness-specific claims unless the skill is intentionally harness-specific
 
 ## Authoring Rules
@@ -66,6 +68,8 @@ Description rules:
 - Name real tools and files agents actually have — across every harness the
   skill ships to.
 - Prefer concrete triggers over broad abstractions.
+- When several rules share a shape, mint the concept once and state one weak
+  rule over it, instead of enumerating strong variants.
 - Cut repeated explanations aggressively.
 - Include red flags when the failure mode is predictable.
 
@@ -85,6 +89,8 @@ Use subagents for testing only when they add signal. They are optional, not the 
 - Descriptions that summarize the full workflow
 - Instructions referencing tools unavailable in the target harness
 - Long examples that restate the same rule
+- Rules encoding one incident's surface details (tool names, paths, exact
+  phrasings) where the failure was structural
 - Skills that restate AGENTS.md law or doctrine entries — skills carry
   mechanics and point at law
 - Vendor tool names or harness-only paths in a shared skill
