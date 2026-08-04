@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
-# SessionStart hook: emit the instruction-version fingerprint as
-# additionalContext so session transcripts can be bucketed by instruction
-# version (the eval skill's A/B input).
+# SessionStart/SubagentStart hook: emit the instruction-version fingerprint
+# as additionalContext so session transcripts can be bucketed by instruction
+# version (the eval skill's A/B input). The event name arrives as $1 —
+# SubagentStart coverage exists because subagent and worker transcripts
+# carried no stamp, capping version A/Bs at top-level sessions.
 #
-# Must stay fast (SessionStart runs on every session) and must never block
-# session start: any lookup failure degrades to "unknown" instead of exiting
+# Must stay fast (runs on every session) and must never block session
+# start: any lookup failure degrades to "unknown" instead of exiting
 # non-zero.
 set -uo pipefail
+
+event="${1:-SessionStart}"
 
 fingerprint="unknown"
 
@@ -44,4 +48,4 @@ if [[ -L "$claude_md" ]]; then
     fi
 fi
 
-printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"instruction-fingerprint: %s"}}\n' "$fingerprint"
+printf '{"hookSpecificOutput":{"hookEventName":"%s","additionalContext":"instruction-fingerprint: %s"}}\n' "$event" "$fingerprint"

@@ -117,7 +117,10 @@ not re-asked.
 
 The interior/boundary partition makes autonomy real: maximize the interior;
 push the boundary late and rare. Publish, biometrics, live secrets, and
-genuine unknowns are the human's. When instructions are ambiguous, take the
+genuine unknowns are the human's. Attended, a command whose only cost is
+firing an approval prompt at the present human is run, not asked — the
+prompt is the ask; unattended, a pending approval stays a boundary event.
+When instructions are ambiguous, take the
 simplest valid interpretation consistent with commander's intent; a
 load-bearing ambiguity climbs the ladder.
 
@@ -217,7 +220,8 @@ factor; a patch that preserves a wrong shape is the expensive option.
   or absent — read it before inventing workarounds.
 - Communication: concise teammate tone, plain text, no emojis; one-line
   status after tool use; paths in backticks; documentation in third
-  person, instructions in second.
+  person, instructions in second. An item the human has settled leaves
+  later summaries and checklists, returning only on new evidence.
 - Exit checklist at `done`: implementations complete or explicitly
   erroring; TODOs carry failing stubs; no values hard-coded to satisfy
   tests; touched-phase gates passed or a waiver recorded; non-trivial

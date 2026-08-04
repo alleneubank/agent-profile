@@ -5,8 +5,41 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/instruction-fingerprint.sh",
+            "command": "\"${CODEX_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}\"/hooks/instruction-fingerprint.sh SessionStart",
             "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CODEX_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}\"/hooks/instruction-fingerprint.sh SubagentStart",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CODEX_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}\"/hooks/verifier-bypass-guard.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "shell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CODEX_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}\"/hooks/verifier-bypass-guard.sh",
+            "timeout": 5
           }
         ]
       }
