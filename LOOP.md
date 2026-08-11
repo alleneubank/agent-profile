@@ -4,7 +4,12 @@ Mission: drive the agent-profile repo to **interior-green** for pi compatibility
 
 ## State (updated 2026-08-11 — rewrite each iteration; newest facts first)
 
-- Branch `main`, HEAD `dbb5992` (agent-workflows v2.6.0), tree clean at iteration 1 start. Submodule of dotfiles; nothing pushed.
+- Branch `main`, HEAD `da042b2`, tree clean. Nothing pushed (submodule of dotfiles; the superproject will show `agent-profile` modified until the human pushes and advances the pointer).
+- **Iteration 1 complete — unit 1 (agent-profile pi package) shipped.** Charter authored (`LOOP.md`, `SPEC.md`) at iteration start.
+  - Delivered: `package.json` pi manifest (skills + `extensions/pi-hooks.ts`), `tsconfig.json`, `extensions/pi-hooks.ts` (SessionStart fingerprint + PreToolUse verifier guard, exec'ing the canonical shell scripts), vitest floors, additive pi gate in `scripts/validate.sh`.
+  - Floors cited: `npx vitest run` 13/13 green (red observed and cited before the extension existed — TDD); `npx tsc --noEmit` clean; `./scripts/validate.sh` exit 0 incl. new pi gate (`pi package ok`); real-pi smoke `pi --verbose -p "Reply with exactly: OK" -e extensions/pi-hooks.ts --no-session` → `OK`, exit 0.
+  - Fixture bug found by the red run: `hooksPath` test used `git config core.hooksPath /dev/null`; the script matches `hooksPath=/dev/null` (with `=`), so the fixture now uses the real bypass shape `git -c core.hooksPath=/dev/null commit`. Extension behavior was correct; the fixture was wrong.
+  - Commit: `da042b2`. Skill dirs double-load with the dotfiles settings floor until unit 3 (Decision 6) — expected, pi first-wins dedups.
 - Direction ratified (human): **fleet-as-pi-packages** — make the plugins themselves pi-compatible instead of building a claude/codex adapter extension. Pi packages are pi's own plugin system; install/update/enable/disable/dedup all owned by pi.
 - Scope ratified: agent-profile is the LOOP home; v1 = agent-profile pi package (manifest + hooks extension + floors). recall/silo/canton manifests are later units or follow-up loops; the adapter (plugin-host) design is shelved, not archived — revive only on the evidence trigger (bulk third-party plugin imports into pi).
 - Baseline evidence: `./scripts/validate.sh` exit 0 on HEAD `dbb5992` (ran this session, full skill+parity output green). No known pre-existing failures.
