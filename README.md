@@ -64,6 +64,43 @@ claude plugin install engineering-practices@agent-profile
 claude plugin install agent-workflows@agent-profile
 ```
 
+## Pi package
+
+This repo is also an installable [pi](https://pi.dev) package. It provides both
+plugins' skills (Agent Skills standard — pi's skill loader accepts Claude Code
+skill frontmatter) plus pi-native equivalents of the plugins' Claude/Codex
+hooks:
+
+- **Instruction fingerprint** — on `session_start`, pi emits the
+  `instruction-fingerprint` custom message so sessions stay bucketable by
+  instruction version (eval A/B input).
+- **Verifier-bypass guard** — on `tool_call` (bash), commands matching the
+guard policy (`git --no-verify`, `core.hooksPath=/dev/null`) are blocked
+with the policy's reason; `HOOK_BYPASS_APPROVED=1` remains the escape hatch.
+
+```bash
+pi install git:git@github.com:alleneubank/agent-profile.git
+```
+
+Hook policy has a single source of truth: the pi extension execs the canonical
+scripts in `plugins/agent-workflows/hooks/` with the same stdin/JSON contract
+Claude and Codex use — no inline duplicate, and `scripts/validate.sh` fails the
+build if the extension stops referencing them. `SubagentStart` has no pi
+analogue (pi has no native subagents) and is a documented skip. Hooks fail
+open: script errors and timeouts never block a tool call or session start.
+
+Develop and verify:
+
+```bash
+npm install
+npm run check          # tsc --noEmit + vitest
+./scripts/validate.sh  # parity + skill + pi package gates
+pi -e extensions/pi-hooks.ts   # load the extension without installing
+```
+
+The root `package.json` version is independent of the per-plugin manifest
+versions managed under Releasing below.
+
 ## Validation
 
 ```bash
