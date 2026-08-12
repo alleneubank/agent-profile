@@ -1,0 +1,35 @@
+{
+  "name": "agent-profile",
+  "version": "1.0.0",
+  "description": "Pi package for alleneubank/agent-profile: engineering-practices + agent-workflows skills and their pi hook equivalents (instruction fingerprint, verifier-bypass guard).",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "skills",
+    "agent-profile",
+    "agent-workflows"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions/pi-hooks.ts"
+    ],
+    "skills": [
+      "./plugins/engineering-practices/skills",
+      "./plugins/agent-workflows/skills"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "^0.84.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test"
+  }
+}

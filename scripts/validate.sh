@@ -175,6 +175,65 @@ print("manifest parity ok")
 PY
 }
 
+# Pi package gate (additive). The repo installs as a pi package: package.json's
+# pi manifest must resolve on disk, and the hooks extension must keep exec'ing
+# the canonical hook scripts rather than duplicating hook policy inline. Pure
+# stdlib (python3) so the pre-push hook has no dependency beyond python3.
+check_pi_package() {
+  python3 - "$ROOT" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+errors = []
+
+
+def load(path):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        errors.append(f"missing manifest: {path}")
+    except json.JSONDecodeError as exc:
+        errors.append(f"invalid json in {path}: {exc}")
+    return None
+
+
+pkg = load(root / "package.json")
+if pkg is not None:
+    pi = pkg.get("pi")
+    if not isinstance(pi, dict):
+        errors.append("package.json declares no pi manifest")
+        pi = {}
+    for ext in pi.get("extensions") or []:
+        f = root / ext.lstrip("./")
+        if not f.is_file():
+            errors.append(f"pi extension not found: {ext}")
+    for skills in pi.get("skills") or []:
+        d = root / skills.lstrip("./")
+        if not d.is_dir():
+            errors.append(f"pi skills dir not found: {skills}")
+        elif not any(p.name == "SKILL.md" for p in d.rglob("SKILL.md")):
+            errors.append(f"pi skills dir has no SKILL.md anywhere: {skills}")
+    ext_rel = (pi.get("extensions") or ["./extensions/pi-hooks.ts"])[0]
+    ext = root / ext_rel.lstrip("./")
+    if ext.is_file():
+        src = ext.read_text(encoding="utf-8")
+        for hook in ("instruction-fingerprint.sh", "verifier-bypass-guard.sh"):
+            if hook not in src:
+                errors.append(f"pi extension no longer references {hook}")
+    else:
+        errors.append(f"pi extension missing: {ext_rel}")
+
+if errors:
+    print("pi package check FAILED:", file=sys.stderr)
+    for e in errors:
+        print(f"  - {e}", file=sys.stderr)
+    raise SystemExit(1)
+print("pi package ok")
+PY
+}
+
 require_json "$ROOT/marketplace.json"
 require_json "$ROOT/.claude-plugin/marketplace.json"
 require_json "$ROOT/plugins/engineering-practices/.codex-plugin/plugin.json"
@@ -182,7 +241,10 @@ require_json "$ROOT/plugins/engineering-practices/.claude-plugin/plugin.json"
 require_json "$ROOT/plugins/agent-workflows/.codex-plugin/plugin.json"
 require_json "$ROOT/plugins/agent-workflows/.claude-plugin/plugin.json"
 
+require_json "$ROOT/package.json"
+
 check_manifest_parity
+check_pi_package
 
 if command -v claude >/dev/null 2>&1; then
   claude plugin validate --strict "$ROOT/.claude-plugin/marketplace.json"
