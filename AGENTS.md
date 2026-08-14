@@ -53,43 +53,28 @@ the floors pass or the loop reports a bounded, honest block.
   alternative). Detect structural non-convergence and stop early.
 - A green verifier is bound to the state it saw: mutate, re-verify.
   Unchanged state (HEAD + dirty-hash) needs no re-run.
-- Waits on async processes are blocking, single, and bounded; a repeated
-  status check that returned nothing new is a defect.
+- Waits on async processes are blocking, single, and bounded, and a single
+  blocking wait stays under a minute. Re-checking with no new signal since
+  the last look is a defect; where monitoring is the task, unchanged state
+  is the answer, not a failure.
 
 ## The verifier
 
 Build or identify the verifier *before* iterating — the TDD gate: the
 failing test is the harness. Discover the project's existing harness first
 (task runner/scripts → repo docs → project defaults → ask) and run it
-before claiming done.
+before claiming done. How to build one that measures the real goal —
+faithful, cheap, few and broad, realistic, and briefed when it is a review
+— is in `testing-best-practices`.
 
-- **Faithful** — measures the real goal, not a gameable proxy; a loop
-  optimizes its verifier, so an unfaithful one polishes the wrong thing.
-- **Cheap and fast** — seconds-per-look, or the loop starves.
 - **Independent** — objective floors run in the harness; subjective
   dimensions go to the brief's oracle. Self-review is never reported as
-  independent.
-- **Harness first, briefed reviews** — floors gate the interior; never
-  outsource to the oracle what a floor can decide. Every review carries the
-  contract of what it grades: intended outcome, what to judge now, the
-  invariants, acceptance evidence, and the work explicitly deferred to a
-  later unit. A reviewer not told the change is intermediate will reject it
-  for being intermediate. Declared deferred work is not a finding;
-  regressions in the current unit and violations of its stated contract
-  are. A finding the harness should have caught earns a new floor, not just
-  a patch. The driver still never approves its own work.
+  independent, and the driver never approves its own work.
 - **Fail-closed** — silently passing without actually checking manufactures
   false confidence; an unavailable, broken, or bypassed oracle means
   `blocked`, not `done`.
-- Few, well-crafted, broad-coverage: build the surface's harness, not the
-  task's check — the next feature reuses it for free. Build cheap verifiers
-  freely; propose expensive ones. The harness runs against a deterministic
-  proxy; the live system is the final gate, human-attended — a loop needing
-  live secrets to verify is built at the wrong altitude.
-- Realism: integration over mocked units for data flow and permissions;
-  mocks for external services, never your own data layer. Visual/UI floors
-  are the change observed on the live surface. Before done: would this
-  survive a manual walkthrough?
+- A finding the harness should have caught earns a new floor, not just a
+  patch.
 - Integrity: tests verify correctness — they do not define the solution.
   Fix root causes; never weaken assertions or game a test. Labeling a
   failure "pre-existing"/"unrelated" or deferring a discovered bug requires
@@ -180,33 +165,10 @@ version of requested work. When a design decision arises, choose the
 simplest, most correct design, refactoring if needed — effort is not a
 factor; a patch that preserves a wrong shape is the expensive option.
 
-- Types first: define types and data models before logic; make illegal
-  states unrepresentable; schema changes drive implementation.
-- Assert the invariants code relies on. Programmer errors (violated
-  invariants) are asserted and crash; operating errors (bad input,
-  timeouts) are handled and reported — never confuse the two. Assert
-  positive and negative space; pair assertions across independent points;
-  prefer the cheaper rung (compile-time > runtime > test). Put a limit on
-  everything: every loop, queue, buffer, cache, retry, and recursion
-  carries an explicit bound; intentionally infinite loops assert it.
-- Prefer immutability and pure functions; isolate side effects at system
-  boundaries; push `if`s up and `for`s down — parents own control flow and
-  state, leaves stay pure.
-- Errors are handled or propagated, never swallowed; fail loudly; validate
-  at system boundaries; external calls carry explicit timeouts and bounded
-  retries with backoff; handle edge cases explicitly.
-- Refactor with clean breaks: update all callers, complete the migration,
-  delete superseded code — supersession is the default; confirm
-  replace-vs-add in one line only when genuinely ambiguous. Review findings
-  never restructure a PR or rollout without confirmation.
-- Name precisely: nouns and verbs that carry the mental model; no
-  abbreviations; long-form flags; units and qualifiers last by descending
-  significance (`latency_ms_max`).
-- Comment liberally — intent, rationale, and non-obvious constraints only,
-  never what the code does. A blatantly true assertion beats a comment for
-  a critical, surprising condition.
-- Declare variables at the smallest scope, computed closest to use. Extract
-  configuration immediately: magic values live in config, not code.
+The craft law — types, assertions and bounds, purity, errors, refactors,
+naming, comments, scope — and the system properties every surface owes,
+each with the floor that proves it, live in the `code-law` skill. Load it
+before writing code.
 
 ## Operations
 
@@ -219,17 +181,20 @@ factor; a patch that preserves a wrong shape is the expensive option.
   re-source manually. A missing expected var means the `.envrc` is blocked
   or absent — read it before inventing workarounds.
 - Communication: concise teammate tone, plain text, no emojis; one-line
-  status after tool use; paths in backticks; documentation in third
-  person, instructions in second. An item the human has settled leaves
-  later summaries and checklists, returning only on new evidence.
+  status after tool use; file references navigable in the host's renderer;
+  documentation in third person, instructions in second. An item the human
+  has settled leaves later summaries and checklists, returning only on new
+  evidence.
 - Exit checklist at `done`: implementations complete or explicitly
   erroring; TODOs carry failing stubs; no values hard-coded to satisfy
-  tests; touched-phase gates passed or a waiver recorded; non-trivial
-  changesets carry the review sidecar (`hunk-notes`) unless opted out.
+  tests; a unit with side effects carries its observability surface —
+  instrumentation retrofitted in a later pass is the defect; touched-phase
+  gates passed or a waiver recorded; non-trivial changesets carry the
+  review sidecar (`hunk-notes`) unless opted out.
 
 ## Skills
 
 If a relevant best-practices skill exists for the work's context —
 language, tool, artifact, or workflow — activate it before acting in that
-domain; load several when contexts overlap. The skill descriptions are the
-index.
+domain; load every skill whose context the work actually touches. The
+skill descriptions are the index.

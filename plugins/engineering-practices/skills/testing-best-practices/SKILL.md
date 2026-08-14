@@ -1,7 +1,34 @@
 ---
 name: testing-best-practices
-description: Use when designing tests, writing test cases, planning test strategy, or attributing test failures. Covers unit, integration, and e2e layering plus verifier discipline (flake attribution, base-commit repro, broken-verifier handling).
+description: Use when designing tests, writing test cases, planning test strategy, building or judging a verifier, or attributing test failures. Covers verifier design, unit/integration/e2e layering, and verifier discipline (flake attribution, base-commit repro, broken-verifier handling).
 ---
+
+## Verifier design
+
+`AGENTS.md` holds the contract a verifier must satisfy — independent,
+fail-closed, integrity, done-claims-carry-evidence. This is how to build
+one that measures the real goal.
+
+- **Faithful** — measures the real goal, not a gameable proxy; a loop
+  optimizes its verifier, so an unfaithful one polishes the wrong thing.
+- **Cheap and fast** — seconds-per-look, or the loop starves.
+- **Harness first, briefed reviews** — floors gate the interior; never
+  outsource to the oracle what a floor can decide. Every review carries the
+  contract of what it grades: intended outcome, what to judge now, the
+  invariants, acceptance evidence, and the work explicitly deferred to a
+  later unit. A reviewer not told the change is intermediate will reject it
+  for being intermediate. Declared deferred work is not a finding;
+  regressions in the current unit and violations of its stated contract
+  are.
+- Few, well-crafted, broad-coverage: build the surface's harness, not the
+  task's check — the next feature reuses it for free. Build cheap verifiers
+  freely; propose expensive ones. The harness runs against a deterministic
+  proxy; the live system is the final gate, human-attended — a loop needing
+  live secrets to verify is built at the wrong altitude.
+- Realism: integration over mocked units for data flow and permissions;
+  mocks for external services, never your own data layer. Visual/UI floors
+  are the change observed on the live surface. Before done: would this
+  survive a manual walkthrough?
 
 ## Test layering policy
 
