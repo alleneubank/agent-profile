@@ -234,6 +234,101 @@ print("pi package ok")
 PY
 }
 
+# Release-tag gate. Plugin versions are consumed by tag (`<plugin>-v<version>`),
+# so a release commit that never got its tag publishes nothing — the marketplace
+# advertises a version no consumer can resolve. Four such tags were missing and
+# had to be backfilled by hand, which is the failure this closes.
+#
+# Both directions matter: a release commit needs its tag, and the version each
+# manifest currently advertises needs one too (a bump whose subject line strays
+# from the convention is invisible to the first check alone).
+check_release_tags() {
+  python3 - "$ROOT" <<'PY'
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+errors = []
+
+
+def git(*args):
+    return subprocess.run(
+        ("git", "-C", str(root)) + args,
+        capture_output=True, text=True, check=True,
+    ).stdout
+
+
+# A tag list that is merely unfetched would make every assertion below pass
+# vacuously, so an empty one is a broken oracle, not a clean result.
+tags = {t for t in git("tag").split() if t}
+if not tags:
+    print(
+        "release tag check FAILED: no tags in this clone, so the check cannot "
+        "run.\n  Run `git fetch --tags` and retry.",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
+
+def tag_commit(tag):
+    # ^{commit} dereferences annotated tags to the commit they point at.
+    return git("rev-list", "-n", "1", f"{tag}^{{commit}}").strip()
+
+
+# Direction 1: every release commit reachable from HEAD names plugin/version
+# pairs in its subject, and each pair owes a tag pointing at that same commit.
+log = git("log", "--format=%H%x00%s", "HEAD")
+for line in log.splitlines():
+    if not line:
+        continue
+    sha, _, subject = line.partition("\0")
+    if not subject.startswith("chore(release):"):
+        continue
+    pairs = re.findall(r"([a-z0-9][a-z0-9-]*) v(\d+\.\d+\.\d+)", subject)
+    if not pairs:
+        errors.append(f"{sha[:7]}: release commit names no plugin/version: {subject!r}")
+        continue
+    for plugin, version in pairs:
+        tag = f"{plugin}-v{version}"
+        if tag not in tags:
+            errors.append(f"{sha[:7]}: missing tag {tag} for {subject!r}")
+        elif tag_commit(tag) != sha:
+            errors.append(
+                f"{tag} points at {tag_commit(tag)[:7]}, "
+                f"not the {sha[:7]} release commit that declares it"
+            )
+
+# Direction 2: whatever version each manifest advertises right now must be
+# tagged, however its release commit was worded.
+for pdir in sorted(p for p in (root / "plugins").iterdir() if p.is_dir()):
+    manifest = pdir / ".claude-plugin" / "plugin.json"
+    try:
+        version = json.loads(manifest.read_text(encoding="utf-8")).get("version")
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        errors.append(f"{pdir.name}: cannot read version: {exc}")
+        continue
+    tag = f"{pdir.name}-v{version}"
+    if tag not in tags:
+        errors.append(f"{pdir.name}: advertises {version} but {tag} does not exist")
+    else:
+        print(f"release tag ok: {tag}")
+
+if errors:
+    # stdout is block-buffered under a pipe while stderr is not, so without this
+    # the "ok" lines land after the error block in CI logs.
+    sys.stdout.flush()
+    print("\nrelease tag check FAILED:", file=sys.stderr)
+    for e in errors:
+        print(f"  - {e}", file=sys.stderr)
+    raise SystemExit(1)
+
+print("release tags ok")
+PY
+}
+
 require_json "$ROOT/marketplace.json"
 require_json "$ROOT/.claude-plugin/marketplace.json"
 require_json "$ROOT/plugins/engineering-practices/.codex-plugin/plugin.json"
@@ -245,6 +340,7 @@ require_json "$ROOT/package.json"
 
 check_manifest_parity
 check_pi_package
+check_release_tags
 
 if command -v claude >/dev/null 2>&1; then
   claude plugin validate --strict "$ROOT/.claude-plugin/marketplace.json"
