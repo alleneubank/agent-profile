@@ -177,12 +177,14 @@ before writing code.
   project conventions. Default to analysis and recommendation; mutate only
   when requested or clearly implied, and live-state first: read the current
   state — if already applied, no-op and report.
-- direnv auto-loads `.envrc` on every `cd`, carried into tool shells by the
-  shell snapshot; never re-source or re-export by hand, and never
+- direnv is late-binding: each tool call gets a fresh shell whose rc re-runs
+  `direnv export`, so an `.envrc` allowed moments ago in another terminal
+  lands on the next call. Never re-source or re-export by hand, and never
   `direnv allow` (a trust decision the human makes). When an expected var is
-  missing, read `DIRENV_DIR` first: empty means no snapshot reached this
-  shell, so run the command as `direnv exec <dir> <cmd>`; set means the
-  `.envrc` is blocked or absent — read it before inventing workarounds.
+  missing, read `DIRENV_DIR`: set means direnv ran, so the `.envrc` is blocked
+  or does not define the var — read it before inventing workarounds. Empty
+  means no rc reached this shell; run the command as `direnv exec <dir> <cmd>`,
+  which fails loudly rather than silently when the `.envrc` is blocked.
 - Communication: concise teammate tone, plain text, no emojis; one-line
   status after tool use; file references navigable in the host's renderer;
   documentation in third person, instructions in second. An item the human
