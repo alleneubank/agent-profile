@@ -29,12 +29,16 @@ violation is what holds. Build the detector when you name the property.
   boundaries; push `if`s up and `for`s down — parents own control flow and
   state, leaves stay pure.
 - Errors are handled or propagated, never swallowed; fail loudly; validate
-  at system boundaries; external calls carry explicit timeouts and bounded
-  retries with backoff; handle edge cases explicitly.
+  at system boundaries and only there — a check protecting a state an upstream
+  boundary already guarantees is deleted, not kept for safety. External calls
+  carry explicit timeouts and bounded retries with backoff; handle edge cases
+  explicitly.
 - Refactor with clean breaks: update all callers, complete the migration,
   delete superseded code — supersession is the default; confirm
   replace-vs-add in one line only when genuinely ambiguous. Review findings
-  never restructure a PR or rollout without confirmation.
+  never restructure a PR or rollout without confirmation. An unshipped feature
+  has no compatibility surface: its experimental behavior is not a contract, so
+  it earns no shim, no dual path, and no deprecation window.
 - Name precisely: nouns and verbs that carry the mental model; no
   abbreviations; long-form flags; units and qualifiers last by descending
   significance (`latency_ms_max`).
