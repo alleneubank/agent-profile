@@ -74,8 +74,8 @@ is deleted.
   remaining phase, then remove the kludges in the same effort.
 - Mixed-severity review findings on a PR → fix correctness-class findings
   now and ship; improvements go to follow-up PRs.
-- Verified findings in-session → fix now, through the purpose-built gate
-  (`rl review`), unless the handoff says report-only.
+- Verified findings in-session → fix now; the gate verifies the fix, it
+  does not license it. Unless the handoff says report-only.
 - About to invent a component the spec does not name → stop and re-derive
   from the spec with the human; new apps, services, and abstractions are
   scope changes, not implementation details.

@@ -70,6 +70,16 @@ faithful, cheap, few and broad, realistic, and briefed when it is a review
 - **Independent** — objective floors run in the harness; subjective
   dimensions go to the brief's oracle. Self-review is never reported as
   independent, and the driver never approves its own work.
+  An oracle is **fresh-context** (has not seen the reasoning that produced
+  the work — a subagent forked from the driver's own context is disqualified
+  by construction), **disinterested** (not the author), **briefed** (carries
+  the contract and the declared deferrals, so it grades against the law and
+  not its own taste), and **severity-scaled** (findings on a named scale, so
+  the terminal is a floor rather than approval). Which oracle is an interior
+  decision, and the cheapest sufficient one wins: the harness alone where the
+  dimension is objective, then a fresh subagent in-session, then a different
+  model where stakes are high or where correlated blind spots are the risk —
+  the one thing a same-model reviewer cannot catch.
 - **Fail-closed** — silently passing without actually checking manufactures
   false confidence; an unavailable, broken, or bypassed oracle means
   `blocked`, not `done`.
