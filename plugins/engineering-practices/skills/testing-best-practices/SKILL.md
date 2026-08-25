@@ -63,9 +63,18 @@ Purpose: verify real user workflows through the full stack.
 
 ## Hard rules
 
+A test is a **second, independent statement of the contract**. Every rule below
+follows from that: where the test stops being independent of the code it grades,
+it stops being a test and becomes a mirror.
+
+- **Expected values are written down, not computed.** A test that derives its
+  expectation the way the implementation does passes by construction, and keeps
+  passing when both sides are wrong. Write the literal. The same failure at a
+  larger scale is a mock that grows into a simulator — past that point the suite
+  measures the simulator.
 - **Never invent signatures, source locations, or line numbers.** Only reference what you have read from the codebase.
 - **No fabricated fixtures.** Derive test data from actual schemas, types, or seed data in the repo.
-- **No test-only hacks in product code.** No `if (process.env.TEST)` branches, no test-specific exports, no test backdoors.
+- **No test-only hacks in product code.** No `if (process.env.TEST)` branches, no test-specific exports, no test backdoors. A runtime branch added to make a test pass is a defect in the test's setup — fix the seam there (fixtures, factories, explicit construction) instead.
 - **E2E must not rely on clean slate.** Tests must tolerate pre-existing data, prior test runs, and shared environments.
 
 ## Execution guidance
