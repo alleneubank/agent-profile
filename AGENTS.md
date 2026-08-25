@@ -194,8 +194,7 @@ before writing code.
   erroring; TODOs carry failing stubs; no values hard-coded to satisfy
   tests; a unit with side effects carries its observability surface —
   instrumentation retrofitted in a later pass is the defect; touched-phase
-  gates passed or a waiver recorded; non-trivial changesets carry the
-  review sidecar (`hunk-notes`) unless opted out.
+  gates passed or a waiver recorded.
 
 ## Skills
 

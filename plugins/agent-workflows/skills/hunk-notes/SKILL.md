@@ -1,6 +1,6 @@
 ---
 name: hunk-notes
-description: Use when a non-trivial changeset is ready for a human to review in hunk (the terminal diff viewer), or the user is reviewing your changes in a live hunk session.
+description: Use when the user asks for hunk notes or a review sidecar for a changeset, or is reviewing your changes in a live hunk session.
 ---
 
 # Hunk Notes
@@ -12,10 +12,8 @@ never launch the TUI.**
 
 ## When
 
-- When hunk is how this human reviews, write the sidecar **by default at review
-  handoff** for any non-trivial changeset — attended or unattended, not
-  on-request. If the human does not review in hunk, skip it.
-- Respect opt-outs: "wip", "no-verify", or an explicit skip means no sidecar.
+- **On request only.** Write the sidecar when the user asks for it. A changeset
+  reaching review handoff is not a trigger, however non-trivial it is.
 - Delegated work: when a worker produced the changeset (e.g. a delegation driver
   supervising a worker), author the sidecar from the packet outputs and reviewer
   verdicts, not from a re-read of the diff alone.

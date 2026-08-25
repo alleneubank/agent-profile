@@ -72,6 +72,6 @@ forking them.
 - Keep the handoff short enough to scan; target 60-100 lines.
 - Do not include secrets or pasted secret values.
 - State publish, push, deploy, and approval boundaries explicitly.
-- If a changeset is pending human review, note whether a `.hunk/agent-context.json`
-  rationale sidecar was written and still matches the diff (see `hunk-notes`).
+- If a `.hunk/agent-context.json` rationale sidecar exists, note whether it still
+  matches the diff (see `hunk-notes`).
 
