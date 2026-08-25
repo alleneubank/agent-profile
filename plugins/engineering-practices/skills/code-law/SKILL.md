@@ -8,7 +8,7 @@ description: Use when writing or changing code in any language — the craft law
 The craft law for code. `AGENTS.md` keeps the law whose violation is
 unrecoverable — boundary, secrets, publish, self-approval, done-claims.
 This skill carries the law whose violation the harness and the review gate
-catch, which is why it can live here.
+catch.
 
 **A property you want held gets a detector, not a paragraph.** A sentence
 saying "be deterministic" changes nothing; the floor that reddens on a
@@ -49,6 +49,10 @@ violation is what holds. Build the detector when you name the property.
 
 Each property is a class of defect plus the cheap floor that catches it.
 Reach for the floor before the prose — the floor is the part that survives.
+
+Determinism, hermeticity, idempotency, isolation, and observability are law:
+an instance that cannot hold one carries a waiver. Evented and contextual are
+defaults: they yield to a named alternative, and no waiver is owed.
 
 ### Deterministic — same inputs, same outputs, same interleaving
 
@@ -98,8 +102,8 @@ isolation defect, not a flake.
 
 ### Observable — the failure is diagnosable from artifacts alone
 
-A side-effecting unit that emits nothing is not done. This is the property
-that gets retrofitted in a batch later; ship it with the unit instead.
+A side-effecting unit that emits nothing is not done. Ship the surface with
+the unit; instrumentation retrofitted in a later pass is the defect.
 Structured fields, not prose log lines; the correlation id on every record
 on the path.
 
@@ -150,11 +154,3 @@ permanent exemption. Debt names what would remove it.
 A waiver is written prose a reviewer can judge, never a suppression flag. A
 waiver list that grows without its debt entries shrinking means the property
 was stated too strongly — weaken the property, don't grow the list.
-
-## Evidence strength
-
-Determinism, hermeticity, idempotency, isolation, and observability each
-have motivating incidents behind them. **Evented and contextual are
-defaults, not laws** — they were adopted on stated intent, without an
-incident corpus, so they yield to a named alternative rather than requiring
-a waiver. Promote them when incidents arrive.
