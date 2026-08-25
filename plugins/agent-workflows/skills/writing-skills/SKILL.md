@@ -63,8 +63,11 @@ Description rules:
 ## Authoring Rules
 
 - Shared skills default to harness-agnostic language: no vendor tool names,
-  no harness-only paths ("your forge CLI" over a bare product name). A
-  harness-specific skill is the marked exception, named as such.
+  no harness-only paths ("your forge CLI" over a bare product name). Assumed
+  primitives travel worse than names do — bootstrap hooks, subagent dispatch,
+  a plan/progress mechanism — so write to the capability ("your harness's plan
+  mechanism, when one exists"). A harness-specific skill is the marked
+  exception, named as such.
 - Name real tools and files agents actually have — across every harness the
   skill ships to.
 - Prefer concrete triggers over broad abstractions.
