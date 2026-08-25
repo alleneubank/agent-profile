@@ -11,10 +11,12 @@
 # session that merely discusses a skill by name; both read as hits and both
 # produce confident wrong answers.
 #
-# Coverage is Claude Code only. Codex records a skill inventory ("skills",
-# "host_skills") but not invocations, and pi records neither, so a skill used
-# only from those harnesses reads as zero here. Treat a zero as "never fired
-# under Claude Code", not "never fired".
+# Coverage is Claude Code only, because it is the only harness with a typed
+# Skill tool. Codex and pi DO record their invocations — both load a skill by
+# reading its SKILL.md, so the call lands as an exec/bash/read of a path under
+# the installed plugin cache — this detector just does not parse those yet
+# (0xsend/recall#97 tracks the same gap in recall's own extraction). Treat a
+# zero as "never fired under Claude Code", never as "never fired".
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -191,7 +193,7 @@ else:
     if truncated:
         print(f"WARNING     : capped at {MAX_FILES} files; counts are a lower bound")
     print(f"window      : {window}")
-    print(f"coverage    : Claude Code only (codex/pi do not record invocations)")
+    print(f"coverage    : Claude Code only (codex/pi invocations are recorded, not yet parsed)")
     print()
     if fired:
         width = max(len(s) for s, _ in fired)
