@@ -36,6 +36,7 @@ Every e2e failure is exactly one of:
 - Update test assertions to match current (correct) behavior
 - Update selectors to match current DOM/API
 - **Never change source code** - the implementation is correct, the test is stale
+- Before updating, check what the test asserts. A selector or DOM update to a test that does assert user-visible behavior is an ordinary update; a test that asserts which calls fired rather than what the user sees is a change detector, and re-syncing it to the new call sequence launders it — rewrite it against the observable outcome or delete it
 
 **Bug fixes:**
 - Quote the spec section that defines expected behavior

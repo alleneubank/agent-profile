@@ -62,6 +62,10 @@ is deleted.
   new floor that catches its class; a patch without the floor leaves the
   gap open. This is how the review budget shrinks over time instead of
   growing.
+- Behavior-preserving refactor reddens the suite → the failing tests are
+  suspects, not chores. Mechanically re-syncing them to the new call
+  sequence launders a change detector; rewrite them against observable
+  behavior or delete them, and say which in the report.
 - Dispatching a review of intermediate work → state the deferred set in
   the review's context, not just in your head; an undeclared deferral
   reads to the reviewer as a defect, and the round spent arguing it is

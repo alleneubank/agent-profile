@@ -86,9 +86,12 @@ faithful, cheap, few and broad, realistic, and briefed when it is a review
 - A finding the harness should have caught earns a new floor, not just a
   patch.
 - Integrity: tests verify correctness — they do not define the solution.
-  Fix root causes; never weaken assertions or game a test. Labeling a
-  failure "pre-existing"/"unrelated" or deferring a discovered bug requires
-  cited evidence. A fix for a review finding still owes an observed red.
+  Fix root causes; never weaken assertions or game a test. A test that
+  mirrors the implementation's call sequence grades nothing — it reddens on
+  refactors while passing defects; assert observable behavior instead.
+  Labeling a failure "pre-existing"/"unrelated" or deferring a discovered
+  bug requires cited evidence. A fix for a review finding still owes an
+  observed red.
 - Done claims carry evidence: name the verifier that ran and cite its
   output. An authored-but-unexecuted verifier is "authored, NOT run".
 
