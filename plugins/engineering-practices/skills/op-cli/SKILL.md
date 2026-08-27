@@ -1,103 +1,155 @@
 ---
 name: op-cli
-description: Use when reading from 1Password, discovering vaults/items, rotating secrets, or piping credentials to other tools via op CLI.
+description: Use when reading, writing, or piping secrets with the 1Password CLI (op) — resolving op:// references, choosing an account, finding an item, or handling an op auth failure.
 ---
 
-# 1Password CLI (`op`) — Secure Handling
+# 1Password CLI (`op`)
 
-## Core Rule: Never Print Secrets
+Three laws govern every `op` call. Everything else is mechanics.
 
-**NEVER** use `op` commands that would print secret values into the conversation. Always pipe directly to the consuming tool or use `wc -c` / redaction to verify without exposing.
+## Law 1 — Attempt the call; never preflight auth
 
-```bash
-# WRONG — would print secret to stdout (do not run)
-# op item get ITEM_ID --vault VAULT --fields label=PASSWORD --reveal
-
-# RIGHT — pipe directly to consumer
-op item get ITEM_ID --vault VAULT --fields label=PASSWORD --reveal | \
-  wrangler secret put SECRET_NAME --env ENV
-
-# RIGHT — verify a value exists without exposing it
-op item get ITEM_ID --vault VAULT --fields label=PASSWORD --reveal 2>/dev/null | wc -c
-```
-
-## Item Titles with Slashes
-
-Many 1Password items use path-style titles (e.g. `pool-party/testnet-pool-party-public/credentials`). The `op://` URI format **breaks** with these because it uses `/` as a delimiter.
+`op` authorizes on the *request*, through the desktop app. A failing
+status probe is not evidence the request will fail.
 
 ```bash
-# BROKEN — too many '/' segments
-op read "op://pool-party-testnet/pool-party/testnet-pool-party-public/credentials/PASSWORD"
-# ERROR: too many '/': secret references should match op://<vault>/<item>[/<section>]/<field>
-
-# WORKS — use item ID instead (avoid printing values)
-op item get ITEM_ID --vault VAULT --fields label=FIELD --reveal 2>/dev/null | wc -c
+# Signed out, several accounts configured:
+op whoami                                        # rc=1  "account is not signed in"
+op read "op://Vault/item/password" | consumer    # SUCCEEDS — the app authorizes it
+op whoami                                        # rc=0  now signed in
 ```
 
-### Discovery Workflow
+Run the real command and diagnose only from *its* failure. Never run
+`op signin` to "fix" things: in a non-interactive agent shell it is a
+no-op (rc=0, empty stdout) when integration is on and a help dump when it
+is off, and it leaves nothing behind for the next call. `eval "$(op
+signin)"` is worse — each tool call is a fresh shell, so the session token
+never reaches the command that needs it.
 
-When you don't know the item ID:
+Unlocking 1Password is biometric: the human's boundary. When the real
+command fails to authorize, report it and stop.
+
+## Law 2 — A secret value never enters the transcript
+
+Preference order, strongest first:
 
 ```bash
-# 1. List items in a vault to find the title and ID
-op item list --vault VAULT_NAME
+# 1. BEST — op run masks the value in the child's stdout AND stderr
+TOKEN="op://Vault/item/credential" op run -- ./deploy.sh
+#    a leak prints as: <concealed by 1Password>
 
-# 2. Use the ID (first column) for all subsequent reads
-op item get ITEM_ID --vault VAULT_NAME --fields label=FIELD_NAME --reveal 2>/dev/null | wc -c
+# 2. Pipe straight to the consumer
+op read "op://Vault/item/password" | kubectl create secret generic s --from-file=password=/dev/stdin
+
+# 3. Shell variable, consumed in the SAME tool call
+TOKEN="$(op read "op://Vault/item/credential")"; curl -H "Authorization: Bearer $TOKEN" ...
+
+# Verify without exposing: length only
+op read "op://Vault/item/password" | wc -c
 ```
 
-## Reading Multiple Fields from One Item
+`op run` is the default for anything that runs a program — it converts
+"remember not to print it" into a property of the process. Masking matches
+the literal value, so a secret the child re-encodes (base64, URL escape)
+is not covered; still don't echo.
+
+**The `--format json` trap:** `op item get --format json` prints CONCEALED
+values in plaintext, with or without `--reveal`. Use the plain form to
+inspect an item — it lists every field label and redacts concealed values
+natively.
 
 ```bash
-# Verify which fields exist (safe — shows labels not values)
-op item get ITEM_ID --vault VAULT_NAME --format json 2>/dev/null | \
-  python3 -c "import json,sys; [print(f['label']) for s in json.load(sys.stdin).get('fields',[]) for f in [s] if f.get('label')]"
-
-# Pipe each field to its destination
-op item get ITEM_ID --vault VAULT --fields label=USERNAME --reveal | consumer_cmd ...
-op item get ITEM_ID --vault VAULT --fields label=PASSWORD --reveal | consumer_cmd ...
+op item get ITEM --vault V --format json   # WRONG — dumps the password
+op item get ITEM --vault V                 # RIGHT — "password: [use ... --reveal]"
 ```
 
-## Common Piping Patterns
+`--reveal` gates only human-readable and `--fields` output: `op item get
+--fields` needs it to emit a value at all, and `op read` never needs it.
 
-### Cloudflare Workers (wrangler)
+## Law 3 — Fix account and vault before reading
+
+Every secret has three coordinates: **account · vault · item**. An
+`op://vault/item/field` reference names only two — the account comes from
+`--account`, `OP_ACCOUNT`, or whatever happens to be signed in. An
+unstated account is not a default; it is an unknown.
+
+Vault names are scoped per account and collide across them: `Private`,
+`Shared`, and `Employee` exist in nearly every account, and environment
+vaults are often named alike (the same team vault name in two orgs, or
+`ci` in both staging and prod). A vault name alone never identifies a
+target.
+
+Source the coordinates in this order, stopping at the first answer:
+
+1. **The request** — the user named an account, vault, or `op://` reference.
+2. **The project** — `OP_ACCOUNT` in the environment, `.envrc`, scripts that
+   already call `op`, repo instructions. Grep for `op://` and `OP_ACCOUNT`
+   before touching `op` at all; it is free and usually decisive.
+3. **Earlier in this session** — an account already established carries forward.
+4. **Ask**, naming the candidates so the answer is one word:
+
+   > Which account and vault holds the deploy token? Configured accounts:
+   > `<personal>.1password.com`, `<org-a>.1password.com`,
+   > `<org-b>.1password.com`.
+
+   `op account list` reads local config — no auth, works signed out — so
+   building that question costs nothing.
+
+**Never resolve the account by trying accounts.** Each attempt is an auth
+event that prompts the human, and a *hit* in the wrong account is worse
+than a miss: identically-named vaults mean the read silently succeeds and
+returns the wrong environment's secret. Ambiguity here is a question, not
+a search.
+
 ```bash
-op item get ITEM_ID --vault VAULT --fields label=PASSWORD --reveal | \
-  npx wrangler secret put POOL_PARTY_PUBLIC_PASSWORD --env testnet
+op vault get VAULT --account ACCOUNT   # confirm a candidate: metadata only, no values
+# "X" isn't a vault in this account.   <- right name, wrong account (or typo)
 ```
 
-### Environment Variable (subshell)
+An explicit `--account` beats `OP_ACCOUNT`, and repeated flags are
+last-value-wins. Pass `--account` on every call once you know it.
+
+## Finding the item
+
+With the coordinates fixed, spend the fewest lookups that can succeed and
+stop at the first hit: read the `op://<vault>/<item-title>/<field>`
+reference; then one `op item list --vault VAULT` (metadata only — id,
+title, category, timestamps); then `op item get ITEM --vault VAULT` for
+field labels; then ask.
+
+Never loop `op item get` over a listing, and never widen the search to
+other vaults or accounts to find a missing string — go back and re-resolve
+the coordinates instead.
+
+A path-style title (`service/environment/credentials`) cannot appear in an
+`op://` reference, since `/` is the delimiter. Use the item ID:
+
 ```bash
-SECRET="$(op item get ITEM_ID --vault VAULT --fields label=TOKEN --reveal 2>/dev/null)"
-# Use $SECRET in subsequent commands within the same shell — it won't appear in output
+op item get ITEM_ID --vault VAULT --fields label=PASSWORD --reveal | consumer
 ```
 
-### kubectl
-```bash
-op item get ITEM_ID --vault VAULT --fields label=PASSWORD --reveal | \
-  kubectl create secret generic my-secret --from-file=password=/dev/stdin
-```
+## Remote hosts
 
-## Verification Without Exposure
+On a host without the 1Password app, `op` may be a forwarding shim that
+relays to the operator's machine, where an allowlist admits known commands
+and anything else raises a prompt there.
 
-```bash
-# Check a value is non-empty (char count)
-op item get ITEM_ID --vault VAULT --fields label=PASSWORD --reveal 2>/dev/null | wc -c
-
-# Compare two sources match (exit code only)
-if cmp -s <(op item get ID1 --vault V --fields label=F --reveal 2>/dev/null) \
-        <(op item get ID2 --vault V --fields label=F --reveal 2>/dev/null); then
-  echo "match"
-else
-  echo "differ"
-fi
-```
+- Keep the argv **exactly** as it will be authorized; a reordered or added
+  flag is a different command and misses the allowlist.
+- Near-miss retries spam the operator with prompts. One attempt, then report.
+- No app and no shim means no `op`. Look for a service-account token
+  (`OP_SERVICE_ACCOUNT_TOKEN`) or an out-of-band credential rather than
+  trying to sign in.
 
 ## Troubleshooting
 
-| Error | Cause | Fix |
+| Symptom | Cause | Action |
 |---|---|---|
-| `too many '/'` | Item title has slashes, `op://` can't parse it | Use item ID with `op item get` |
-| `could not find item` | Wrong vault or title mismatch | Run `op item list --vault VAULT` to discover |
-| Empty output | Missing `--reveal` flag | Add `--reveal` and pipe to consumer (or `| wc -c`) |
-| `not signed in` | Session expired | Run `eval "$(op signin)"` (avoid printing the session token) |
+| `account is not signed in` from `whoami` | Status probe, not a request | Ignore it — run the real command |
+| `op` root help text dumped | No configured account / app integration off | Human enables 1Password → Settings → Developer → CLI integration |
+| Command hangs ~30-60s then fails | Biometric/approval prompt nobody answered | Report and stop; the human approves |
+| `too many '/'` | Item title contains `/` | Use item ID with `op item get` |
+| `"X" isn't a vault in this account` | Right vault name, wrong account (or typo) | Re-resolve the account — do not retry other accounts |
+| `could not find item` | Wrong vault or title | One `op item list --vault V`, then ask |
+| Empty value from `op item get --fields` | Missing `--reveal` | Add `--reveal` and pipe to a consumer |
+| `operation not permitted` reading the 1Password group container | macOS TCC / Full Disk Access | Human-side setting; report and stop |
