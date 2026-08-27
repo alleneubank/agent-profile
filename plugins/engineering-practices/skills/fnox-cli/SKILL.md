@@ -22,43 +22,50 @@ fnox exec -- ./deploy.sh              # value reaches the program, not the termi
 TOKEN="$(fnox get KEY)"; curl -H "Authorization: Bearer $TOKEN" ...   # same tool call
 ```
 
+`fnox get` appends a newline, so `wc -c` reports the value's length plus one.
+
 **`fnox exec` does not mask, and this is where it differs from `op run`.**
 `op run` rewrites a leaked value in the child's output as `<concealed by
-1Password>`; fnox passes it through untouched on both streams. Verified:
-
-```bash
-fnox exec -- sh -c 'echo "$KEY"'      # prints the value verbatim
-```
+1Password>`; fnox passes it through untouched on both streams. Verified on
+1.34.0 against a throwaway value: a child that echoes `$KEY` prints it
+verbatim, with no substitution on either stream.
 
 So `fnox exec` is the right default for *running a program* — it keeps the
 value out of argv and out of your own commands — but it is not a safety net.
-A child that echoes a secret leaks it.
-
-### The zsh MULTIOS trap — this is how a key actually gets leaked
-
-**In zsh, you cannot suppress stdout with a redirect inside a pipeline.**
-MULTIOS is on by default and treats the pipe as an *additional* destination
-rather than a replacement, so the value is teed to the pipe anyway:
-
-```bash
-# zsh, MULTIOS on (the default) — ALL of these LEAK:
-fnox get KEY 2>&1 >/dev/null | head        # the classic "show me only stderr"
-fnox get KEY >/dev/null 2>&1 | cat         # reordering does not save you
-
-# Same commands are safe in bash, and safe in zsh with `unsetopt multios`,
-# and safe in zsh with no pipeline at all. None of that is worth relying on.
-```
-
-This is a property of the shell, not of fnox — it applies equally to `op
-read`, `aws`, and anything else that prints a credential. The lesson is not
-"get the redirection right." It is: **never construct a command whose stdout
-could reach a viewer.** Pipe to `wc -c`, or to the consumer, and nothing else.
+A child that echoes a secret leaks it, and no flag will stop that.
 
 Never `fnox export`, `fnox get` bare, or anything else that puts a value on a
 terminal. `fnox list` and `fnox check` show keys, types, provider keys, and
 descriptions — value-free **only while every provider key is a reference**.
 For a `plain` or encrypted-inline secret the provider key *is* the value, and
 `fnox list` prints it. Check the provider type before treating `list` as safe.
+
+### The zsh MULTIOS trap
+
+**In zsh, a redirect cannot suppress stdout inside a pipeline — in any
+order.** MULTIOS is on by default (including in the non-interactive `zsh -c`
+that an agent tool call gets) and treats the pipe as an *additional*
+destination rather than a replacement, so the value is teed to the pipe
+anyway. Reproduce it with a throwaway value — four lines, four results,
+observed on zsh 5.9 and bash 3.2:
+
+```bash
+zsh -c 'echo LEAKED 2>&1 >/dev/null | head'                    # LEAKED
+zsh -c 'echo LEAKED >/dev/null 2>&1 | cat'                     # LEAKED
+zsh -c 'unsetopt multios; echo LEAKED 2>&1 >/dev/null | head'  # (nothing)
+bash -c 'echo LEAKED 2>&1 >/dev/null | head'                   # (nothing)
+```
+
+This is a property of the shell, not of any one tool: it applies to `op
+read`, `fnox get`, `aws`, and anything else that prints a credential on
+stdout. On 2026-08-27 it put a live Stripe test key into a session
+transcript, and the key had to be rotated.
+
+The lesson is not "get the redirection right" — that framing invites another
+attempt, and the safe form differs per shell. It is: **never construct a
+command whose stdout could reach a viewer.** `| wc -c` for a length,
+`cmp -s <(one) <(other)` for equality, pipe to the consumer otherwise.
+Nothing else.
 
 ## Law 2 — An empty read is a diagnosis, not an answer
 
@@ -67,9 +74,12 @@ changes underneath it, fnox keeps serving the old value — including an old
 *empty*, which is how "I just filled that field and it still reads blank"
 happens.
 
-**A stale read and a missing secret are indistinguishable: both return empty,
-rc=0, no error.** So `fnox get` returning nothing is never evidence that the
-vault is empty. Walk down the layers:
+An *absent* backing entry is loud: fnox exits 1 and names the provider
+(`fnox::provider::secret_not_found`). An entry that resolves to the **empty
+string** is silent — zero bytes, rc=0, no error — and a stale cached empty is
+byte-for-byte identical to it. **So empty is a diagnosis, never an answer:
+`fnox get` returning nothing is not evidence that the vault is empty.** Walk
+down the layers:
 
 ```bash
 fnox get KEY | wc -c                                    # 1. what fnox serves
@@ -147,7 +157,7 @@ fnox get KEY | wc -c            # read (see Law 1 before piping anywhere else)
 fnox set KEY VALUE              # write — argv, so only for values that are not secret
 fnox exec -- CMD                # run CMD with secrets in its environment
 fnox list                       # keys, types, provider keys (see Law 1 caveat)
-fnox check                      # are all declared secrets resolvable
+fnox check                      # config is well-formed — fails open, see below
 fnox doctor                     # diagnostic state
 fnox config-files               # which fnox.toml files are in play
 fnox profiles                   # available profiles
@@ -168,16 +178,32 @@ answer: right key, wrong profile, or wrong directory.
 Convenient for humans; irrelevant to an agent, since each tool call is a fresh
 shell and the hook never fires. Use `fnox exec` instead.
 
-`--if-missing <error|warn|ignore>` decides what a missing secret does. Leave it
-at the default; a run that silently proceeds without a credential fails later
-and further from the cause.
+**`fnox check` and `fnox exec` fail open, and this is the trap in the
+mechanics.** Verified on 1.34.0 against a secret whose backing entry does not
+exist: bare `fnox check` prints `Configuration is healthy` and exits 0;
+`fnox check --all` demotes the failure to a warning and still exits 0;
+`fnox exec` logs one stderr `WARN` and runs the program *without* the
+variable, exit 0. `--if-missing <error|warn|ignore>` is what changes this, and
+the default does not error:
+
+```bash
+fnox --if-missing error check   # rc=1, and names every secret that cannot resolve
+```
+
+So when a run must not proceed without its credentials, `fnox --if-missing
+error check` is the gate — or set `if_missing = "error"` on the secret in
+`fnox.toml`, which makes bare `check` fail on it too. Do not treat a green
+`fnox check` as proof the secrets resolve.
 
 ## Troubleshooting
 
 | Symptom | Cause | Action |
 |---|---|---|
 | A value appeared in your output | zsh MULTIOS teed stdout into the pipeline | Treat the secret as compromised and rotate it. Only `\| wc -c` is safe |
-| `fnox get` returns empty, rc=0 | Stale cache **or** genuinely absent — indistinguishable | Walk the three layers in Law 2; never conclude from fnox alone |
+| `fnox get` returns empty, rc=0 | Stale cached empty **or** a genuinely empty field — identical output | Walk the three layers in Law 2; never conclude from fnox alone |
+| `fnox get` errors `secret_not_found`, rc=1 | The backing entry is absent, not empty | Real, and it names the provider — fix the reference or the vault |
+| `fnox check` green but the program has no credential | `check` fails open without `if_missing` | `fnox --if-missing error check` — the default exits 0 on unresolvable secrets |
+| `fnox exec` ran and the app saw an unset variable | Same fail-open default, one stderr `WARN` | Gate the run on `fnox --if-missing error check` first |
 | Value correct via `op read`, empty via `fnox` | Daemon serving a pre-change cache | `fnox --no-daemon get KEY \| wc -c` to confirm, then `fnox daemon clear` |
 | `cached_entries: N` right after a clear | The next read repopulated it | Not a failure — clear works; re-check the value instead |
 | `not found in profile 'default'` | Wrong profile, or wrong directory | `fnox config-files` and `fnox profiles` |

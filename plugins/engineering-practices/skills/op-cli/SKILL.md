@@ -51,7 +51,8 @@ op read "op://Vault/item/password" | wc -c
 `op run` is the default for anything that runs a program — it converts
 "remember not to print it" into a property of the process. Masking matches
 the literal value, so a secret the child re-encodes (base64, URL escape)
-is not covered; still don't echo.
+is not covered; still don't echo. It covers the *child's* streams only — a
+pipeline you build around `op read` yourself is not masked at all.
 
 **The `--format json` trap:** `op item get --format json` prints CONCEALED
 values in plaintext, with or without `--reveal`. Use the plain form to
@@ -65,6 +66,33 @@ op item get ITEM --vault V                 # RIGHT — "password: [use ... --rev
 
 `--reveal` gates only human-readable and `--fields` output: `op item get
 --fields` needs it to emit a value at all, and `op read` never needs it.
+
+### The zsh MULTIOS trap
+
+**In zsh, a redirect cannot suppress stdout inside a pipeline — in any
+order.** MULTIOS is on by default (including in the non-interactive `zsh -c`
+that an agent tool call gets) and treats the pipe as an *additional*
+destination rather than a replacement, so the value is teed to the pipe
+anyway. Reproduce it with a throwaway value — four lines, four results,
+observed on zsh 5.9 and bash 3.2:
+
+```bash
+zsh -c 'echo LEAKED 2>&1 >/dev/null | head'                    # LEAKED
+zsh -c 'echo LEAKED >/dev/null 2>&1 | cat'                     # LEAKED
+zsh -c 'unsetopt multios; echo LEAKED 2>&1 >/dev/null | head'  # (nothing)
+bash -c 'echo LEAKED 2>&1 >/dev/null | head'                   # (nothing)
+```
+
+This is a property of the shell, not of any one tool: it applies to `op
+read`, `fnox get`, `aws`, and anything else that prints a credential on
+stdout. On 2026-08-27 it put a live Stripe test key into a session
+transcript, and the key had to be rotated.
+
+The lesson is not "get the redirection right" — that framing invites another
+attempt, and the safe form differs per shell. It is: **never construct a
+command whose stdout could reach a viewer.** `| wc -c` for a length,
+`cmp -s <(one) <(other)` for equality, pipe to the consumer otherwise.
+Nothing else.
 
 ## Law 3 — Fix account and vault before reading
 
@@ -153,3 +181,4 @@ and anything else raises a prompt there.
 | `could not find item` | Wrong vault or title | One `op item list --vault V`, then ask |
 | Empty value from `op item get --fields` | Missing `--reveal` | Add `--reveal` and pipe to a consumer |
 | `operation not permitted` reading the 1Password group container | macOS TCC / Full Disk Access | Human-side setting; report and stop |
+| A value appeared in your output | zsh MULTIOS teed stdout into the pipeline | Treat the secret as compromised and rotate it. Only `\| wc -c` is safe |
