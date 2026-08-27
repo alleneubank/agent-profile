@@ -60,5 +60,6 @@ Synchronizing with **external systems**: browser APIs (WebSocket, IntersectionOb
 - Render JSX directly for UI variation; avoid config-array mini-frameworks unless the config is real domain data
 - Lift the provider boundary when sibling or external controls need access to the same state/actions
 - Use `flushSync` when you need to read the DOM synchronously after a state update
+- Never `vi.mock` a child and assert on the props it received — that grades the parent's implementation, not what renders; assert on the real tree with `screen.getByRole` (the change-detector shape in `testing-best-practices`)
 
 See `react-patterns.md` for code examples and detailed patterns.

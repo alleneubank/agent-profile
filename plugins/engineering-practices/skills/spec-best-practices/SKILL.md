@@ -42,7 +42,7 @@ Specs are freeform markdown. No rigid template, no YAML frontmatter, no required
 
 **Risk tags** (conditional) -- flag high-risk items (schema migrations, auth changes, public API contracts, infra changes) when those risks exist or the ADF `PLAN` gate requires approval.
 
-**Test traceability** (conditional) -- `REQ-*` to test file:line mapping. Added during/after TDD, not at initial authoring.
+**Test traceability** (conditional) -- `REQ-*` to test file:line mapping. Added during/after TDD, not at initial authoring. The mapped test asserts the requirement, not the code that implements it -- a test traceable only to a call sequence proves the implementation exists, not that the requirement holds.
 
 ## Authoring rules
 

@@ -7,7 +7,7 @@ description: Use when reading or writing Rust files (.rs, Cargo.toml).
 
 Follows type-first, functional, and error handling patterns from AGENTS.md. This skill covers Rust-specific idioms only.
 
-**The verifier is the taste.** `cargo clippy --all-targets --all-features -- -D warnings`, `cargo fmt --check`, and `cargo test` (incl. doctests) decide done — not the model's confidence. Clippy's `style`/`complexity`/`perf` groups *are* a published encoding of most rules below; let them run before claiming an idiom is followed. Baseline lint config: [TOOLING.md](TOOLING.md).
+**The verifier is the taste.** `cargo clippy --all-targets --all-features -- -D warnings`, `cargo fmt --check`, and `cargo test` (incl. doctests) decide done — not the model's confidence. Clippy's `style`/`complexity`/`perf` groups *are* a published encoding of most rules below; let them run before claiming an idiom is followed. Baseline lint config: [TOOLING.md](TOOLING.md). `mockall`'s `expect_foo().times(1).in_sequence(...)` grades call count and order rather than the result — the change-detector shape in `testing-best-practices`; a plain struct impl of the trait plus an assertion on the returned value is the idiom.
 
 ## Make Illegal States Unrepresentable
 

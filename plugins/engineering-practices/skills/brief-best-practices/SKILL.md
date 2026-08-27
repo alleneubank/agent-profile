@@ -47,6 +47,7 @@ Open every brief with a one-line law statement, e.g.:
 - **Floors are gates, not ceilings.** A passing artifact may still owe refinement; say so. Never weaken a floor to pass a gate — an infeasible item gets the nearest-feasible alternative plus a dated waiver Decision naming the blocker, and the gap stays on record.
 - **Calibrate claims to enforcement.** Match absolutist words ("never", "cannot") to what the oracle actually proves. Overclaiming invites reject cycles.
 - **Parsimony.** Few, well-crafted floors that cover the cases beat a long brittle list. The brief is read every loop; every line earns its place.
+- **Floors discriminate.** A floor earns its place by reddening on the defect and staying green through behavior-preserving change. One that reddens on every edit is noise the loop learns to override; one that cannot redden at all is theater. Neither measures the dimension it claims to.
 - **Mutation policy.** The Boundary amends only with explicit human confirmation, and ratified Decisions are never re-litigated. The driver appends provisional Decisions freely — that is the ladder working — marked as such and never silently promoted to ratified. When brief/implementation drift is found, surface it — the human decides.
 
 ## Lifecycle

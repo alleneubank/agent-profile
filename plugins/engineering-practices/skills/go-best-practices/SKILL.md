@@ -122,3 +122,7 @@ func createWidget(name string) (*Widget, error) {
     return widget, nil
 }
 ```
+
+## Test Doubles
+
+`gomock.InOrder(...)` and `mock.EXPECT().Fetch(id).Times(n)` (`go.uber.org/mock`) standing in for your own collaborator assert which calls happened, not what the code produced — the change-detector shape in `testing-best-practices`. Accept the interface, pass a hand-written fake, and assert the return value in a table test; keep the call assertion only where the count *is* the contract, such as a retry budget.

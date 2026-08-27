@@ -38,7 +38,11 @@ violation is what holds. Build the detector when you name the property.
   replace-vs-add in one line only when genuinely ambiguous. Review findings
   never restructure a PR or rollout without confirmation. An unshipped feature
   has no compatibility surface: its experimental behavior is not a contract, so
-  it earns no shim, no dual path, and no deprecation window.
+  it earns no shim, no dual path, and no deprecation window. Tests that redden
+  under a supposedly behavior-preserving refactor are first suspected of having
+  caught a regression it introduced; only the ones asserting the old call
+  sequence rather than an outcome are change detectors, and those are part of
+  the migration — rewrite them against behavior or delete them.
 - Name precisely: nouns and verbs that carry the mental model; no
   abbreviations; long-form flags; units and qualifiers last by descending
   significance (`latency_ms_max`).

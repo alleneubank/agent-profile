@@ -106,6 +106,10 @@ if (!result.success) {
 }
 ```
 
+## Test Doubles
+
+`toHaveBeenCalledWith` / `toHaveBeenNthCalledWith` on a `vi.fn()` standing in for your own module assert the call sequence, not the result — the change-detector shape in `testing-best-practices`. Mock at the network edge (`msw`) and assert the value the caller receives.
+
 ## Optional: type-fest
 
 For advanced type utilities beyond TypeScript builtins, consider [type-fest](https://github.com/sindresorhus/type-fest):

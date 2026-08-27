@@ -100,6 +100,10 @@ def create_widget(name: str) -> Widget:
     return widget
 ```
 
+## Test Doubles
+
+`assert_has_calls` and `mock_calls` on a `MagicMock` standing in for your own collaborator grade the order of the calls, not the result — the change-detector shape in `testing-best-practices`. Prefer a small class satisfying the `Protocol` and assert its return value; `autospec=True` binds the signature, not the behavior. Reach for `assert_called_once_with` only where firing exactly once *is* the contract.
+
 ## Optional: ty
 
 For fast type checking, consider [ty](https://docs.astral.sh/ty/) from Astral (creators of ruff and uv). Written in Rust, significantly faster than mypy or pyright.

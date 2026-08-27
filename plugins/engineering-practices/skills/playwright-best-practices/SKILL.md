@@ -39,6 +39,7 @@ Always prefer user-facing attributes:
 - Shared state between tests — each test creates own data
 - UI login in every test — use setup project + storageState
 - Manual assertions without await — use web-first assertions
+- Asserting a `page.route` handler fired — a change detector; assert the DOM the user sees (`testing-best-practices`)
 - Hardcoded waits — rely on Playwright's auto-waiting
 - Default reporter in CI/agent — use `--reporter=line` or `--reporter=dot`
 
@@ -51,6 +52,7 @@ Always prefer user-facing attributes:
 - [ ] Tests isolated — no shared state
 - [ ] Auth state reused via setup project
 - [ ] Network mocks set up before navigation
+- [ ] UI assertions target rendered output, not route calls
 - [ ] Test data created per-test or via fixtures
 - [ ] Debug logging added for complex flows
 - [ ] Minimal reporter (`line`/`dot`) used in CI/agent contexts
