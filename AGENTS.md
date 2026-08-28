@@ -192,12 +192,22 @@ before writing code.
   state — if already applied, no-op and report.
 - direnv is late-binding: each tool call gets a fresh shell whose rc re-runs
   `direnv export`, so an `.envrc` allowed moments ago in another terminal
-  lands on the next call. Never re-source or re-export by hand, and never
-  `direnv allow` (a trust decision the human makes). When an expected var is
-  missing, read `DIRENV_DIR`: set means direnv ran, so the `.envrc` is blocked
-  or does not define the var — read it before inventing workarounds. Empty
-  means no rc reached this shell; run the command as `direnv exec <dir> <cmd>`,
-  which fails loudly rather than silently when the `.envrc` is blocked.
+  lands on the next call. Never re-source or re-export by hand. `direnv allow`
+  is an interior action for the current task's worktree when the repository was
+  placed in scope by the human or was created during the current mission from
+  an already trusted repository. Before allowing, resolve the repository and
+  worktree identity, read the `.envrc`, and inspect any `.envrc` diff. Run
+  `direnv allow <explicit-worktree-path>` when the file is tracked at the
+  selected base or its changes are intended work in the current task; this
+  includes fresh clones/worktrees and re-allowing after an in-scope `.envrc`
+  edit. An unknown repository, an untracked or externally modified `.envrc`,
+  suspicious side effects, or another owner's worktree remains a human trust
+  boundary — never widen trust or route around it. When an expected var is
+  missing, read `DIRENV_DIR`: set means direnv ran, so inspect and allow an
+  eligible blocked `.envrc` instead of freezing the mission; otherwise confirm
+  the file actually defines the var. Empty means no rc reached this shell; run
+  the command as `direnv exec <dir> <cmd>`, which fails loudly rather than
+  silently when the `.envrc` is blocked.
 - Communication: concise teammate tone, plain text, no emojis; one-line
   status after tool use; file references navigable in the host's renderer;
   documentation in third person, instructions in second. An item the human
