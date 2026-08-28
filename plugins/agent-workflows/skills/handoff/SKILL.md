@@ -27,6 +27,8 @@ forking them.
    - uncommitted and staged change summary
    - recent relevant commits
    - task requested, decisions made, and current terminal state
+   - mission ID, campaign ID, targeted rubric IDs, red/stale floors, and the
+     evidence pointers already earned
 2. Write to `~/.handoffs/handoff-<repo>-<shortname>-<timestamp>.md`.
 3. Front-load the next action in the first 10 lines.
 4. Include concrete file paths, commands, identifiers, and constraints.
@@ -41,6 +43,12 @@ forking them.
 ## What's done
 
 - ...
+
+## Mission state
+
+- Mission / campaign: ...
+- Targets and red or stale floors: ...
+- Admissible evidence: ...
 
 ## What to do
 
@@ -69,9 +77,11 @@ forking them.
   Decisions carries the calls already made — each marked ratified or
   provisional — so the receiving session inherits them instead of re-asking.
 - Link to specs and docs instead of paraphrasing long context.
+- Link to `MISSION.md` and the one campaign `LOOP.md`; never merge a later
+  campaign's journal into the handoff or treat campaign completion as mission
+  achievement.
 - Keep the handoff short enough to scan; target 60-100 lines.
 - Do not include secrets or pasted secret values.
 - State publish, push, deploy, and approval boundaries explicitly.
 - If a `.hunk/agent-context.json` rationale sidecar exists, note whether it still
   matches the diff (see `hunk-notes`).
-

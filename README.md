@@ -151,6 +151,14 @@ versions managed under Releasing below.
 ./scripts/validate.sh
 ```
 
+## Typed mission command
+
+The `mission-command` skill consumes the separately versioned `missionctl`
+executable from `PATH`; agent-profile does not vendor or release that tool or
+register its lifecycle hooks. Fleet installations manage the executable
+through mise and install the hooks-only plugin from
+`github:alleneubank/missionctl`.
+
 The old `codex-reviewer` and `ralph-reviewed` Claude hook plugins are retired.
 Use modern `rl` skills and commands for review gates and autonomous loops.
 

@@ -29,6 +29,8 @@ and a set of proposed amendments — never silent law edits.
 1. **Frame.** Name the instruction version(s) under eval (agent-profile SHAs),
    the time window, and the hypotheses — which behaviors did the amendments
    target? An eval without hypotheses drifts into anecdote collection.
+   For mission-command changes, run after one to two weeks and name the mission
+   and rollout campaign being evaluated.
 2. **Sample.** `recall list` / `recall search` for substantive sessions in the
    window (skip trivial Q&A). Stratify before reading: attended vs unattended
    (rl workers, afk, overnight loops), across repos, across machines. 15-20
@@ -96,6 +98,16 @@ than diluting the sample.
 - **Instruction friction** — did a rule force a needless ask, block, or
   detour, or draw a correction in the opposite direction? Feeds the
   over-strength bucket.
+- **Scope stability** — did campaign work advance a named mission rubric ID,
+  invariant, or safety requirement without silent adjacency?
+- **Campaign boundary fidelity** — did each `LOOP.md` contain one attempt, with
+  later attempts starting fresh and durable evidence promoted to `MISSION.md`?
+- **Evidence-backed completion** — did done claims identify admissible current
+  evidence, and did stale evidence stop keeping mission floors green?
+- **Attention routing** — could the operator identify `decide`, `review`,
+  `publish`, `watch`, and `recover` work without using activity proxies?
+- **Gate latency and early stops** — how long did campaigns wait at human
+  boundaries, and did budget or structural non-convergence stop them early?
 
 ## Red Flags
 

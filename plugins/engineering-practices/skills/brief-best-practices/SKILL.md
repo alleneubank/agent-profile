@@ -7,7 +7,7 @@ description: Use when creating, reviewing, or updating a BRIEF.md (the quality l
 
 A `BRIEF.md` is the **verifier's spec** — the codified taste that says what "good" means for a surface, so an agent can verify its own iterations and run a loop without guessing or interrupting. Where `SPEC.md` is the contract (*what* to build: `REQ-*`, invariants), the brief is the bar (*what "good" is*, and *who judges*).
 
-It is the **BRIEF** rung in the stack `VISION → SPEC → BRIEF → HARNESS → LOOP → BOUNDARY`: the brief is what makes the autonomous loop trustworthy, because the harness runs the brief's floors and the oracle judges against them.
+It is the **BRIEF** rung in the stack `VISION → MISSION → SPEC + BRIEF → HARNESS → CAMPAIGN/LOOP → BOUNDARY`: the brief is what makes a surface's autonomous loop trustworthy, because the harness runs the brief's floors and the oracle judges against them. `MISSION.md` owns strategic success; BRIEF owns surface quality and never duplicates the mission rubric.
 
 ## When to author one
 
@@ -43,6 +43,10 @@ Open every brief with a one-line law statement, e.g.:
 
 - **Match the house first.** If the repo already has ratified briefs, copy *their* shape — section names, voice, any closing coda — over this skeleton. Consistency across the brief set beats the generic template; the seven concerns are the fallback when no house dialect exists yet. A reviewer judges a brief against the house dialect, and must not reject it for matching the repo's own law.
 - **Evidence-based.** Ground Dimensions and Floors in the real surface; cite reference exemplars. Do not invent thresholds, signals, or behaviors.
+- **No strategic duplication.** Link mission rubric IDs when the surface serves
+  a mission, but do not restate outcome criteria as BRIEF dimensions or floors.
+  A mission asks whether the outcome succeeded; a BRIEF asks whether this
+  surface is good enough.
 - **The oracle must be independent.** Maker ≠ judge for any subjective dimension. Name *why* it can't be gamed — without independence the gate is theater.
 - **Floors are gates, not ceilings.** A passing artifact may still owe refinement; say so. Never weaken a floor to pass a gate — an infeasible item gets the nearest-feasible alternative plus a dated waiver Decision naming the blocker, and the gap stays on record.
 - **Calibrate claims to enforcement.** Match absolutist words ("never", "cannot") to what the oracle actually proves. Overclaiming invites reject cycles.

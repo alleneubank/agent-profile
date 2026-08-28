@@ -34,6 +34,9 @@ If the request covers multiple independent changes, split it into separate plans
 ## Plan Format
 
 When a `LOOP.md` charter exists for the branch, the plan lives in its "Work plan" section, not a separate doc.
+Each task names the mission rubric IDs it advances. A task that advances no
+target is omitted unless a mission invariant or safety requirement makes it
+necessary; cite that requirement in the task.
 
 Otherwise, save the plan where the user asked. If they did not specify a location, use:
 
@@ -58,6 +61,7 @@ Then include:
 - Test: `path/to/test_file`
 
 ### Task N: <name>
+- Mission targets: `<RUBRIC-ID>`
 - Outcome: <what is true when this task is done>
 - Steps:
   - Write or update the failing test
@@ -81,6 +85,8 @@ Then include:
 - Keep unrelated refactors out unless they are required to make the change safe.
 - Give each task a risk class; the ADF law defines the high-risk set and its approval requirement.
 - Include a back-of-envelope resource sketch for data-plane work (per-request/per-item hot paths).
+- Keep the campaign's declared review-capacity measure explicit. Do not invent
+  a global line, issue-count, or work-in-progress limit.
 
 ## Execution Handoff
 

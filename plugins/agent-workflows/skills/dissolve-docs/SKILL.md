@@ -1,6 +1,6 @@
 ---
 name: dissolve-docs
-description: Use when the user calls a docs cleanup, a campaign has shipped, or the repo has accumulated narrative, planning, status, handoff, or loop docs whose authoritative content belongs in the standing docs (VISION, BRIEF, SPEC, README).
+description: Use when the user calls a docs cleanup, a campaign has shipped, or the repo has accumulated narrative, planning, status, handoff, or loop docs whose authoritative content belongs in the standing docs (VISION, MISSION, BRIEF, SPEC, README).
 ---
 
 # Dissolve Docs
@@ -16,7 +16,7 @@ git is the changelog: deleted text is demoted to history, never lost.
 Sweep the scope (repo, package, or branch) for docs and sort each into
 one of three classes:
 
-- **Standing** — VISION, BRIEF, SPEC, README, agent instruction files,
+- **Standing** — VISION, MISSION, BRIEF, SPEC, README, agent instruction files,
   skills. Migration targets, never candidates.
 - **Durable reference** — describes the system as it is and is read to
   operate or extend it: runbooks, API references, maintained architecture
@@ -42,6 +42,7 @@ necessary, or authoritative:
 | Content | Destination |
 | --- | --- |
 | Direction, goals, what "done" means | VISION |
+| Enduring outcome, strategic rubric, durable campaign evidence | MISSION |
 | Requirements, invariants, acceptance, non-goals | SPEC |
 | Quality bar, taste calls, decided questions | BRIEF (Decisions) |
 | Build / run / operate commands, onboarding | README |
@@ -67,8 +68,8 @@ and authoritative:
 
 - One source of truth per fact: a fact stated in two docs will drift.
   Keep it in the doc that owns it; other mentions become links or die.
-- Altitude: each standing doc has one job — VISION direction, SPEC
-  contract, BRIEF quality law, README operation. Content sitting in the
+- Altitude: each standing doc has one job — VISION direction, MISSION
+  strategic outcome and evidence, SPEC contract, BRIEF quality law, README operation. Content sitting in the
   wrong doc moves to the right one while it is in hand.
 - Contradiction check: where a surviving doc disagrees with the system,
   the system wins — fix the doc or flag it with evidence.

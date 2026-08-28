@@ -11,6 +11,11 @@ An entry that keeps proving out graduates to AGENTS.md law in its weakest
 proven form — specifics that never recurred stay behind; an overturned one
 is deleted.
 
+The artifact hierarchy is `VISION → MISSION → SPEC + BRIEF → HARNESS →
+CAMPAIGN/LOOP → BOUNDARY`. `MISSION.md` owns strategic success and durable
+evidence. One `LOOP.md` owns one bounded attempt and targets named mission
+rubric IDs; successive attempts never share a journal.
+
 ## Laws
 
 - Run it before asserting it: commands, endpoints, and fixes are presented
@@ -89,6 +94,15 @@ is deleted.
 - Completed or in-flight work in the way → salvage and build on it;
   discarding prior output or duplicating a running agent's job requires
   explicit sign-off.
+- Campaign work advances no named mission target → stop it unless a mission
+  invariant or safety requires it; useful adjacency is a future campaign, not
+  silent scope growth.
+- Campaign reaches a terminal → promote admissible evidence into `MISSION.md`
+  before dissolving the charter; never merge a later attempt into the same
+  `LOOP.md`.
+- Human review capacity varies by repository and surface → declare its measure
+  and limit in the campaign contract; never replace it with a global line,
+  issue, or effort limit.
 - Secret provisioning → scaffold the full structure (items, references,
   wiring); the human injects only the secret material.
 - Agreed plan about to execute → restate the scope as a self-contained

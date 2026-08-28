@@ -5,6 +5,9 @@
 > Decisions, marked and dated. Working memory lives in the campaign's LOOP.md State, not here;
 > floor waivers are dated Decisions below.
 
+Mission: <link to MISSION.md and relevant rubric IDs>. This BRIEF governs
+surface quality and does not duplicate the mission's strategic success rubric.
+
 ## Bar
 
 <One sentence: what "shippable" means for this surface. The north-star "done.">
