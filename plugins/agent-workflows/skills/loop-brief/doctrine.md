@@ -11,6 +11,13 @@ An entry that keeps proving out graduates to AGENTS.md law in its weakest
 proven form — specifics that never recurred stay behind; an overturned one
 is deleted.
 
+The artifact hierarchy is `VISION → SPEC + BRIEF → HARNESS → LOOP →
+BOUNDARY`, with an optional `.mission/mission.yaml` above LOOP only when an
+outcome spans campaigns or repositories. One `LOOP.md` owns one bounded
+attempt and targets named SPEC requirements, BRIEF floors, or mission rubric
+ids; successive attempts never share a loop. Evidence stays in its native
+verifier, CI, review, or release system; git is the archive.
+
 ## Laws
 
 - Run it before asserting it: commands, endpoints, and fixes are presented
@@ -89,6 +96,16 @@ is deleted.
 - Completed or in-flight work in the way → salvage and build on it;
   discarding prior output or duplicating a running agent's job requires
   explicit sign-off.
+- Campaign work advances no declared target → stop it unless a SPEC
+  invariant or safety requires it; useful adjacency is a future campaign, not
+  silent scope growth.
+- Campaign reaches a terminal → `missionctl close`: route durable decisions
+  to SPEC/BRIEF, cite evidence on any linked mission rubric items, delete the
+  loop; never merge a later attempt into the same `LOOP.md`. Compact at
+  milestones so the loop stays a bounded working set, never a journal.
+- Human review capacity varies by repository and surface → declare its measure
+  and limit in the campaign contract; never replace it with a global line,
+  issue, or effort limit.
 - Secret provisioning → scaffold the full structure (items, references,
   wiring); the human injects only the secret material.
 - Agreed plan about to execute → restate the scope as a self-contained

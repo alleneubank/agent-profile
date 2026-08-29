@@ -1,5 +1,8 @@
 # SPEC — pi package support for agent-profile
 
+`missionctl` is a separately versioned PATH dependency. This repository owns
+the shared doctrine, not the reducer, executable, or lifecycle adapter.
+
 ## Goal
 
 Make the agent-profile repo installable and usable as a pi package: `pi install git:...` (or `pi -e` for development) loads both plugins' skills and provides pi-native equivalents of the plugins' Claude/Codex hooks. No claude/codex manifests or hook scripts are modified — pi reads them; the shell scripts remain the single source of truth for hook policy.
@@ -7,7 +10,7 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
 ## Context
 
 - Repo layout: `plugins/engineering-practices/` and `plugins/agent-workflows/`, each with `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and `skills/` (Agent Skills standard). `agent-workflows` additionally ships `hooks/hooks.json` + two scripts.
-- Hooks in scope: `SessionStart` (instruction-fingerprint → additionalContext) and `PreToolUse` on `Bash`/`shell` (verifier-bypass guard → deny JSON). `SubagentStart` has no pi analogue (pi has no native subagents) — documented, skipped.
+- Pi adapter hooks in scope: `SessionStart` (instruction-fingerprint → additionalContext) and `PreToolUse` on `Bash`/`shell` (verifier-bypass guard → deny JSON). `SubagentStart` has no pi analogue. The separately installed missionctl plugin owns its own `SessionStart` loop-context hook.
 - pi's hook model: in-process extension events (`session_start`, `tool_call`, ...). There is no hooks.json consumer in pi core; the extension is the consumer.
 - pi's skill loader already accepts Claude Code skill frontmatter (upstream #7468), so skills port untouched.
 
@@ -25,7 +28,7 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
 
 - The extension never throws into pi startup or the agent loop; every handler path is caught.
 - Hooks fail open; the guard blocks only the shapes the canonical script denies.
-- No edits to `.claude-plugin/`, `.codex-plugin/`, `marketplace.json`, `hooks.json`, or `hooks/*.sh`.
+- The Pi adapter does not duplicate or reinterpret `.claude-plugin/`, `.codex-plugin/`, marketplace, or hook policy. Additive shared lifecycle hooks remain documented Pi skips when no analogue exists.
 - No network calls and no credential access from the extension.
 - `package.json` is additive: it must not interfere with existing release-please plugin versioning or `scripts/validate.sh` behavior.
 
@@ -51,5 +54,9 @@ Dated entries; provisional statuses ratify only with human confirmation at the P
 - D4 2026-08-11 — **Hooks fail open:** script errors, timeouts, and parse failures never block a tool call or session start; the guard denies only the shapes the canonical script denies. **provisional**
 - D5 2026-08-11 — **Pi package version is independent** of plugin versions (root `package.json` 1.0.0; plugins keep release-please 2.x lines). **provisional**
 - D6 2026-08-11 — **Dotfiles `pi/settings.json` skills wiring retires** in favor of the pi package (overlap double-loads the same skills; pi first-wins dedups with warnings). Pending work — migrated to the continuation charter in the recall repo. **provisional**
+- D7 2026-08-28 — **Missionctl owns its lifecycle adapter.** Its hooks-only plugin registers a single `SessionStart` hook that injects the bounded loop context; compaction is an agent-driven `missionctl compact` transition, not a hook. Pi still receives the portable mission-command skill. **ratified (human)** (hook set narrowed 2026-08-29 with the LOOP-first missionctl redesign — provisional (driver))
+- D8 2026-08-28 — **Agent-profile does not vendor or register missionctl.** Dotfiles installs the independently versioned executable through mise and the lifecycle adapter through missionctl's marketplace. **ratified (human)**
 
 Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into this SPEC + README + git history (dissolve-docs, 2026-08-11).
+- 2026-08-29 — SPEC.md D7 is amended in place to the single SessionStart hook instead of adding a superseding decision, because the compaction hooks never shipped. **provisional (driver)**
+- 2026-08-29 — The stack diagram lists MISSION last as optional rather than removing it, so cross-campaign outcomes keep a named home. **provisional (driver)**

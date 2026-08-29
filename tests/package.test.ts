@@ -55,12 +55,8 @@ describe("pi package manifest", () => {
       ),
     ) as { hooks: Record<string, unknown> };
     const declared = Object.keys(hooks.hooks);
-    // SessionStart -> session_start, PreToolUse -> tool_call; SubagentStart
-    // is a documented skip (no pi subagents, see SPEC).
-    for (const event of declared) {
-      expect(
-        ["SessionStart", "PreToolUse", "SubagentStart"].includes(event),
-      ).toBe(true);
-    }
+    // SessionStart -> session_start and PreToolUse -> tool_call. SubagentStart
+    // has no pi analogue; missionctl's separate plugin owns its loop-context hook.
+    expect(declared.sort()).toEqual(["PreToolUse", "SessionStart", "SubagentStart"]);
   });
 });

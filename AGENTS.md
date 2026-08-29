@@ -13,19 +13,23 @@ attention and the session's context.
 The stack every project rides:
 
 ```
-VISION   direction + what "done" means               (human authors)
-SPEC     the contract: REQ-*, invariants, acceptance (human + agent)
-BRIEF    the quality law / codified taste            (agent drafts, human ratifies)
-HARNESS  the verifier that runs the brief's floors
-LOOP     the OODA cycle: observe → orient → decide → act; bounded
-BOUNDARY publish / irreversible / synchronous-human = the human handoff
+VISION    direction and commander's intent             (human authors)
+SPEC      contract: REQ-*, invariants, acceptance       (human + agent)
+BRIEF     surface quality law / codified taste          (agent drafts, human ratifies)
+HARNESS   verifier that runs the contract and floors
+LOOP      one bounded LOOP.md campaign: OODA + evidence
+BOUNDARY  publish / irreversible / synchronous-human   (human handoff)
+MISSION   optional .mission/mission.yaml: outcome + rubric spanning campaigns
 ```
 
 The stack is **mission command**: the operator leads with intent, not
-supervision. VISION is commander's intent; the BRIEF and the doctrine
-(laws, standing orders, conventions — `doctrine.md` in the loop-brief
-skill) are codified judgment; a LOOP.md charter is a campaign's operation
-order; the Boundary is the rules of engagement. The system is measured by
+supervision. VISION is commander's intent; SPEC and BRIEF turn it into a
+contract and a bar; the doctrine (laws, standing orders, conventions —
+`doctrine.md` in the loop-brief skill) is codified judgment; one `LOOP.md`
+is one campaign's operation order and advances named SPEC requirements,
+BRIEF floors, or — when an outcome spans campaigns or repositories — the
+rubric ids of a declared mission; the Boundary is the rules of engagement.
+Ordinary one-branch work declares no mission. The system is measured by
 how far agents act correctly in the operator's absence — an interruption
 for a decision the doctrine already answers is a training failure.
 
@@ -48,7 +52,8 @@ vs. the floor, what does it say is wrong? This is where the work lives.
 Decide — the smallest move that closes the gap. Act — make it. Repeat until
 the floors pass or the loop reports a bounded, honest block.
 
-- Terminal states: `done` (floors pass), `budget-exhausted`, or `blocked`
+- Campaign terminal states: `done` (targeted floors have admissible evidence),
+  `budget-exhausted`, `superseded`, or `blocked`
   (what was tried, why it can't converge, what would unblock it, a proposed
   alternative). Detect structural non-convergence and stop early.
 - A green verifier is bound to the state it saw: mutate, re-verify.
@@ -97,7 +102,7 @@ faithful, cheap, few and broad, realistic, and briefed when it is a review
 
 ## The brief & the doctrine
 
-A brief removes guessing: what "good" means for a surface, written once so
+A brief removes guessing about what "good" means for a surface, written once so
 the agent neither guesses nor interrupts. Author one when work will loop or
 the cost of being wrong is high (load `brief-best-practices`). The shape is
 fixed: **Bar · Dimensions · Floors** (minimums, with how measured) **·
@@ -105,7 +110,9 @@ Oracle · Never · Decisions** (calls already made — grows with every
 answered question) **· Boundary**. The brief is law: present-tense, no
 narrated history (git is the changelog); the Boundary and ratified
 Decisions amend only with human confirmation — the driver appends
-provisional entries via the ladder, ratified at the boundary.
+provisional entries via the ladder, ratified at the boundary. A BRIEF never
+duplicates a mission rubric: it governs surface quality, while a declared
+`.mission/mission.yaml` governs whether an enduring outcome was achieved.
 
 The doctrine (laws / standing orders / conventions) is codified operator
 judgment for acting in the human's absence; a standing answer is applied,
@@ -131,6 +138,12 @@ load-bearing ambiguity climbs the ladder.
   Attended, an interactive question is answered once and written into
   Decisions. Unattended, never freeze on one question: accumulate and
   terminate `blocked: needs N decisions` with a numbered, evidenced batch.
+- **Campaign scope is declared.** A campaign advances its loop's named
+  targets. Adjacent work that advances none is out of scope unless a SPEC
+  invariant or safety requires it. One `LOOP.md` never contains successive
+  campaigns; a terminal loop closes through `missionctl close` — decisions
+  routed to SPEC/BRIEF, rubric evidence cited, loop deleted — and a new
+  attempt starts fresh. Git is the archive.
 - **Unattended terminals are interior-verifiable.** Severity-floor review
   semantics — approve unless findings at or above a floor named in the
   reviewer's own severity scale; never "until approval" from a generative
@@ -154,12 +167,14 @@ load-bearing ambiguity climbs the ladder.
 
 ## Agentic delivery flow
 
-The ADF is the macro loop's phases. Agent owns SPEC → PLAN → TDD → DEV →
+The ADF is the macro loop's phases. Agent owns MISSION → SPEC → PLAN → TDD → DEV →
 E2E; publish (review-to-merge) is the human's. Fix-shaped work defaults to
 delegation (impl packet → reviewer verdict → fix-up); reserve attended
 driving for live-ops and incidents.
 
-- Gates: SPEC — IDs, invariants, non-goals, acceptance (load
+- Gates: MISSION — intended outcome, what measurable done means, and
+  boundaries (a `.mission/mission.yaml` only when the outcome spans
+  campaigns or repositories); SPEC — IDs, invariants, non-goals, acceptance (load
   `spec-best-practices`; colocated `SPEC.md`). PLAN — task graph with
   files/types/tests and risk class; data-plane work gets a resource sketch.
   TDD — the new test observed red against the pre-fix tree, output cited.
@@ -168,8 +183,8 @@ driving for live-ops and incidents.
 - High-risk, approval required in PLAN: schema/data migrations,
   auth/security boundaries, public API contracts, infra/deploy config.
   Low-risk docs/non-runtime changes may run SPEC → PLAN → DEV.
-- Traceability: every change maps REQ-* → tests → commit. Deviations record
-  a waiver with rationale.
+- Traceability: every change maps loop target → REQ-* → tests → commit or
+  artifact evidence. Deviations record a waiver with rationale.
 
 ## Code law
 

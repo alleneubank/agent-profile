@@ -22,8 +22,9 @@ one of three classes:
   operate or extend it: runbooks, API references, maintained architecture
   docs. Keep, subject to the focus pass.
 - **Candidates** — records how the work got here, what was planned, or
-  what was true mid-flight: completed LOOP.md charters (legacy
-  `.claude/loop.md`), `DELTA.md` / `DEVIATIONS.md` brief sidecars (a
+  what was true mid-flight: terminal LOOP.md campaigns (closed through
+  `missionctl close`; a legacy `.claude/loop.md` or `MISSION.md` journal is
+  routed by hand), `DELTA.md` / `DEVIATIONS.md` brief sidecars (a
   retired pattern — still-active floor waivers migrate to the BRIEF's
   Decisions, dated), PLAN / TODO / NOTES / STATUS / HANDOFF docs, phase
   and iteration journals, proposals whose decision already landed, design
@@ -42,6 +43,7 @@ necessary, or authoritative:
 | Content | Destination |
 | --- | --- |
 | Direction, goals, what "done" means | VISION |
+| Rubric status of a declared multi-campaign outcome | `.mission/mission.yaml` (via `missionctl close`) |
 | Requirements, invariants, acceptance, non-goals | SPEC |
 | Quality bar, taste calls, decided questions | BRIEF (Decisions) |
 | Build / run / operate commands, onboarding | README |
@@ -98,7 +100,7 @@ ratification and any contradictions flagged.
   criteria still inside.
 - Durable reference dissolved because of where it lives, or a journal
   kept because of where it lives.
-- A completed campaign charter surviving the cleanup — the defect the
+- A terminal campaign loop surviving the cleanup — the defect the
   standing order exists to clear.
 - The cleanup ends with more docs, or longer docs, than the content
   earned.

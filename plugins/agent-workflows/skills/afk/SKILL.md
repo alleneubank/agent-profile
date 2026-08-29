@@ -7,7 +7,7 @@ description: Use when the user says they are stepping away and the agent should 
 
 The user is away: no interactive approval will arrive. Campaign protocol —
 scope derivation, the unblocking ladder, terminal states, budgets — is the
-loop-brief skill's; when a `LOOP.md` charter exists, run its iterations.
+loop-brief skill's; when a `LOOP.md` exists, run its iterations.
 This skill adds the operational constraint: nothing you run may block on a
 prompt.
 
@@ -26,12 +26,12 @@ prompt.
   new auth flows; secret reads without a provisioned noninteractive path.
 - Unbounded foreground processes.
 
-## No charter?
+## No loop?
 
 Derive scope from committed artifacts: `LOOP.md`, handoffs, specs, recent
 commit messages. Uncovered decisions climb the ladder — reversible interior
 calls are made and logged as dated provisional Decisions, not accumulated.
 Terminate per the loop's terminal states (`done`, `blocked: needs N
 decisions` with a numbered evidenced batch, or `budget-exhausted`), and
-write back the charter — or a handoff when no charter exists — before
+write back the loop — or a handoff when no loop exists — before
 stopping.
