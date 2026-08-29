@@ -7,7 +7,7 @@ description: Use when creating, reviewing, or updating a BRIEF.md (the quality l
 
 A `BRIEF.md` is the **verifier's spec** — the codified taste that says what "good" means for a surface, so an agent can verify its own iterations and run a loop without guessing or interrupting. Where `SPEC.md` is the contract (*what* to build: `REQ-*`, invariants), the brief is the bar (*what "good" is*, and *who judges*).
 
-It is the **BRIEF** rung in the stack `VISION → MISSION → SPEC + BRIEF → HARNESS → CAMPAIGN/LOOP → BOUNDARY`: the brief is what makes a surface's autonomous loop trustworthy, because the harness runs the brief's floors and the oracle judges against them. `MISSION.md` owns strategic success; BRIEF owns surface quality and never duplicates the mission rubric.
+It is the **BRIEF** rung in the stack `VISION → SPEC + BRIEF → HARNESS → LOOP → BOUNDARY`: the brief is what makes a surface's autonomous loop trustworthy, because the harness runs the brief's floors and the oracle judges against them. An optional `.mission/mission.yaml` owns strategic success when an outcome spans campaigns; BRIEF owns surface quality and never duplicates a mission rubric.
 
 ## When to author one
 
@@ -43,8 +43,8 @@ Open every brief with a one-line law statement, e.g.:
 
 - **Match the house first.** If the repo already has ratified briefs, copy *their* shape — section names, voice, any closing coda — over this skeleton. Consistency across the brief set beats the generic template; the seven concerns are the fallback when no house dialect exists yet. A reviewer judges a brief against the house dialect, and must not reject it for matching the repo's own law.
 - **Evidence-based.** Ground Dimensions and Floors in the real surface; cite reference exemplars. Do not invent thresholds, signals, or behaviors.
-- **No strategic duplication.** Link mission rubric IDs when the surface serves
-  a mission, but do not restate outcome criteria as BRIEF dimensions or floors.
+- **No strategic duplication.** Link mission rubric ids when the surface serves
+  a declared mission, but do not restate outcome criteria as BRIEF dimensions or floors.
   A mission asks whether the outcome succeeded; a BRIEF asks whether this
   surface is good enough.
 - **The oracle must be independent.** Maker ≠ judge for any subjective dimension. Name *why* it can't be gamed — without independence the gate is theater.
@@ -62,7 +62,7 @@ Open every brief with a one-line law statement, e.g.:
 
 ## How the brief drives the loop
 
-The brief is inert until it runs: the **harness** runs the Floors and emits pass/fail with evidence; the **oracle** judges the subjective Dimensions independently; the **OODA loop** iterates against them to `done` or a bounded, honest `blocked`. In a campaign, the LOOP.md charter names this brief and carries the loop's live State and Decisions.
+The brief is inert until it runs: the **harness** runs the Floors and emits pass/fail with evidence; the **oracle** judges the subjective Dimensions independently; the **OODA loop** iterates against them to `done` or a bounded, honest `blocked`. In a campaign, LOOP.md targets this brief's floors by name (`targets.brief`) and carries the loop's live state and decisions.
 
 ## References
 

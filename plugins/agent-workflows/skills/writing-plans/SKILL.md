@@ -33,10 +33,11 @@ If the request covers multiple independent changes, split it into separate plans
 
 ## Plan Format
 
-When a `LOOP.md` charter exists for the branch, the plan lives in its "Work plan" section, not a separate doc.
-Each task names the mission rubric IDs it advances. A task that advances no
-target is omitted unless a mission invariant or safety requirement makes it
-necessary; cite that requirement in the task.
+When a `LOOP.md` exists for the branch, the plan is its `units` list, not a
+separate doc. Each unit names the SPEC requirements, BRIEF floors, or mission
+rubric ids it advances (`targets`). A unit that advances no target is omitted
+unless a SPEC invariant or safety requirement makes it necessary; cite that
+requirement in the unit.
 
 Otherwise, save the plan where the user asked. If they did not specify a location, use:
 
@@ -61,7 +62,7 @@ Then include:
 - Test: `path/to/test_file`
 
 ### Task N: <name>
-- Mission targets: `<RUBRIC-ID>`
+- Targets: `<REQ-ID | Floor | RUBRIC-ID>`
 - Outcome: <what is true when this task is done>
 - Steps:
   - Write or update the failing test

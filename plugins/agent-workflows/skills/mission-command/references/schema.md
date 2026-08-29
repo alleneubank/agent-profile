@@ -1,96 +1,100 @@
-# Mission-command schema v1
+# Loop and mission schema
 
-Read this reference when creating or repairing a typed mission or campaign.
+Read this reference when authoring or repairing a `LOOP.md` or a
+`.mission/mission.yaml`. `missionctl check` is the authority; this page is the
+human-readable summary of its grammar.
 
-## Mission frontmatter
+## LOOP.md
 
-```yaml
-mission_control: 1
-id: stable-mission-id
-title: Finite measurable outcome
-kind: delivery
-status: active
-owner: accountable-owner
-rubric:
-  - id: OUTCOME-001
-    dimension: contract-acceptance
-    criterion: The intended outcome in plain language.
-    measure: The observation that decides the floor.
-    floor: The minimum passing result.
-    evaluator: harness
-    evidence_type: verifier-run
-    freshness: P7D
-boundaries: [publish]
-evidence: []
-```
-
-Mission states are `draft`, `active`, `paused`, `achieved`, and `abandoned`.
-Achievement requires current admissible evidence for every required floor.
-Evidence states `unknown` and `stale` are projections, not stored results.
-
-## Kind guide
-
-Choose the kind by the outcome, not the repository or team:
-
-| Kind | Use when the outcome is | Required dimensions |
-|---|---|---|
-| delivery | a product or contract lands | contract-acceptance, quality-bar, integration-e2e, operability, landing-readiness |
-| operations | a live state changes or stays healthy | health, safety, reversibility, observability, post-change-observation |
-| research | a question becomes decision-ready | question-resolution, evidence-quality, alternative-explanations, reproducibility, decision-usefulness |
-| maintenance | a bounded inventory closes and recurs less | bounded-inventory, closure-evidence, regression-prevention, recurrence-reduction |
-| administrative | a correct artifact, approval, or deadline state is obtained | outcome-artifact, dependency-deadline-state, privacy-compliance, required-approval |
-| training | demonstrated capability transfers and persists | recall, application, novel-transfer, retention-performance |
-
-Numeric progress is valid only when the mission defines a meaningful numerator
-and denominator. There is no cross-mission score.
-
-## Campaign frontmatter
+YAML frontmatter followed by a free Markdown body. The body is working notes;
+missionctl preserves it byte-for-byte and only removes `## ` sections through
+`compact`/`close` dispositions.
 
 ```yaml
-mission_control: 1
-mission_id: stable-mission-id
-campaign_id: bounded-attempt-id
-objective: Advance named floors through one attempt.
-status: active
-phase: TDD
-iteration: 1
+---
+loop: 1
+id: widget-pagination
+objective: Ship cursor pagination for widget listing behind the existing API.
+status: active            # planned | active | waiting | blocked | done | budget-exhausted | superseded
+phase: TDD                # MISSION | SPEC | PLAN | TDD | DEV | E2E | BOUNDARY (optional)
+iteration: 3              # default 0; never exceeds iteration_budget
 iteration_budget: 8
-targets: [OUTCOME-001]
-attention: none
-next_action: Run the failing verifier.
-expected_signal_by: 2026-09-01T18:00:00Z
-updated_at: 2026-08-28T18:00:00Z
-head: abc123
-review_capacity:
-  measure: changed-contract surfaces
-  limit: one reviewed unit at a time
-evidence: []
+updated_at: 2026-08-29T12:00:00Z          # optional
+expected_signal_by: 2026-09-01T18:00:00Z  # required when waiting
+mission: regional-rollout                 # optional; or { id, source: { repository, ref, path } }
+targets:
+  spec: [REQ-WIDGET-002]  # each must appear in the nearest SPEC.md
+  brief: [Correctness]    # each must be a "- Name:" floor under ## Floors in the nearest BRIEF.md
+  mission: [REGION-002]   # each must be a rubric id in the linked mission
+gates:                    # required, non-empty; state is what the driver last observed
+  - { id: unit, run: npm test, green: all widget tests pass, state: red }   # unknown | red | green
+units:                    # ordered work; at most one current
+  - { id: U1, title: Cursor encoding helper, targets: [REQ-WIDGET-002], state: done }   # pending | current | done | deferred
+  - { id: U2, title: List endpoint accepts cursor, state: current }
+decisions:
+  - { date: 2026-08-28, call: Cursors are opaque base64url strings., status: ratified }  # provisional | ratified
+blockers:                 # required when blocked
+  - { summary: Cursor spec ambiguous for empty pages, proposed: Return an empty page with a null cursor }
+boundary: [publish, merge-tracked-ref]    # required, non-empty
+---
 ```
 
-Cross-repository campaigns also declare:
+Rules `check` enforces: required fields present; enum membership;
+`iteration ≤ iteration_budget`; unique gate and unit ids; at most one
+`current` unit (an `active` loop without one is a warning); `blocked` needs a
+blocker; `waiting` needs `expected_signal_by`; `done` needs every gate
+`green`; targets resolve. Reads are tolerant — CRLF, BOM, quoted integers,
+unknown fields (preserved, warned), a bare-string mission — and writes are
+canonical.
+
+## .mission/mission.yaml (optional)
 
 ```yaml
-mission_source:
-  repository: https://example.com/owner/repository.git
-  ref: main
-  path: MISSION.md
+mission: 1
+id: regional-rollout
+title: Regional rollout of the widget service
+outcome: Every region runs the widget service with cursor pagination.
+rubric:
+  - id: REGION-001
+    criterion: Canary region runs the new build.
+    floor: Canary health green for 24 hours.
+    status: met                       # open | met | waived
+    evidence: ci://rollout/canary/2026-08-27   # required when met; a reference, never a narrative
+  - id: REGION-002
+    criterion: All remaining regions run the new build.
+    floor: Every region health green for 24 hours.
+    status: open
+boundary: [publish, production-cutover]
 ```
 
-Campaign states are `planned`, `active`, `waiting`, `blocked`, `done`,
-`budget-exhausted`, and `superseded`. Keep `waiting` for a declared external
-signal and `blocked` for an exhausted ladder requiring a decision.
+A mission is achieved when every rubric item is `met` or `waived`. Campaigns
+are discovered, not listed: `missionctl mission` walks the directory below
+`.mission/` for loops whose `mission.id` matches. Nothing else is stored.
 
-## Evidence
+## Lifecycle plans
 
-Mission evidence includes `rubric_id`, `campaign_id`, `evaluator`,
-`evidence_type`, stored `result` (`passing`, `failing`, or `waived`), UTC
-`timestamp`, and `commit` or `artifact_ref`. Campaign evidence has the same
-shape without `campaign_id`, which the campaign supplies.
+`compact prepare` and `close prepare` emit a plan:
 
-Only evidence matching the exact rubric ID, evaluator, and evidence type may
-change its state. The newest admissible record wins. A rubric or evidence
-freshness duration makes expired evidence `stale`; stale evidence cannot keep a
-mission green. Point to executable machine-readable artifacts or immutable
-external results. Do not commit prose sidecars that narrate verifier output,
-review history, or rollout status; CI, the pull request, and git own that
-history.
+```json
+{ "plan": 1, "transition": "compact", "loop_path": "...", "source_sha256": "...",
+  "items": [ { "id": "unit:U1", "kind": "unit", "summary": "U1 Cursor encoding helper [done]",
+               "allowed": ["drop", "keep"], "proposed": "drop", "disposition": null, "reason": null } ] }
+```
+
+Fill `disposition` for every item (and `reason` or `evidence` where the
+disposition requires it), then `validate` and `apply`. A changed loop
+(`plan.stale-source`), a missing or disallowed disposition, or a routing
+target without a `SPEC.md`/`BRIEF.md` refuses the apply; nothing is deleted
+until its destination exists.
+
+## Commands
+
+```
+missionctl check | context | statusline | repair [--dry-run] | inspect | adopt [--write]
+missionctl compact prepare|validate|apply [--plan FILE|-]
+missionctl close   prepare|validate|apply [--plan FILE|-]
+missionctl mission
+missionctl harness claude session-start
+```
+
+All commands take `--root DIR`, `--now TIMESTAMP`, and `--json`.

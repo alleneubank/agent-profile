@@ -13,12 +13,11 @@ or prod-verify, or when work is blocked upstream, prefer minting a handoff and
 starting fresh over compacting — the next session opens with this artifact
 instead of inherited sprawl.
 
-When a `LOOP.md` charter exists, the charter is the campaign's memory:
-mid-campaign continuation is its State/Decisions write-back, committed with
-the work — an iteration ending is not a handoff moment. Mint a handoff only
-at a terminal state, as the boundary package for the human, or for
-non-campaign sessions; its Decisions reference the charter's rather than
-forking them.
+When a `LOOP.md` exists, the loop is the campaign's memory: mid-campaign
+continuation is its frontmatter/State write-back, committed with the work —
+an iteration ending is not a handoff moment. Mint a handoff only at a
+terminal state, as the boundary package for the human, or for non-campaign
+sessions; its Decisions reference the loop's rather than forking them.
 
 ## Workflow
 
@@ -27,8 +26,8 @@ forking them.
    - uncommitted and staged change summary
    - recent relevant commits
    - task requested, decisions made, and current terminal state
-   - mission ID, campaign ID, targeted rubric IDs, red/stale floors, and the
-     evidence pointers already earned
+   - `missionctl context` output when a loop exists: loop id, current unit,
+     red gates, blockers, and the evidence pointers already earned
 2. Write to `~/.handoffs/handoff-<repo>-<shortname>-<timestamp>.md`.
 3. Front-load the next action in the first 10 lines.
 4. Include concrete file paths, commands, identifiers, and constraints.
@@ -44,10 +43,10 @@ forking them.
 
 - ...
 
-## Mission state
+## Loop state
 
-- Mission / campaign: ...
-- Targets and red or stale floors: ...
+- Loop / current unit: ...
+- Targets and red gates: ...
 - Admissible evidence: ...
 
 ## What to do
@@ -77,9 +76,9 @@ forking them.
   Decisions carries the calls already made — each marked ratified or
   provisional — so the receiving session inherits them instead of re-asking.
 - Link to specs and docs instead of paraphrasing long context.
-- Link to `MISSION.md` and the one campaign `LOOP.md`; never merge a later
-  campaign's journal into the handoff or treat campaign completion as mission
-  achievement.
+- Link to the one campaign `LOOP.md` (and `.mission/mission.yaml` when one
+  is declared); never merge a later campaign's notes into the handoff or
+  treat campaign completion as mission achievement.
 - Keep the handoff short enough to scan; target 60-100 lines.
 - Do not include secrets or pasted secret values.
 - State publish, push, deploy, and approval boundaries explicitly.

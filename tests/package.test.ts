@@ -56,7 +56,7 @@ describe("pi package manifest", () => {
     ) as { hooks: Record<string, unknown> };
     const declared = Object.keys(hooks.hooks);
     // SessionStart -> session_start and PreToolUse -> tool_call. SubagentStart
-    // has no pi analogue; missionctl's separate plugin owns compaction hooks.
+    // has no pi analogue; missionctl's separate plugin owns its loop-context hook.
     expect(declared.sort()).toEqual(["PreToolUse", "SessionStart", "SubagentStart"]);
   });
 });

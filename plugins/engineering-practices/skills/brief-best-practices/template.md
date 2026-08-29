@@ -5,8 +5,8 @@
 > Decisions, marked and dated. Working memory lives in the campaign's LOOP.md State, not here;
 > floor waivers are dated Decisions below.
 
-Mission: <link to MISSION.md and relevant rubric IDs>. This BRIEF governs
-surface quality and does not duplicate the mission's strategic success rubric.
+Mission (only if declared): <`.mission/mission.yaml` id and relevant rubric ids>. This BRIEF
+governs surface quality and does not duplicate a mission's strategic success rubric.
 
 ## Bar
 

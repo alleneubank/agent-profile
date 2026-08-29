@@ -10,7 +10,7 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
 ## Context
 
 - Repo layout: `plugins/engineering-practices/` and `plugins/agent-workflows/`, each with `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and `skills/` (Agent Skills standard). `agent-workflows` additionally ships `hooks/hooks.json` + two scripts.
-- Pi adapter hooks in scope: `SessionStart` (instruction-fingerprint → additionalContext) and `PreToolUse` on `Bash`/`shell` (verifier-bypass guard → deny JSON). `SubagentStart` has no pi analogue. The separately installed missionctl plugin owns `PreCompact`, `PostCompact`, and compact `SessionStart` state refresh.
+- Pi adapter hooks in scope: `SessionStart` (instruction-fingerprint → additionalContext) and `PreToolUse` on `Bash`/`shell` (verifier-bypass guard → deny JSON). `SubagentStart` has no pi analogue. The separately installed missionctl plugin owns its own `SessionStart` loop-context hook.
 - pi's hook model: in-process extension events (`session_start`, `tool_call`, ...). There is no hooks.json consumer in pi core; the extension is the consumer.
 - pi's skill loader already accepts Claude Code skill frontmatter (upstream #7468), so skills port untouched.
 
@@ -54,7 +54,7 @@ Dated entries; provisional statuses ratify only with human confirmation at the P
 - D4 2026-08-11 — **Hooks fail open:** script errors, timeouts, and parse failures never block a tool call or session start; the guard denies only the shapes the canonical script denies. **provisional**
 - D5 2026-08-11 — **Pi package version is independent** of plugin versions (root `package.json` 1.0.0; plugins keep release-please 2.x lines). **provisional**
 - D6 2026-08-11 — **Dotfiles `pi/settings.json` skills wiring retires** in favor of the pi package (overlap double-loads the same skills; pi first-wins dedups with warnings). Pending work — migrated to the continuation charter in the recall repo. **provisional**
-- D7 2026-08-28 — **Missionctl owns its compaction lifecycle adapter.** Its hooks-only plugin registers `PreCompact`, `PostCompact`, and compact `SessionStart`; Pi still receives the portable mission-command skill. **ratified (human)**
+- D7 2026-08-28 — **Missionctl owns its lifecycle adapter.** Its hooks-only plugin registers a single `SessionStart` hook that injects the bounded loop context; compaction is an agent-driven `missionctl compact` transition, not a hook. Pi still receives the portable mission-command skill. **ratified (human)** (hook set narrowed 2026-08-29 with the LOOP-first missionctl redesign — provisional (driver))
 - D8 2026-08-28 — **Agent-profile does not vendor or register missionctl.** Dotfiles installs the independently versioned executable through mise and the lifecycle adapter through missionctl's marketplace. **ratified (human)**
 
 Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into this SPEC + README + git history (dissolve-docs, 2026-08-11).
