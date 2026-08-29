@@ -43,6 +43,10 @@ Quote any prose value containing ` #` (`title: "Fix PR #12"`): YAML reads an
 unquoted ` #` as a comment, and `check` warns `loop.comment-in-value` when a
 free-text field lost its tail that way.
 
+Every frontmatter string is one line (multi-line notes belong in the body);
+unknown keys anywhere — top level or inside a gate, unit, decision, blocker,
+or the mission link — are preserved on rewrite and warned about.
+
 Rules `check` enforces: required fields present; enum membership;
 `iteration ≤ iteration_budget`; unique gate and unit ids; at most one
 `current` unit (an `active` loop without one is a warning); `blocked` needs a
