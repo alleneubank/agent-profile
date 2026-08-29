@@ -25,21 +25,30 @@ one that measures the real goal.
   freely; propose expensive ones. The harness runs against a deterministic
   proxy; the live system is the final gate, human-attended — a loop needing
   live secrets to verify is built at the wrong altitude.
-- Realism: integration over mocked units for data flow and permissions;
-  mocks for external services, never your own data layer. Visual/UI floors
-  are the change observed on the live surface. Before done: would this
-  survive a manual walkthrough?
+- Realism: integration over mocked units for data flow and permissions; use the
+  dependency-fidelity order under Integration / contract tests. Visual/UI floors
+  are the change observed on the live surface. Before done: would this survive a
+  manual walkthrough?
 
 ## Test layering policy
+
+Choose scope by the contract and the trade among **speed, maintainability,
+utilization, reliability, and fidelity**. No pyramid shape or layer count is
+universally correct. Improve any dimension that does not make another worse;
+spend slower, broader tests where their fidelity catches risks a smaller test
+cannot.
 
 ### Unit tests
 
 Purpose: verify individual functions and invariants in isolation.
 
-- **Data-driven**: parameterized tables covering happy path, boundary, error, and edge cases.
+- **Data-driven**: use a parameterized table when every row is the same behavior
+  with the same setup, action, assertion shape, and failure interpretation.
+  Vary independent input dimensions independently unless their interaction is
+  the contract. Give distinct scenarios or outcomes, especially different error
+  contracts, separate tests even when a table would be shorter.
 - **Property-based**: fuzz invariants that must hold across all inputs (e.g., idempotency, sort stability, roundtrip serialization).
 - **Cross the boundary**: cover the transition from valid to invalid, not just samples of each — where data moves across the valid/invalid line is where the bugs live.
-- Derive cases from the module's public API surface: input types/constraints, output shape, error modes, invariants.
 
 ### Integration / contract tests
 
@@ -50,15 +59,24 @@ Purpose: verify interactions between components and external services.
 - **Auth and scoping**: token validation, role-based access, tenant isolation.
 - **Eventual consistency**: verify convergence within bounded time; poll rather than sleep.
 - Reuse auth state across tests where possible; avoid redundant login flows.
+- Prefer, in order, the real dependency; a service-owner fake or hermetic local
+  server; a mock of an interface you own. Do not invent a third party's fake or
+  mocked contract. If no faithful implementation is practical, wrap that API in
+  an interface you own and test the wrapper against the real contract.
 
 ### E2E tests
 
 Purpose: verify real user workflows through the full stack.
 
-- No mocks; exercise real services, databases, and APIs.
-- Happy-path workflows only; save edge cases for lower layers.
-- **State-tolerant**: never assume a clean slate; tolerate and work with prior state.
-- **Idempotent**: safe to run repeatedly without cleanup between runs.
+- Exercise the real path and the highest-fidelity practical dependencies.
+- Keep the suite small: cover each important user workflow and one representative
+  of each important error class. Lower layers carry variations that do not need
+  the full stack.
+- **Hermetic environments**: provision isolated, ephemeral state and dispose of
+  it after the run; a clean namespace is a declared input, not an ambient
+  assumption.
+- **Shared environments**: use unique data, discover and tolerate prior state,
+  and make flows idempotent rather than depending on cleanup or a clean slate.
 - **Flow-oriented**: validate real data paths end-to-end rather than isolated assertions.
 
 ## Hard rules
@@ -67,11 +85,24 @@ A test is a **second, independent statement of the contract**. Every rule below
 follows from that: where the test stops being independent of the code it grades,
 it stops being a test and becomes a mirror.
 
+- **Name the scenario and outcome, not merely the method.** A failure should say
+  what condition was exercised and what behavior broke. One test covers one
+  scenario; one behavior may span methods and one method may need several tests.
+- **Make relevant details explicit and hide only noise.** Keep cause next to
+  effect. Builders and helpers may supply irrelevant boilerplate, but a test
+  writes every value or condition its expectation depends on even when it matches
+  a helper default. Prefer descriptive and meaningful phrases (DAMP) to DRY
+  indirection when readability and uniqueness conflict.
 - **Expected values are written down, not computed.** A test that derives its
   expectation the way the implementation does passes by construction, and keeps
   passing when both sides are wrong. Write the literal. The same failure at a
   larger scale is a mock that grows into a simulator — past that point the suite
   measures the simulator.
+- **Assertions are narrow and actionable.** Assert the field, property, or
+  interaction the behavior promises instead of incidental full-object equality.
+  Use literal, non-default, discriminating values, varying them where a swap,
+  reuse, or missing write must be exposed. The test name plus failure output is
+  enough to begin investigation.
 - **Tests assert observable behavior, not the call sequence that produced it.**
   Mocking every collaborator and verifying the calls in order restates the
   implementation in a second syntax — a change detector: it reddens on
@@ -85,7 +116,11 @@ it stops being a test and becomes a mirror.
 - **Never invent signatures, source locations, or line numbers.** Only reference what you have read from the codebase.
 - **No fabricated fixtures.** Derive test data from actual schemas, types, or seed data in the repo.
 - **No test-only hacks in product code.** No `if (process.env.TEST)` branches, no test-specific exports, no test backdoors. A runtime branch added to make a test pass is a defect in the test's setup — fix the seam there (fixtures, factories, explicit construction) instead.
-- **E2E must not rely on clean slate.** Tests must tolerate pre-existing data, prior test runs, and shared environments.
+- **Observe red.** A new test fails for the expected reason before the production
+  change makes it green; a compile failure counts when it proves the missing
+  contract. While refactoring test code, deliberately break the behavior under
+  test and keep the expected failure present so a deleted assertion cannot pass
+  silently; restore production behavior and finish green.
 
 ## Execution guidance
 
@@ -107,7 +142,7 @@ it stops being a test and becomes a mirror.
 - Poll with bounded timeout and backoff; never use fixed `sleep`/`waitForTimeout`.
 - Set explicit timeout per operation; fail fast with a descriptive message on timeout.
 - Bound retry attempts (e.g., max 3 retries with exponential backoff).
-- Use framework-native waiting (Playwright `expect`, async assertions) over manual loops.
+- Use the test framework's native waiting and async assertions over manual loops.
 
 ### Flake handling
 
