@@ -79,8 +79,9 @@ multi-phase, or cross-repository. Its rubric items are the enduring floors
 campaigns advance through `targets.mission`; their `status` moves through
 `close` dispositions, and `evidence` is a reference into the native verifier,
 CI, review, or release system — never a narrative. A cross-repository loop
-links by `mission.source` (repository, ref, path); an unavailable source is a
-visible warning, not a silent pass. Ordinary one-branch work declares no
+links by `mission.source` (repository, ref, path), resolved from a sibling
+checkout of that repository; an absent sibling is a visible warning, not a
+silent pass. Ordinary one-branch work declares no
 mission.
 
 ## Boundary

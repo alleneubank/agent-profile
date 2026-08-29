@@ -39,6 +39,10 @@ boundary: [publish, merge-tracked-ref]    # required, non-empty
 ---
 ```
 
+Quote any prose value containing ` #` (`title: "Fix PR #12"`): YAML reads an
+unquoted ` #` as a comment, and `check` warns `loop.comment-in-value` when a
+free-text field lost its tail that way.
+
 Rules `check` enforces: required fields present; enum membership;
 `iteration ≤ iteration_budget`; unique gate and unit ids; at most one
 `current` unit (an `active` loop without one is a warning); `blocked` needs a
@@ -66,6 +70,10 @@ rubric:
     status: open
 boundary: [publish, production-cutover]
 ```
+
+A loop in another repository links by `mission: { id, source: { repository, ref, path } }`;
+missionctl resolves it from a sibling checkout (`<ancestor>/<repository name>/<path>`),
+never over the network, and warns `mission.unavailable` when none is present.
 
 A mission is achieved when every rubric item is `met` or `waived`. Campaigns
 are discovered, not listed: `missionctl mission` walks the directory below
