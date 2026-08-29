@@ -58,3 +58,5 @@ Dated entries; provisional statuses ratify only with human confirmation at the P
 - D8 2026-08-28 — **Agent-profile does not vendor or register missionctl.** Dotfiles installs the independently versioned executable through mise and the lifecycle adapter through missionctl's marketplace. **ratified (human)**
 
 Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into this SPEC + README + git history (dissolve-docs, 2026-08-11).
+- 2026-08-29 — SPEC.md D7 is amended in place to the single SessionStart hook instead of adding a superseding decision, because the compaction hooks never shipped. **provisional (driver)**
+- 2026-08-29 — The stack diagram lists MISSION last as optional rather than removing it, so cross-campaign outcomes keep a named home. **provisional (driver)**
