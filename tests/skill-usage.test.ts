@@ -464,7 +464,56 @@ cat "$FAKE_RECALL_PAYLOAD"
     expect(result.stdout).not.toContain("never_fired");
   });
 
-  it("fails closed when aliases collide inside one source and host", () => {
+  it("reports honest session bounds when aliases collide inside one source and host", () => {
+    const census = makeCensus(
+      [
+        {
+          skill_name: "engineering-practices:code-law",
+          source: "codex",
+          host: "control",
+          invocations: 1,
+          sessions: 1,
+        },
+        {
+          skill_name: "code-law",
+          source: "codex",
+          host: "control",
+          invocations: 1,
+          sessions: 1,
+        },
+      ],
+      {
+        considered_sessions: 10,
+        control: {
+          considered_sessions: 10,
+          attributed_invocations: 2,
+          unattributed_candidates: 0,
+        },
+      },
+    );
+
+    const result = run(["--json"], { census });
+
+    expect(result.status).toBe(0);
+    const report = JSON.parse(result.stdout) as {
+      fired: {
+        skill: string;
+        invocations: number;
+        sessions: number | null;
+        session_bounds?: { minimum: number; maximum: number };
+      }[];
+      never_fired: string[];
+    };
+    expect(report.fired).toContainEqual({
+      skill: "engineering-practices:code-law",
+      invocations: 2,
+      sessions: null,
+      session_bounds: { minimum: 1, maximum: 2 },
+    });
+    expect(report.never_fired).toContain("engineering-practices:rust-best-practices");
+  });
+
+  it("deduplicates alias sessions when the window population proves overlap", () => {
     const census = makeCensus(
       [
         {
@@ -494,9 +543,180 @@ cat "$FAKE_RECALL_PAYLOAD"
 
     const result = run(["--json"], { census });
 
+    expect(result.status).toBe(0);
+    const report = JSON.parse(result.stdout) as {
+      fired: { skill: string; invocations: number; sessions: number }[];
+    };
+    expect(report.fired).toContainEqual({
+      skill: "engineering-practices:code-law",
+      invocations: 2,
+      sessions: 1,
+    });
+  });
+
+  it("caps summed alias-session bounds at the window population", () => {
+    const census = makeCensus(
+      [
+        {
+          skill_name: "engineering-practices:code-law",
+          source: "codex",
+          host: "control",
+          invocations: 1,
+          sessions: 1,
+        },
+        {
+          skill_name: "code-law",
+          source: "codex",
+          host: "control",
+          invocations: 1,
+          sessions: 1,
+        },
+        {
+          skill_name: "engineering-practices:code-law",
+          source: "grok",
+          host: "edge",
+          invocations: 1,
+          sessions: 1,
+        },
+        {
+          skill_name: "code-law",
+          source: "grok",
+          host: "edge",
+          invocations: 1,
+          sessions: 1,
+        },
+      ],
+      {
+        considered_sessions: 3,
+        control: {
+          considered_sessions: 3,
+          attributed_invocations: 4,
+          unattributed_candidates: 0,
+        },
+      },
+    );
+
+    const result = run(["--json"], { census });
+
+    expect(result.status).toBe(0);
+    const report = JSON.parse(result.stdout) as {
+      fired: {
+        skill: string;
+        invocations: number;
+        sessions: number | null;
+        session_bounds?: { minimum: number; maximum: number };
+      }[];
+    };
+    expect(report.fired).toContainEqual({
+      skill: "engineering-practices:code-law",
+      invocations: 4,
+      sessions: null,
+      session_bounds: { minimum: 2, maximum: 3 },
+    });
+  });
+
+  it("fails closed when summed session minima exceed the window population", () => {
+    const census = makeCensus(
+      [
+        {
+          skill_name: "engineering-practices:code-law",
+          source: "codex",
+          host: "control",
+          invocations: 1,
+          sessions: 1,
+        },
+        {
+          skill_name: "engineering-practices:code-law",
+          source: "grok",
+          host: "edge",
+          invocations: 1,
+          sessions: 1,
+        },
+      ],
+      {
+        considered_sessions: 1,
+        control: {
+          considered_sessions: 1,
+          attributed_invocations: 2,
+          unattributed_candidates: 0,
+        },
+      },
+    );
+
+    const result = run(["--json"], { census });
+
     expect(result.status).toBe(2);
-    expect(result.stderr).toContain("cannot prove distinct sessions");
+    expect(result.stderr).toContain("session minimum exceeds");
     expect(result.stdout).not.toContain("never_fired");
+  });
+
+  it("validates impossible canonical rows outside the selected plugin", () => {
+    const census = makeCensus(
+      [
+        {
+          skill_name: "engineering-practices:code-law",
+          source: "codex",
+          host: "control",
+          invocations: 1,
+          sessions: 1,
+        },
+        {
+          skill_name: "engineering-practices:code-law",
+          source: "grok",
+          host: "edge",
+          invocations: 1,
+          sessions: 1,
+        },
+      ],
+      {
+        considered_sessions: 1,
+        control: {
+          considered_sessions: 1,
+          attributed_invocations: 2,
+          unattributed_candidates: 0,
+        },
+      },
+    );
+
+    const result = run(["--plugin", "agent-workflows", "--json"], { census });
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain("session minimum exceeds");
+    expect(result.stdout).not.toContain("never_fired");
+  });
+
+  it("renders uncertain session bounds in text output", () => {
+    const census = makeCensus(
+      [
+        {
+          skill_name: "engineering-practices:code-law",
+          source: "codex",
+          host: "control",
+          invocations: 1,
+          sessions: 1,
+        },
+        {
+          skill_name: "code-law",
+          source: "codex",
+          host: "control",
+          invocations: 1,
+          sessions: 1,
+        },
+      ],
+      {
+        considered_sessions: 10,
+        control: {
+          considered_sessions: 10,
+          attributed_invocations: 2,
+          unattributed_candidates: 0,
+        },
+      },
+    );
+
+    const result = run([], { census });
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toMatch(/engineering-practices:code-law\s+2\s+1-2/);
   });
 
   it.each([
