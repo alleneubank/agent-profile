@@ -70,13 +70,16 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
   all-time control MUST contain both sessions and attributed invocations. Every
   invocation row MUST contain at least one distinct session and MUST fit inside
   the considered-session population. If multiple reported names canonicalize
-  to one skill within the same source and host, the wrapper MUST fail because
-  the aggregate output cannot prove a distinct-session union.
+  to one skill within the same source and host, invocation counts MUST aggregate
+  exactly. The wrapper MUST emit an exact distinct-session count only when the
+  union bounds collapse; otherwise it MUST emit explicit minimum/maximum bounds
+  and MUST NOT claim an exact count.
 - REQ-CENSUS-006 — **Report**: JSON preserves `window`, `control_total`,
   `fired`, and `never_fired`; replaces transcript metadata with Recall's
   structured `coverage`; and adds aggregated `unmatched` diagnostics. Fired
-  rows aggregate invocation and distinct-session counts across Recall's
-  source/host rows.
+  rows aggregate invocation counts across Recall's source/host rows. `sessions`
+  is an integer when the distinct-session union is provable; otherwise it is
+  `null` and `session_bounds` carries inclusive `minimum` and `maximum` values.
 - REQ-CENSUS-007 — **Decision boundary**: this census declares no skill dead
   and performs no archival, rename, catalog, or plugin-version mutation.
   `agent-workflows:afk` remains public and `agent-workflows:writing-plans`

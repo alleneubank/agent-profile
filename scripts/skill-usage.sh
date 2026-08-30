@@ -311,13 +311,26 @@ for row in normalized_rows:
         unmatched_rows.append(row)
         continue
     group = (canonical_name, row["source"], row["host"])
-    if group in canonical_groups:
-        fail(
-            f"multiple Recall rows canonicalize to {canonical_name!r} for "
-            f"{row['source']} on {row['host']}; cannot prove distinct sessions"
+    canonical_groups.setdefault(group, []).append(row)
+
+for (canonical_name, source, host), group_rows in sorted(canonical_groups.items()):
+    session_minimum = max(row["sessions"] for row in group_rows)
+    session_maximum = min(
+        sum(row["sessions"] for row in group_rows),
+        window_population["considered_sessions"],
+    )
+    canonical_rows.append(
+        (
+            canonical_name,
+            {
+                "source": source,
+                "host": host,
+                "invocations": sum(row["invocations"] for row in group_rows),
+                "session_minimum": session_minimum,
+                "session_maximum": session_maximum,
+            },
         )
-    canonical_groups[group] = reported_name
-    canonical_rows.append((canonical_name, row))
+    )
 
 selected_declared = declared
 if plugin_filter:
@@ -329,20 +342,42 @@ if plugin_filter:
 
 fired_totals = {}
 for skill, row in canonical_rows:
+    aggregate = fired_totals.setdefault(
+        skill,
+        {"invocations": 0, "session_minimum": 0, "session_maximum": 0},
+    )
+    aggregate["invocations"] += row["invocations"]
+    aggregate["session_minimum"] += row["session_minimum"]
+    aggregate["session_maximum"] += row["session_maximum"]
+
+fired = []
+for skill, totals in fired_totals.items():
+    if totals["session_minimum"] > window_population["considered_sessions"]:
+        fail(
+            f"canonical skill {skill!r} session minimum exceeds the "
+            "considered-session population"
+        )
+    totals["session_maximum"] = min(
+        totals["session_maximum"],
+        window_population["considered_sessions"],
+    )
     if skill not in selected_declared:
         continue
-    aggregate = fired_totals.setdefault(skill, {"invocations": 0, "sessions": 0})
-    aggregate["invocations"] += row["invocations"]
-    aggregate["sessions"] += row["sessions"]
-
-fired = [
-    {
+    fired_row = {
         "skill": skill,
         "invocations": totals["invocations"],
-        "sessions": totals["sessions"],
+        "sessions": (
+            totals["session_minimum"]
+            if totals["session_minimum"] == totals["session_maximum"]
+            else None
+        ),
     }
-    for skill, totals in fired_totals.items()
-]
+    if fired_row["sessions"] is None:
+        fired_row["session_bounds"] = {
+            "minimum": totals["session_minimum"],
+            "maximum": totals["session_maximum"],
+        }
+    fired.append(fired_row)
 fired.sort(key=lambda row: (-row["invocations"], row["skill"]))
 never_fired = sorted(selected_declared - set(fired_totals))
 
@@ -399,9 +434,17 @@ if fired:
     width = max(len(row["skill"]) for row in fired)
     print(f"{'skill'.ljust(width)}  invocations  sessions")
     for row in fired:
+        session_label = (
+            str(row["sessions"])
+            if row["sessions"] is not None
+            else (
+                f"{row['session_bounds']['minimum']}-"
+                f"{row['session_bounds']['maximum']}"
+            )
+        )
         print(
             f"{row['skill'].ljust(width)}  {row['invocations']:>11d}  "
-            f"{row['sessions']:>8d}"
+            f"{session_label:>8s}"
         )
 else:
     print("(no catalog invocations in window)")
