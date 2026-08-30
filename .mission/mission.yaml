@@ -14,7 +14,8 @@ rubric:
   - id: CENSUS-003
     criterion: Agent-profile derives catalog coverage from Recall rather than parsing one harness directly.
     floor: Wrapper tests prove catalog canonicalization, ambiguity rejection, unmatched diagnostics, option forwarding, control-population checks, and Recall failure propagation.
-    status: open
+    status: met
+    evidence: "https://github.com/alleneubank/agent-profile/commit/f6010d0374f7398651194e999a1de3415ded329c (npm run check: 48 passed; ./scripts/validate.sh: passed)"
   - id: CENSUS-004
     criterion: The released census runs successfully on the complete configured fleet.
     floor: A released Recall version with the fleet-scale census bound is healthy without version drift on every configured host, and all-time plus recent-window censuses report every expected host and source.
