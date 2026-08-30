@@ -1,4 +1,4 @@
-# SPEC — pi package support for agent-profile
+# SPEC — agent-profile runtime and maintenance contracts
 
 `missionctl` is a separately versioned PATH dependency. This repository owns
 the shared doctrine, not the reducer, executable, or lifecycle adapter.
@@ -44,6 +44,65 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
 3. Clean-host E2E: skills load, the fingerprint hook fires, no `extension_error` events (evidence in REQ-PI-007).
 4. Claude/Codex parity gate still green after all changes (proof of invariant 3).
 
+## Cross-harness skill usage census
+
+### Requirements
+
+- REQ-CENSUS-001 — **Recall ownership**: `scripts/skill-usage.sh` MUST obtain
+  usage from `recall stats skills --json`; it MUST NOT parse transcripts or
+  accept `--root`. Missing Recall, a failed Recall command, malformed output,
+  or incomplete coverage MUST exit nonzero before emitting `never_fired`.
+- REQ-CENSUS-002 — **Options**: the wrapper preserves `--since`, `--plugin`,
+  and `--json`; adds repeatable `--source`, `--local`, and `--fleet-config`;
+  and forwards every Recall-owned option without forwarding `--plugin`.
+- REQ-CENSUS-003 — **Catalog**: declared skills are discovered from the current
+  `plugins/*/skills/*/SKILL.md` catalog and represented as
+  `<plugin>:<skill>`. `--plugin` limits only the declared report population.
+- REQ-CENSUS-004 — **Canonicalization**: an exact declared
+  `<plugin>:<skill>` name is accepted. A bare name maps only when exactly one
+  skill in the complete catalog has that suffix. Any ambiguous bare name MUST
+  fail before computing `never_fired`; unrelated names remain unmatched
+  diagnostics and MUST NOT count as catalog coverage.
+- REQ-CENSUS-005 — **Coverage**: local mode requires one complete local
+  endpoint; default mode requires complete local-plus-fleet coverage. Expected
+  and successful hosts MUST match, covered sources MUST equal the request (all
+  five by default), population counters MUST be internally consistent, and the
+  all-time control MUST contain both sessions and attributed invocations. Every
+  invocation row MUST contain at least one distinct session and MUST fit inside
+  the considered-session population. If multiple reported names canonicalize
+  to one skill within the same source and host, the wrapper MUST fail because
+  the aggregate output cannot prove a distinct-session union.
+- REQ-CENSUS-006 — **Report**: JSON preserves `window`, `control_total`,
+  `fired`, and `never_fired`; replaces transcript metadata with Recall's
+  structured `coverage`; and adds aggregated `unmatched` diagnostics. Fired
+  rows aggregate invocation and distinct-session counts across Recall's
+  source/host rows.
+- REQ-CENSUS-007 — **Decision boundary**: this census declares no skill dead
+  and performs no archival, rename, catalog, or plugin-version mutation.
+  `agent-workflows:afk` remains public and `agent-workflows:writing-plans`
+  remains only a candidate pending complete-fleet evidence.
+- REQ-CENSUS-008 — **Verification**: tests use a fake Recall executable and
+  cover exact/bare canonicalization, ambiguity, unmatched names, filters and
+  option forwarding, missing/failed Recall, malformed or incomplete coverage,
+  and empty control. `npm run check` and `./scripts/validate.sh` are release
+  gates.
+
+### Invariants
+
+- No incomplete or ambiguous result can produce a `never_fired` list.
+- Recall remains the only owner of transcript formats and harness attribution.
+- Unmatched Recall names are visible without reducing the declared catalog's
+  never-fired population.
+
+### Acceptance
+
+1. Fake-Recall wrapper tests prove REQ-CENSUS-001..006 and fail closed on every
+   incomplete-coverage class.
+2. `npm run check` and `./scripts/validate.sh` pass without changing either
+   plugin's `3.0.0` version.
+3. A real all-time and recent-window query succeeds only after every configured
+   host and all five sources report complete coverage.
+
 ## Decisions
 
 Dated entries; provisional statuses ratify only with human confirmation at the PR review gate. D1 ratified in-session by the human.
@@ -56,6 +115,7 @@ Dated entries; provisional statuses ratify only with human confirmation at the P
 - D6 2026-08-11 — **Dotfiles `pi/settings.json` skills wiring retires** in favor of the pi package (overlap double-loads the same skills; pi first-wins dedups with warnings). Pending work — migrated to the continuation charter in the recall repo. **provisional**
 - D7 2026-08-28 — **Missionctl owns its lifecycle adapter.** Its hooks-only plugin registers a single `SessionStart` hook that injects the bounded loop context; compaction is an agent-driven `missionctl compact` transition, not a hook. Pi still receives the portable mission-command skill. **ratified (human)** (hook set narrowed 2026-08-29 with the LOOP-first missionctl redesign — provisional (driver))
 - D8 2026-08-28 — **Agent-profile does not vendor or register missionctl.** Dotfiles installs the independently versioned executable through mise and the lifecycle adapter through missionctl's marketplace. **ratified (human)**
+- D9 2026-08-30 — **Skill usage is Recall-owned and fail-closed across the complete fleet.** The wrapper owns only current-catalog canonicalization and presentation; no skill is archived in this campaign. `afk` remains public and `writing-plans` remains a candidate only. **ratified (human)**
 
 Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into this SPEC + README + git history (dissolve-docs, 2026-08-11).
 - 2026-08-29 — SPEC.md D7 is amended in place to the single SessionStart hook instead of adding a superseding decision, because the compaction hooks never shipped. **provisional (driver)**
