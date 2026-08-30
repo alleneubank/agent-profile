@@ -123,3 +123,5 @@ Dated entries; provisional statuses ratify only with human confirmation at the P
 Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into this SPEC + README + git history (dissolve-docs, 2026-08-11).
 - 2026-08-29 — SPEC.md D7 is amended in place to the single SessionStart hook instead of adding a superseding decision, because the compaction hooks never shipped. **provisional (driver)**
 - 2026-08-29 — The stack diagram lists MISSION last as optional rather than removing it, so cross-campaign outcomes keep a named home. **provisional (driver)**
+- 2026-08-30 — Keep afk public and make no archival or renaming changes in this campaign. **ratified (human)**
+- 2026-08-30 — When exact and bare aliases overlap within one host/source, preserve exact invocation totals and report honest distinct-session union bounds unless the population proves an exact union. **provisional (driver)**
