@@ -1,4 +1,4 @@
-# Window and Webview APIs
+# Electrobun Window and Webview APIs
 
 ## Contents
 - BrowserWindow constructor and common methods

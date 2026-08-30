@@ -1,4 +1,4 @@
-# Build Config Reference
+# Electrobun Build Config Reference
 
 ## Contents
 - electrobun.config.ts baseline

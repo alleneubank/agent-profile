@@ -1,8 +1,3 @@
----
-name: electrobun-best-practices
-description: Use when building or maintaining Electrobun desktop apps in TypeScript, including electrobun.config.ts, electrobun/bun or electrobun/view imports, BrowserWindow/BrowserView usage, updater flows, and distribution artifacts.
----
-
 # Electrobun Best Practices
 
 Electrobun builds cross-platform desktop apps with TypeScript and Bun. This skill gives safe defaults, typed RPC patterns, and operational guidance for build/update/distribution.
@@ -198,6 +193,6 @@ Important caveat:
 
 ## Reference Files
 
-- Build config, artifacts, and hooks: [reference/build-config.md](reference/build-config.md)
-- BrowserWindow, BrowserView, and webview tag APIs: [reference/window-and-webview.md](reference/window-and-webview.md)
-- Menus, tray, events, updater, utils/session APIs: [reference/platform-apis.md](reference/platform-apis.md)
+- Build config, artifacts, and hooks: [build-config.md](build-config.md)
+- BrowserWindow, BrowserView, and webview tag APIs: [window-and-webview.md](window-and-webview.md)
+- Menus, tray, events, updater, utils/session APIs: [platform-apis.md](platform-apis.md)

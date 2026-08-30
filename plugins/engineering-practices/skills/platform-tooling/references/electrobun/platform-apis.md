@@ -1,4 +1,4 @@
-# Platform APIs
+# Electrobun Platform APIs
 
 ## Contents
 - Application and context menus

@@ -1,7 +1,12 @@
 ---
 name: spec-best-practices
-description: Use when creating, reviewing, or updating SPEC.md files or entering the ADF SPEC gate.
+description: Use when creating, reviewing, updating, interviewing for, completing, or finding gaps in SPEC.md files, or entering the ADF SPEC gate.
 ---
+
+## Modes
+
+- Interview, complete, or find gaps in a `SPEC.md` → read the [interview workflow](references/interview.md) and apply it alongside the rules below.
+- Create, review, or update a `SPEC.md` → use the rules below directly.
 
 ## Naming
 

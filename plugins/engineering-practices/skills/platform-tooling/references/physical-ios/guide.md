@@ -1,15 +1,10 @@
----
-name: ios-device-toolkit
-description: Use when interacting with USB-attached iOS devices via pymobiledevice3 — screenshots, syslog, crash reports, app install/launch/pull, file transfer, sysmon perf, TCP port forwarding, WebInspector/CDP, and device diagnostics.
----
-
 # iOS Device Toolkit
 
-Drive a physical iOS device over USB with `pymobiledevice3`. This skill covers the high-value workflows; deep reference per area is in `references/`.
+Drive a physical iOS device over USB with `pymobiledevice3`. This guide covers the high-value workflows; deeper references live alongside it.
 
-- Capture, logs, crashes → `references/capture.md`
-- Apps, app sandbox files, AFC media, debugserver → `references/apps-files.md`
-- Device info, perf, springboard, webinspector, tunneling → `references/diagnostics-perf.md`
+- Capture, logs, crashes → [capture.md](capture.md)
+- Apps, app sandbox files, AFC media, debugserver → [apps-files.md](apps-files.md)
+- Device info, perf, springboard, webinspector, tunneling → [diagnostics-perf.md](diagnostics-perf.md)
 
 ## Install
 

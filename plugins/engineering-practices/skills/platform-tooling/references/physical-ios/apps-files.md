@@ -1,4 +1,4 @@
-# Apps and Files
+# Physical iOS Apps and Files
 
 App lifecycle (list, install, launch, kill), app sandbox file I/O, AFC media access, and debugserver. Most app-lifecycle operations and the app-sandbox AFC require a tunneld session on iOS 17+.
 

@@ -1,4 +1,4 @@
-# Diagnostics, Performance, and Networking
+# Physical iOS Diagnostics, Performance, and Networking
 
 Reference for device introspection (lockdown, diagnostics, mounter), live performance metrics (sysmon, processes, energy), SpringBoard control, WebInspector/CDP, and port forwarding.
 

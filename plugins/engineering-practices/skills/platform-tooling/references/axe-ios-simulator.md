@@ -1,8 +1,3 @@
----
-name: axe-ios-simulator
-description: Use when automating iOS Simulator interactions, capturing screenshots/video, or inspecting accessibility via AXe CLI.
----
-
 # AXe iOS Simulator Automation
 
 AXe is a single-binary CLI for iOS Simulator automation via Apple's Accessibility APIs and HID.

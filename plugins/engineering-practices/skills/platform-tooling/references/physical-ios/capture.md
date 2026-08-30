@@ -1,6 +1,6 @@
-# Capture: screenshots, screen content, logs, crashes, traffic
+# Physical iOS Capture: Screenshots, Screen Content, Logs, Crashes, Traffic
 
-Reference for the read-only capture surface of `pymobiledevice3`. See `SKILL.md` for prerequisites (Developer Mode + tunneld for iOS 17+).
+Reference for the read-only capture surface of `pymobiledevice3`. See [guide.md](guide.md) for prerequisites (Developer Mode + tunneld for iOS 17+).
 
 ## Screenshots
 
