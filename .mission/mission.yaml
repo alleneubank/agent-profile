@@ -1,0 +1,26 @@
+mission: 1
+id: cross-harness-skill-census
+title: Cross-harness skill census before further archival
+outcome: Every declared agent-profile skill has trustworthy all-time and recent-window usage evidence across every configured harness and fleet host before another archival decision is made.
+rubric:
+  - id: CENSUS-001
+    criterion: Recall attributes skill invocations for Claude Code, Codex, Pi Agent, Grok, and Kimi Code.
+    floor: Parser, historical-fallback, analytics, CLI, RPC, and five-source tests pass with negative authoring and pseudo-call cases.
+    status: open
+  - id: CENSUS-002
+    criterion: Skill census coverage fails closed across the configured fleet.
+    floor: Missing inventory, unreachable hosts, unsupported remote CLIs, failed queries, and incomplete source or host coverage exit nonzero without a never-fired result.
+    status: open
+  - id: CENSUS-003
+    criterion: Agent-profile derives catalog coverage from Recall rather than parsing one harness directly.
+    floor: Wrapper tests prove catalog canonicalization, ambiguity rejection, unmatched diagnostics, option forwarding, control-population checks, and Recall failure propagation.
+    status: open
+  - id: CENSUS-004
+    criterion: The released census runs successfully on the complete configured fleet.
+    floor: A released Recall version with the fleet-scale census bound is healthy without version drift on every configured host, and all-time plus recent-window censuses report every expected host and source.
+    status: open
+boundary:
+  - publish
+  - merge-tracked-ref
+  - release-tag
+  - fleet-install
