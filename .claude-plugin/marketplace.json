@@ -10,7 +10,7 @@
       "name": "engineering-practices",
       "source": "./plugins/engineering-practices",
       "description": "Language, tooling, and delivery-practice skills for agentic coding.",
-      "version": "2.0.0",
+      "version": "3.0.0",
       "author": {
         "name": "Allen Eubank",
         "email": "bigboss@metalrodeo.xyz"
@@ -22,7 +22,7 @@
       "name": "agent-workflows",
       "source": "./plugins/agent-workflows",
       "description": "Reusable planning, handoff, verification, and workflow skills for agents.",
-      "version": "2.8.0",
+      "version": "3.0.0",
       "author": {
         "name": "Allen Eubank",
         "email": "bigboss@metalrodeo.xyz"
