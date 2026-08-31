@@ -93,7 +93,9 @@ RECALL_ARGS=(stats skills --json)
 if [[ -n "$SINCE" ]]; then
   RECALL_ARGS+=(--since "$SINCE")
 fi
-for source in "${SOURCES[@]}"; do
+# ${arr[@]+...} guard: macOS ships bash 3.2, where "${arr[@]}" on an empty
+# array trips `set -u` (fixed upstream in bash 4.4).
+for source in ${SOURCES[@]+"${SOURCES[@]}"}; do
   RECALL_ARGS+=(--source "$source")
 done
 if [[ "$LOCAL" == "true" ]]; then
@@ -125,7 +127,7 @@ if [[ $RECALL_STATUS -ne 0 ]]; then
   exit 2
 fi
 
-python3 - "$ROOT" "$PAYLOAD_FILE" "$SINCE" "$PLUGIN" "$FORMAT" "$LOCAL" "${SOURCES[@]}" <<'PY'
+python3 - "$ROOT" "$PAYLOAD_FILE" "$SINCE" "$PLUGIN" "$FORMAT" "$LOCAL" ${SOURCES[@]+"${SOURCES[@]}"} <<'PY'
 import json
 import sys
 from pathlib import Path
