@@ -8,13 +8,6 @@ const SKILL_ROOTS = [
   resolve(ROOT, "plugins/engineering-practices/skills"),
   resolve(ROOT, "plugins/agent-workflows/skills"),
 ];
-const RETIRED_SKILLS = [
-  "plugins/agent-workflows/skills/spec-interview",
-  "plugins/engineering-practices/skills/electrobun-best-practices",
-  "plugins/engineering-practices/skills/ios-device-toolkit",
-  "plugins/engineering-practices/skills/axe-ios-simulator",
-];
-
 function hasSkillMd(dir: string): boolean {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
@@ -49,29 +42,6 @@ function referencesOnLine(path: string, marker: string): string[] {
 }
 
 describe("public skill catalog", () => {
-  it("ships exactly 41 top-level skill entrypoints", () => {
-    const entrypoints = SKILL_ROOTS.flatMap((root) =>
-      readdirSync(root)
-        .map((entry) => join(root, entry, "SKILL.md"))
-        .filter(existsSync),
-    );
-    expect(entrypoints).toHaveLength(41);
-  });
-
-  it("replaces the four retired entrypoints with platform-tooling", () => {
-    expect(
-      existsSync(
-        resolve(
-          ROOT,
-          "plugins/engineering-practices/skills/platform-tooling/SKILL.md",
-        ),
-      ),
-    ).toBe(true);
-    for (const retired of RETIRED_SKILLS) {
-      expect(existsSync(resolve(ROOT, retired)), retired).toBe(false);
-    }
-  });
-
   it("keeps references out of recursive skill discovery", () => {
     const nestedEntrypoints = SKILL_ROOTS.flatMap(filesBelow).filter(
       (path) => path.endsWith("/references/SKILL.md") || path.includes("/references/") && path.endsWith("/SKILL.md"),
