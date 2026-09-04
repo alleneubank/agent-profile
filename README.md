@@ -161,7 +161,21 @@ installations manage the executable through mise and install the hooks-only
 plugin from `github:alleneubank/missionctl`.
 
 The old `codex-reviewer` and `ralph-reviewed` Claude hook plugins are retired.
-Use modern `rl` skills and commands for review gates and autonomous loops.
+For an operable application or system, use the `bugbash` skill as the default
+behavior-first readiness gate: exercise the built surface through realistic
+user or operator tasks and capture reproducible findings. Use `rl` review or
+another bounded specialist review when explicitly requested, for the ADF's
+high-risk classes unless the human records a PLAN waiver, or when the QA design
+names another non-executable risk such as code comprehensibility. Run that
+review before the final bug bash so its fixes do not stale the experiential
+evidence.
+
+When this repository is also the installed global profile, Codex would normally
+discover the same `AGENTS.md` once globally and once at the project root.
+`AGENTS.override.md` keeps the project layer small and conditionally points back
+to the canonical file for contributors who have not installed the profile. This
+is a Codex self-hosting optimization; it neither controls nor claims
+deduplication for Claude or Pi instruction loading.
 
 ## Releasing
 

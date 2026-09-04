@@ -108,7 +108,7 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
 
 ## Decisions
 
-Dated entries; provisional statuses ratify only with human confirmation at the PR review gate. D1 ratified in-session by the human.
+Dated entries; provisional statuses ratify only with human confirmation at the publish boundary. D1 ratified in-session by the human.
 
 - D1 2026-08-11 — **Direction: fleet-as-pi-packages, not an adapter.** Why: pi packages ARE pi's plugin system; a claude/codex adapter would duplicate install/enable/dedup/state/trust that `pi install` + `pi config` already own. **ratified (human)**
 - D2 2026-08-11 — **Single source of truth for hook policy:** the extension execs the canonical shell scripts (same stdin/JSON contract), never an inline duplicate. Why: the repo's claude↔codex parity gate would otherwise have a third copy to drift. Enforced by the validate.sh pi gate. **provisional**
@@ -125,3 +125,80 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
 - 2026-08-29 — The stack diagram lists MISSION last as optional rather than removing it, so cross-campaign outcomes keep a named home. **provisional (driver)**
 - 2026-08-30 — Keep afk public and make no archival or renaming changes in this campaign. **ratified (human)**
 - 2026-08-30 — When exact and bare aliases overlap within one host/source, preserve exact invocation totals and report honest distinct-session union bounds unless the population proves an exact union. **provisional (driver)**
+
+## Behavior-first verification profile
+
+### Requirements
+
+- REQ-BUGBASH-001 — **Evidence selection:** `AGENTS.md` starts verification
+  from material user/operator risks and chooses the cheapest faithful evidence.
+  Generic generative code review is not a default delivery gate. Specialized
+  review is bounded to a named risk and severity floor; ADF high-risk classes
+  receive the matching review by default unless the human records a PLAN waiver.
+- REQ-BUGBASH-002 — **Real-use gate:** an operable application or system uses a
+  task-based bug bash when lower-level checks cannot expose its assembled
+  behavior. The charter names the exact artifact and environment, roles, tasks,
+  expected outcomes, evidence, severity floor, budget, and boundaries.
+- REQ-BUGBASH-003 — **Independent terminal:** author-run dogfood is discovery;
+  an experiential terminal uses a fresh, disinterested participant when the
+  path is automatable. A required device, biometric, live secret, or subjective
+  human response remains a Boundary item.
+- REQ-BUGBASH-004 — **Findings and boundedness:** findings are observable and
+  reproducible through the public surface. A run terminates `green`, `findings`,
+  `blocked`, or `budget-exhausted`; skipped tasks and unavailable environments
+  cannot silently pass, and no loop runs "until approval."
+- REQ-BUGBASH-005 — **Workflow coherence:** loop, brief, E2E, eval, planning,
+  and plugin guidance route assembled-behavior verification to `bugbash` while
+  retaining objective harnesses and explicitly selected specialist review.
+- REQ-BUGBASH-006 — **Wiki deltas:** test planning maps risks and public
+  contracts to evidence rather than tests per function; retry outcome does not
+  classify flakes; legitimate production test seams remain allowed; applicable
+  code properties are scoped to their failure modes; post-green refactoring and
+  independently green prefactoring are represented in delivery guidance.
+- REQ-BUGBASH-007 — **Codex self-hosting instructions:** when Codex project
+  override semantics apply, working in this repository does not load the
+  canonical global `AGENTS.md` body twice. The override points contributors
+  without the installed profile back to the canonical file; it makes no
+  fleet-wide deduplication claim for other harnesses.
+- REQ-BUGBASH-008 — **Verification:** the skill catalog validates, fixed
+  engineering and gate-routing scenarios have no material-or-higher gap in a
+  fresh-context run, and `npm run check` plus `./scripts/validate.sh` pass.
+
+### Invariants
+
+- Dogfooding does not replace deterministic correctness, security, migration,
+  or public-contract checks that a more faithful verifier already covers.
+- Static review requested by the user or selected for a named non-executable
+  risk remains supported; only the unconditional generic review loop is removed.
+- No release version, tag, push, PR, merge, or marketplace publication occurs
+  in this change.
+
+### Decisions
+
+- Replace the profile's default reviewer/fix-up terminal with a bounded bug bash
+  focused on the application or system under test. (2026-09-03, ratified by the
+  user's request; corroborated by Recall sessions
+  `9987bea729a9d8bf310d2abbf35ba3ce` and
+  `c92d7097a72be8b1e994391537ce94d3`)
+- Preserve author dogfood as discovery while requiring fresh execution only for
+  an independent experiential terminal. (2026-09-03, provisional)
+- Preserve targeted specialist review for named trust-boundary risks: Recall
+  session `7e2b9709083b760ab88e143f9530d1d8` found a real packet-boundary
+  validation defect. (2026-09-03, provisional)
+- Keep the existing August engineering-practices distillate and amend only the
+  wiki gaps that change decisions; the runtime profile does not copy or depend
+  on the wiki. (2026-09-03, provisional)
+- Defer plugin version bumps and all publication to a separately authorized
+  release action. (2026-09-03, provisional)
+
+### Acceptance
+
+1. `plugins/agent-workflows/skills/bugbash/SKILL.md` validates and produces a
+   task charter plus behavior-evidence findings rather than a static diff review.
+2. No always-loaded instruction requires generic reviewer approval to finish an
+   ordinary operable-surface change.
+3. Engineering-practice scenarios cover risk-driven QA, causal flake diagnosis,
+   legitimate test seams, property applicability, and prefactoring.
+4. Gate-routing scenarios distinguish harness-only, bug-bash, specialist-review,
+   and human-boundary work, including exhausted task budgets.
+5. `npm run check` and `./scripts/validate.sh` pass after the final mutation.

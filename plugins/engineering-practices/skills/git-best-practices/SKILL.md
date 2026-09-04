@@ -156,7 +156,11 @@ Executing any of these merges into a deploy-tracked ref is a publish: restate th
 
 ### Sizing
 
-Pragmatic sizing over arbitrary limits. Each commit tells a clear story regardless of PR size. A PR should be reviewable as a coherent unit — if a reviewer cannot hold the full change in their head, consider splitting.
+Prefer small, focused changes without imposing arbitrary line or file limits.
+When a change cannot be small, it must still tell one coherent story. If existing
+structure fights the feature, separate a behavior-preserving prefactor from the
+behavior change when each can remain independently green and reversible; do not
+split an inherently atomic change into invalid intermediate states.
 
 ### PR Creation
 

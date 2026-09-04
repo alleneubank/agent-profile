@@ -13,14 +13,14 @@
   "interface": {
     "displayName": "Agent Workflows",
     "shortDescription": "Reusable workflow skills for coding agents",
-    "longDescription": "Workflow skills for handoffs, planning, review routing, issue triage, e2e improvement, and safe autonomous execution.",
+    "longDescription": "Workflow skills for handoffs, planning, behavior-first bug bashes, issue triage, e2e improvement, and safe autonomous execution.",
     "developerName": "Allen Eubank",
     "category": "Productivity",
     "capabilities": ["Interactive", "Read", "Write"],
     "defaultPrompt": [
       "Write a self-contained handoff",
       "Plan this work before implementation",
-      "Improve the e2e baseline with a verified loop"
+      "Dogfood this application with a bounded bug bash"
     ]
   }
 }

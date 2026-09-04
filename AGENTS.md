@@ -35,12 +35,13 @@ for a decision the doctrine already answers is a training failure.
 
 Three laws hold across the stack:
 
-- **Independence** — never grade your own work; subjective outcomes need a
-  fresh, disinterested oracle.
+- **Independence** — authors may run objective harnesses and dogfood for
+  discovery, but a terminal experiential or subjective judgment needs a fresh,
+  disinterested executor.
 - **Presence axis** — verification rigor scales *inversely* with the
   human's presence: attended, the human is a live backstop and may opt
-  trivial work out (judged by intent); unattended, the harness is the only
-  backstop and rigor is maximal.
+  trivial work out (judged by intent); unattended, the harness and any
+  automatable real-use gate are the only backstops, so rigor is maximal.
 - **Bounded loops, honest blocks** — every autonomous loop has a budget and
   explicit terminal states; "blocked" is evidence plus a proposed path,
   never a shrug and never the norm.
@@ -65,38 +66,45 @@ the floors pass or the loop reports a bounded, honest block.
 
 ## The verifier
 
-Build or identify the verifier *before* iterating — the TDD gate: the
-failing test is the harness. Discover the project's existing harness first
-(task runner/scripts → repo docs → project defaults → ask) and run it
-before claiming done. How to build one that measures the real goal —
-faithful, cheap, few and broad, realistic, and briefed when it is a review
-— is in `testing-best-practices`.
+Build or identify the verifier *before* iterating. Start from the contract's
+largest risks, then choose the cheapest evidence that can actually expose each
+one. Discover the project's existing harness first (task runner/scripts → repo
+docs → project defaults → ask) and run it before claiming done. For an operable
+application or system, the final pre-boundary gate is a task-based bug bash on
+the assembled surface whenever unit or contract checks cannot expose the real
+risk. Generic static review is not a default gate. The high-risk classes named
+by the ADF receive a matching, bounded specialist-review gate unless the human
+waives it in PLAN with a faithful alternative; other work adds one only when the
+QA design names code comprehension, design, or another property execution cannot
+decide. Every specialist review names one risk, a severity floor, and a round
+budget; fix-up confirms its findings instead of reopening the whole diff.
+Mechanics live in `testing-best-practices` and `bugbash`.
 
-- **Independent** — objective floors run in the harness; subjective
-  dimensions go to the brief's oracle. Self-review is never reported as
-  independent, and the driver never approves its own work.
-  An oracle is **fresh-context** (has not seen the reasoning that produced
-  the work — a subagent forked from the driver's own context is disqualified
-  by construction), **disinterested** (not the author), **briefed** (carries
-  the contract and the declared deferrals, so it grades against the law and
-  not its own taste), and **severity-scaled** (findings on a named scale, so
-  the terminal is a floor rather than approval). Which oracle is an interior
-  decision, and the cheapest sufficient one wins: the harness alone where the
-  dimension is objective, then a fresh subagent in-session, then a different
-  model where stakes are high or where correlated blind spots are the risk —
-  the one thing a same-model reviewer cannot catch.
+- **Independent** — objective floors run in the harness. Experiential floors run
+  as user or operator tasks against the built surface. Author-run dogfood is
+  useful discovery, but an independent terminal uses a **fresh-context**
+  participant (one who has not seen the implementation reasoning), is
+  **disinterested** (not the author), **task-briefed** (given the canonical
+  `bugbash` charter and declared deferrals), and is
+  **severity-scaled** (a named blocking floor, not an approval mood). A fork of
+  the author's context is not fresh. The cheapest sufficient oracle wins:
+  deterministic harness for objective contracts, fresh-participant bug bash for
+  assembled behavior, and specialized review for an ADF high-risk class or
+  another named non-executable risk. For high-stakes specialist review, use a
+  different frontier model when correlated blind spots are material.
 - **Fail-closed** — silently passing without actually checking manufactures
-  false confidence; an unavailable, broken, or bypassed oracle means
-  `blocked`, not `done`.
-- A finding the harness should have caught earns a new floor, not just a
-  patch.
+  false confidence; an unavailable, broken, or bypassed required verifier means
+  `blocked`, not `done`. Static review is not a substitute for an unavailable
+  real-use gate.
+- A behavior finding the harness should have caught earns a new floor, not just
+  a patch.
 - Integrity: tests verify correctness — they do not define the solution.
   Fix root causes; never weaken assertions or game a test. A test that
   mirrors the implementation's call sequence grades nothing — it reddens on
   refactors while passing defects; assert observable behavior instead.
   Labeling a failure "pre-existing"/"unrelated" or deferring a discovered
-  bug requires cited evidence. A fix for a review finding still owes an
-  observed red.
+  bug requires cited evidence. A behavior fix owes a reproducer observed red
+  before it is made green.
 - Done claims carry evidence: name the verifier that ran and cite its
   output. An authored-but-unexecuted verifier is "authored, NOT run".
 
@@ -133,8 +141,8 @@ load-bearing ambiguity climbs the ladder.
   (blockers are usually located facts) → check Decisions and the doctrine →
   consult an independent frontier model (`rl consult`) carrying evidence
   and candidates — consults inform, the driver decides → decide. Reversible
-  interior calls are made, logged as dated provisional Decisions, checked
-  by the review gate, ratified at the boundary.
+  interior calls are made, logged as dated provisional Decisions, exercised by
+  the declared verifier where applicable, and ratified at the boundary.
   Attended, an interactive question is answered once and written into
   Decisions. Unattended, never freeze on one question: accumulate and
   terminate `blocked: needs N decisions` with a numbered, evidenced batch.
@@ -144,11 +152,12 @@ load-bearing ambiguity climbs the ladder.
   campaigns; a terminal loop closes through `missionctl close` — decisions
   routed to SPEC/BRIEF, rubric evidence cited, loop deleted — and a new
   attempt starts fresh. Git is the archive.
-- **Unattended terminals are interior-verifiable.** Severity-floor review
-  semantics — approve unless findings at or above a floor named in the
-  reviewer's own severity scale; never "until approval" from a generative
-  oracle; never a terminal conditioned on a device or synchronous human;
-  always paired with a round budget.
+- **Unattended terminals are interior-verifiable.** A required bug bash names
+  its tasks, environment, severity floor, and time or task budget. It terminates
+  `green`, `findings`, `blocked`, or `budget-exhausted`; never "until approval"
+  from a generative critic. A device or synchronous human that automation cannot
+  faithfully replace stays at the Boundary rather than becoming a fake interior
+  terminal.
 - **Publish is the human's, per-artifact and per-ref.** Restate the
   concrete artifacts before executing any publish; approval covers only the
   named artifact — a follow-up resets the boundary. A request that itself
@@ -168,20 +177,29 @@ load-bearing ambiguity climbs the ladder.
 ## Agentic delivery flow
 
 The ADF is the macro loop's phases. Agent owns MISSION → SPEC → PLAN → TDD → DEV →
-E2E; publish (review-to-merge) is the human's. Fix-shaped work defaults to
-delegation (impl packet → reviewer verdict → fix-up); reserve attended
-driving for live-ops and incidents.
+E2E/BUGBASH; publish (merge or deployment) is the human's. Fix-shaped work
+defaults to delegation (implementation packet → objective verifier → fresh
+bug bash when the surface is operable → fix-up); reserve attended driving for
+live-ops and incidents. Do not insert a generic code-review loop by default.
 
 - Gates: MISSION — intended outcome, what measurable done means, and
   boundaries (a `.mission/mission.yaml` only when the outcome spans
   campaigns or repositories); SPEC — IDs, invariants, non-goals, acceptance (load
   `spec-best-practices`; colocated `SPEC.md`). PLAN — task graph with
-  files/types/tests and risk class; data-plane work gets a resource sketch.
+  files/types/tests, risk class, and a QA design mapping each material risk to
+  its cheapest faithful evidence; data-plane work gets a resource sketch.
   TDD — the new test observed red against the pre-fix tree, output cited.
-  DEV — environment boots healthy. E2E — happy path and failure modes
-  against the live dev environment.
-- High-risk, approval required in PLAN: schema/data migrations,
-  auth/security boundaries, public API contracts, infra/deploy config.
+  DEV — environment boots healthy. E2E/BUGBASH — representative user or
+  operator tasks, important failure modes, and state transitions exercised on
+  the assembled dev surface. Non-operable artifacts use their declared harness.
+- Within a candidate iteration, run objective checks first, any selected
+  specialist review next, then rebuild and run the terminal bug bash on the
+  resulting artifact. A mutation invalidates its downstream evidence.
+- High-risk, approval and a matching bounded specialist review required by
+  default in PLAN: schema/data migrations, auth/security boundaries, public API
+  compatibility or contract changes, infra/deploy config. The human may waive
+  the review only by naming faithful alternative evidence; execution remains
+  required for observable risk.
   Low-risk docs/non-runtime changes may run SPEC → PLAN → DEV.
 - Traceability: every change maps loop target → REQ-* → tests → commit or
   artifact evidence. Deviations record a waiver with rationale.
@@ -194,9 +212,8 @@ simplest, most correct design, refactoring if needed — effort is not a
 factor; a patch that preserves a wrong shape is the expensive option.
 
 The craft law — types, assertions and bounds, purity, errors, refactors,
-naming, comments, scope — and the system properties every surface owes,
-each with the floor that proves it, live in the `code-law` skill. Load it
-before writing code.
+naming, comments, scope — and each system property's applicability and floor
+live in the `code-law` skill. Load it before writing code.
 
 ## Operations
 
@@ -232,7 +249,8 @@ before writing code.
   erroring; TODOs carry failing stubs; no values hard-coded to satisfy
   tests; a unit with side effects carries its observability surface —
   instrumentation retrofitted in a later pass is the defect; touched-phase
-  gates passed or a waiver recorded.
+  gates passed or a waiver recorded; an operable surface has current bug-bash
+  evidence or an explicit, evidenced reason the gate does not apply.
 
 ## Skills
 

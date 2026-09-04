@@ -47,9 +47,14 @@ docs → project defaults), each with a `run` command and a `green` meaning;
 boundaries from repo instructions plus the profile's Boundary law; known
 pre-existing failures only with cited evidence — never as a place to park
 new breakage. A wrong target compounds every iteration; `missionctl check`
-refuses unresolved ones. Set a numeric `iteration_budget` at authoring.
-Declare review capacity in a repository-specific measure; never invent a
-global line, issue-count, or work-in-progress limit.
+refuses unresolved ones. Set a numeric `iteration_budget` at authoring. When an
+operable surface needs experiential verification, declare a bug-bash gate with
+its artifact, environment, task or time budget, and severity floor; load the
+`bugbash` skill for its mechanics. The ADF high-risk classes receive a matching,
+bounded specialist-review gate unless the human records a PLAN waiver with
+faithful alternative evidence; other classes add one only for a named risk that
+execution cannot decide. Run objective gates first, selected specialist review
+next, and the terminal bug bash on the resulting artifact last.
 
 ## Iteration protocol
 
@@ -87,7 +92,8 @@ global line, issue-count, or work-in-progress limit.
    sunk-cost bias.
 4. **Decide provisionally** — reversible and interior: make the call, add a
    dated `decisions` entry with `status: provisional` (rationale + consult
-   verdict in State), keep moving. The review gate checks it downstream.
+   verdict in State), keep moving. Exercise the call through the declared
+   verifier or bug bash where it affects observable behavior.
 5. **Accumulate for the human** — irreversible, scope-changing, or Boundary
    items only. Keep working independent items; set `status: blocked` with
    one `blockers` entry per decision, each carrying evidence and a
@@ -95,8 +101,9 @@ global line, issue-count, or work-in-progress limit.
 
 ## Terminal states
 
-- `done` — every gate `green` and the targeted floors have admissible
-  evidence. Stop the loop and write the handoff for the human's boundary
+- `done` — every gate `green`, the targeted floors have admissible evidence,
+  and any required bug-bash gate is `green` against the current artifact. Stop
+  the loop and write the handoff for the human's boundary
   steps. Once the boundary clears, `missionctl close` routes durable
   decisions to SPEC/BRIEF, marks linked mission rubric items with evidence,
   and deletes the loop — a closed campaign's loop left on the branch is a
@@ -120,7 +127,8 @@ global line, issue-count, or work-in-progress limit.
 - A consult treated as approval authority, or run before investigating.
 - A mid-loop interactive question (attended: answer it, then it goes into
   decisions; unattended: a ladder defect).
-- Ratified decisions re-litigated because a reviewer or consult disagreed.
+- Ratified decisions re-litigated because a consult or specialized reviewer
+  disagreed, absent new behavior evidence.
 - A loop living outside git (untracked or harness-private paths) — the
   campaign then cannot move across hosts or harnesses.
 - Successive campaigns appended to one `LOOP.md`, or campaign done treated

@@ -12,19 +12,20 @@ one that measures the real goal.
 - **Faithful** — measures the real goal, not a gameable proxy; a loop
   optimizes its verifier, so an unfaithful one polishes the wrong thing.
 - **Cheap and fast** — seconds-per-look, or the loop starves.
-- **Harness first, briefed reviews** — floors gate the interior; never
-  outsource to the oracle what a floor can decide. Every review carries the
-  contract of what it grades: intended outcome, what to judge now, the
-  invariants, acceptance evidence, and the work explicitly deferred to a
-  later unit. A reviewer not told the change is intermediate will reject it
-  for being intermediate. Declared deferred work is not a finding;
-  regressions in the current unit and violations of its stated contract
-  are.
+- **Risk first, harness before judgment** — list the material product risks and
+  map each to the cheapest evidence that can expose it. Floors gate the
+  interior; never outsource to a person or generative critic what a
+  deterministic check can decide. Use a task-based dogfood or bug bash when the
+  risk lives in assembled behavior. The ADF high-risk classes default to a
+  matching bounded specialist review unless the human records a PLAN waiver
+  with faithful alternative evidence; other changes use one only for a named
+  property execution cannot decide.
 - Few, well-crafted, broad-coverage: build the surface's harness, not the
   task's check — the next feature reuses it for free. Build cheap verifiers
-  freely; propose expensive ones. The harness runs against a deterministic
-  proxy; the live system is the final gate, human-attended — a loop needing
-  live secrets to verify is built at the wrong altitude.
+  freely; propose expensive ones. A deterministic harness proves known
+  contracts; an operable product's assembled surface is the final pre-boundary
+  gate when lower layers cannot expose the risk. A loop needing live secrets to
+  verify is built at the wrong altitude.
 - Realism: integration over mocked units for data flow and permissions; use the
   dependency-fidelity order under Integration / contract tests. Visual/UI floors
   are the change observed on the live surface. Before done: would this survive a
@@ -40,7 +41,10 @@ cannot.
 
 ### Unit tests
 
-Purpose: verify individual functions and invariants in isolation.
+Purpose: verify public behaviors and invariants at a small, precise boundary.
+Do not assume one test per method or one test suite per implementation-detail
+class; test a detail directly only when its complexity or diagnostic precision
+earns the coupling.
 
 - **Data-driven**: use a parameterized table when every row is the same behavior
   with the same setup, action, assertion shape, and failure interpretation.
@@ -63,6 +67,9 @@ Purpose: verify interactions between components and external services.
   server; a mock of an interface you own. Do not invent a third party's fake or
   mocked contract. If no faithful implementation is practical, wrap that API in
   an interface you own and test the wrapper against the real contract.
+- Prefer a shared behavioral contract suite that runs against both the real
+  implementation and its fake. Without conformance evidence, name fake drift as
+  a risk rather than assuming equivalence.
 
 ### E2E tests
 
@@ -115,7 +122,12 @@ it stops being a test and becomes a mirror.
   effect), and then it names the guarantee, not the call.
 - **Never invent signatures, source locations, or line numbers.** Only reference what you have read from the codebase.
 - **No fabricated fixtures.** Derive test data from actual schemas, types, or seed data in the repo.
-- **No test-only hacks in product code.** No `if (process.env.TEST)` branches, no test-specific exports, no test backdoors. A runtime branch added to make a test pass is a defect in the test's setup — fix the seam there (fixtures, factories, explicit construction) instead.
+- **No test-only runtime behavior or backdoors in product code.** A branch such
+  as `if (process.env.TEST)` that changes product behavior is a defect in the
+  test setup. Legitimate production design may include explicit dependency
+  injection, package-scoped seams, stable automation IDs, or an interface with
+  the test as a real consumer; the seam must preserve or improve the production
+  contract rather than weaken it.
 - **Observe red.** A new test fails for the expected reason before the production
   change makes it green; a compile failure counts when it proves the missing
   contract. While refactoring test code, deliberately break the behavior under
@@ -146,7 +158,10 @@ it stops being a test and becomes a mirror.
 
 ### Flake handling
 
-- **Single infrastructure retry** per test run; if it fails twice, it is not flake.
+- Use at most one infrastructure retry as a diagnostic probe, not a verdict. A
+  pass does not prove flake and two failures do not prove determinism; locate the
+  uncontrolled input and decide whether it belongs to product, test, or
+  environment.
 - On retry failure, collect diagnostics: screenshots, network logs, service health, timestamps.
 - Classify the failure (flaky / outdated / bug) before attempting a fix; a classification that waives or defers anything lands as a dated provisional Decision.
 - Never add arbitrary delays or retry loops as a flake "fix."
@@ -165,23 +180,32 @@ it stops being a test and becomes a mirror.
 - **Wait event-driven with a timeout** — watch modes, CI wait commands, background completion notifications.
 - **Never bypass a gate.** `--no-verify` and equivalents are never a shortcut (doctrine law); a gate that is wrong gets fixed, or waived by the human at the boundary — never bypassed in-flight.
 
-## API surface discovery
+## Contract and risk discovery
 
-Before generating test cases:
-- Read the module source to enumerate exports/public functions.
-- Confirm scope from the user request and inspected code context; if ambiguous, state assumptions and proceed conservatively.
-- For each function: input types/constraints, output shape, error modes, invariants.
-- Probe for state dependencies and ordering constraints between functions.
+Before generating checks:
+- Read the SPEC, public surface, and user request to enumerate promised
+  behaviors, invariants, important failure modes, and state transitions.
+- Name the highest-impact ways the change could harm a user or operator,
+  including risks no code-coverage metric can see.
+- Confirm scope from inspected context; state conservative assumptions when
+  ambiguity is not load-bearing.
+- Map each contract or risk to the cheapest faithful mitigation: type or static
+  check, unit/property test, integration contract, E2E flow, task-based
+  dogfood/bug bash, telemetry, or a named specialized review.
+- Use coverage only after designing the checks, as a clue to missed paths; never
+  use a percentage as evidence that the risk is covered.
 
 ## Output format
 
-Use markdown. Produce three sections:
+Use markdown. Produce only the layers the QA design actually needs:
 
-**Test Strategy** -- one bullet per layer (unit/integration/e2e) naming the functions/flows and their coverage type.
+**QA Design** -- table with `Risk or contract | Impact | Evidence | Why this is the cheapest faithful check`.
 
-**Test Matrix** -- table per function: columns `ID | Category | Name | Input | Expected`. Case ID scheme: `{CATEGORY}-{NN}` (HP, BV, ERR, EDGE). Append-only; never renumber.
+**Test Cases** -- for checks that become tests, use `ID | Scope | Scenario | Input/state | Expected`. Case IDs are append-only; do not organize the matrix by function unless the function is itself the public contract.
 
-**Implementation Plan** -- ordered steps: fixtures, unit tests, integration tests, e2e flows, run command.
+**Execution Plan** -- ordered red/green/refactor steps, exact commands, and any
+task-based bug bash or telemetry gate. A layer with no material risk to cover is
+omitted rather than filled ceremonially.
 
 ## CI guidance
 
@@ -198,7 +222,12 @@ Full unit + integration + e2e suite with higher property-based iteration counts.
 ## Workflow
 
 1. Spec or code defines the module behavior (types, constraints, API surface).
-2. This skill produces the test strategy, matrix, and implementation plan.
-3. The driver or a dispatched worker translates the plan to runnable tests, observed red before the implementation lands.
-4. Implementation proceeds to green.
-5. If implementation reveals missing cases, propose them first; append to spec only when explicitly requested.
+2. This skill produces the QA design, selected test cases, and execution plan.
+3. The driver or a dispatched worker translates the plan to runnable tests,
+   observed red before the implementation lands.
+4. Implementation proceeds to green; apply the code-health law, refactor while
+   green, then rerun the affected verifier.
+5. Exercise an operable assembled surface through the declared E2E or bug-bash
+   tasks when the QA design selected that evidence.
+6. If implementation reveals missing cases, propose them first; append to spec
+   only when explicitly requested.
