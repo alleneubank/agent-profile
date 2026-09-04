@@ -1,18 +1,22 @@
 # Engineering-practices doctrine scenarios
 
-Read `plugins/engineering-practices/SPEC.md`, `BRIEF.md`, and only these runtime
-skills:
+Read root `AGENTS.md`, `plugins/engineering-practices/SPEC.md`, `BRIEF.md`, and
+only these runtime skills:
 
 - `skills/testing-best-practices/SKILL.md`
 - `skills/code-law/SKILL.md`
 
-Act as a fresh-context, disinterested engineer completing these tasks. Do not
-perform a line-by-line review of the skill prose. Define a finding scale with at
-least `minor`, `material`, and `critical`. For each scenario, make the decision
-the task requires and cite the controlling passage you actually used. Report a
-finding when the skills are silent, contradictory, or forbid a legitimate
-neighboring behavior. The run is green only when no finding is material or
-critical.
+Act as a fresh-context, disinterested engineer completing these tasks. Define a
+finding scale with at least `minor`, `material`, and `critical`. For each
+scenario, make the decision the task requires and cite the controlling passage
+you actually used. Report a finding when the skills are silent, contradictory,
+or forbid a legitimate neighboring behavior. After the scenarios, make one
+bounded consistency pass limited to duplicated rules in the loaded skills that
+change no decision, generic capability advice that changes no decision, private
+or harness-only runtime dependencies, and contradictions among the loaded
+skills, scenario decisions, and always-loaded verification law. Do not perform
+a general line-by-line or diff review. The run is green only when no finding is
+material or critical.
 
 1. A unit-test planner has four cases spanning a happy path, a boundary, two
    distinct error behaviors, and two independent input dimensions. Decide when a

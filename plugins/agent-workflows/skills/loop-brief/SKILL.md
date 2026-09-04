@@ -50,8 +50,11 @@ new breakage. A wrong target compounds every iteration; `missionctl check`
 refuses unresolved ones. Set a numeric `iteration_budget` at authoring. When an
 operable surface needs experiential verification, declare a bug-bash gate with
 its artifact, environment, task or time budget, and severity floor; load the
-`bugbash` skill for its mechanics. Add a specialized review gate only when the
-PLAN names a risk that execution cannot decide.
+`bugbash` skill for its mechanics. The ADF high-risk classes receive a matching,
+bounded specialist-review gate unless the human records a PLAN waiver with
+faithful alternative evidence; other classes add one only for a named risk that
+execution cannot decide. Run objective gates first, selected specialist review
+next, and the terminal bug bash on the resulting artifact last.
 
 ## Iteration protocol
 
@@ -99,8 +102,8 @@ PLAN names a risk that execution cannot decide.
 ## Terminal states
 
 - `done` — every gate `green`, the targeted floors have admissible evidence,
-  and any required bug-bash tasks ran against the current artifact. Stop the
-  loop and write the handoff for the human's boundary
+  and any required bug-bash gate is `green` against the current artifact. Stop
+  the loop and write the handoff for the human's boundary
   steps. Once the boundary clears, `missionctl close` routes durable
   decisions to SPEC/BRIEF, marks linked mission rubric items with evidence,
   and deletes the loop — a closed campaign's loop left on the branch is a

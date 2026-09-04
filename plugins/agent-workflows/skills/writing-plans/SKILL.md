@@ -93,8 +93,11 @@ Then include:
 - Give each task a risk class; the ADF law defines the high-risk set and its approval requirement.
 - Include a back-of-envelope resource sketch for data-plane work (per-request/per-item hot paths).
 - For an operable surface, keep the bug-bash artifact, environment, task or time
-  budget, and severity floor explicit. Add specialized review only for a named
-  risk that execution cannot decide; do not invent an open-ended review loop.
+  budget, and severity floor explicit. High-risk ADF classes default to a
+  matching bounded specialist review unless the human records a PLAN waiver;
+  other classes add one only for a named risk that execution cannot decide. Put
+  selected review before the terminal bug bash and never invent an open-ended
+  review loop.
 
 ## Execution Handoff
 

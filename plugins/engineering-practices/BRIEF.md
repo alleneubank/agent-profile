@@ -27,19 +27,22 @@ wiki mirror, a list of absolutes, or a harness-specific procedure.
 - Contract fidelity: A fresh-context task runner applies
   `tests/engineering-practices-scenarios.md` and reports no material-or-higher
   finding on its declared severity scale.
-- Parsimony: The scenario run finds no rule that merely restates another rule
-  or teaches generic model capability without changing a named decision.
-- Portability: `./scripts/validate.sh` passes and the task run finds no runtime
-  dependency on `eng-wiki`, a private path, or a harness-only primitive.
-- Coherence: `npm run check` passes and the task run finds no contradiction between
-  the revised skills or with always-loaded law.
+- Parsimony: The scenario runner's bounded consistency pass finds no rule in the
+  loaded skills that merely restates another rule or teaches generic model
+  capability without changing a named decision.
+- Portability: `./scripts/validate.sh` passes and that bounded pass finds no
+  runtime dependency on `eng-wiki`, a private path, or a harness-only primitive.
+- Coherence: `npm run check` passes and that bounded pass finds no contradiction
+  between the revised skills, their scenario decisions, or always-loaded law.
 
 ## Oracle
 
 - **Behavioral:** A fresh-context, disinterested task runner sees only the
   revised skills, fixed scenarios, contract, and declared deferrals, then makes
-  the engineering decisions the scenarios require. The author neither supplies
-  expected answers inline nor grades the result.
+  the engineering decisions the scenarios require. It then performs the one
+  narrowly scoped consistency pass named by the floors—not a general diff
+  review. The author neither supplies expected answers inline nor grades the
+  result.
 - **Mechanical:** `npm run check` and `./scripts/validate.sh` run from the
   repository root after the final mutation.
 

@@ -84,8 +84,9 @@ archive.
 - Mixed-severity bug-bash findings → findings at or above the chartered floor
   block; lower-severity improvements go to follow-up work unless they are
   trivial and remain in scope.
-- Verified findings in-session → fix now; the gate verifies the fix, it
-  does not license it. Unless the handoff says report-only.
+- Verified findings in-session and the request or campaign authorizes fixes →
+  fix now; the gate verifies the fix, it does not license it. Otherwise report
+  the finding without mutating the surface.
 - About to invent a component the spec does not name → stop and re-derive
   from the spec with the human; new apps, services, and abstractions are
   scope changes, not implementation details.
@@ -105,6 +106,8 @@ archive.
 - Bug-bash capacity varies by repository and surface → declare its task or time
   budget and severity floor in the campaign contract; never replace it with a
   global issue count or an open-ended "until approval" loop.
+- Specialist-review capacity is a named risk, severity floor, and round budget;
+  a fix-up confirms reported findings instead of reopening the whole diff.
 - Secret provisioning → scaffold the full structure (items, references,
   wiring); the human injects only the secret material.
 - Agreed plan about to execute → restate the scope as a self-contained

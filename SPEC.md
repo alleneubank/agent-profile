@@ -133,8 +133,8 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
 - REQ-BUGBASH-001 — **Evidence selection:** `AGENTS.md` starts verification
   from material user/operator risks and chooses the cheapest faithful evidence.
   Generic generative code review is not a default delivery gate. Specialized
-  design, security, or contract review remains available when the PLAN names a
-  risk execution cannot decide.
+  review is bounded to a named risk and severity floor; ADF high-risk classes
+  receive the matching review by default unless the human records a PLAN waiver.
 - REQ-BUGBASH-002 — **Real-use gate:** an operable application or system uses a
   task-based bug bash when lower-level checks cannot expose its assembled
   behavior. The charter names the exact artifact and environment, roles, tasks,
@@ -145,8 +145,8 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   human response remains a Boundary item.
 - REQ-BUGBASH-004 — **Findings and boundedness:** findings are observable and
   reproducible through the public surface. A run terminates `green`, `findings`,
-  or `blocked`; skipped tasks and unavailable environments cannot silently pass,
-  and no loop runs "until approval."
+  `blocked`, or `budget-exhausted`; skipped tasks and unavailable environments
+  cannot silently pass, and no loop runs "until approval."
 - REQ-BUGBASH-005 — **Workflow coherence:** loop, brief, E2E, eval, planning,
   and plugin guidance route assembled-behavior verification to `bugbash` while
   retaining objective harnesses and explicitly selected specialist review.
@@ -155,12 +155,14 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   classify flakes; legitimate production test seams remain allowed; applicable
   code properties are scoped to their failure modes; post-green refactoring and
   independently green prefactoring are represented in delivery guidance.
-- REQ-BUGBASH-007 — **Self-hosting instructions:** working in this repository
-  does not load the canonical global `AGENTS.md` body twice. A project override
-  points contributors without the installed profile back to the canonical file.
+- REQ-BUGBASH-007 — **Codex self-hosting instructions:** when Codex project
+  override semantics apply, working in this repository does not load the
+  canonical global `AGENTS.md` body twice. The override points contributors
+  without the installed profile back to the canonical file; it makes no
+  fleet-wide deduplication claim for other harnesses.
 - REQ-BUGBASH-008 — **Verification:** the skill catalog validates, fixed
-  engineering scenarios have no material-or-higher gap in a fresh-context run,
-  and `npm run check` plus `./scripts/validate.sh` pass.
+  engineering and gate-routing scenarios have no material-or-higher gap in a
+  fresh-context run, and `npm run check` plus `./scripts/validate.sh` pass.
 
 ### Invariants
 
@@ -197,4 +199,6 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
    ordinary operable-surface change.
 3. Engineering-practice scenarios cover risk-driven QA, causal flake diagnosis,
    legitimate test seams, property applicability, and prefactoring.
-4. `npm run check` and `./scripts/validate.sh` pass after the final mutation.
+4. Gate-routing scenarios distinguish harness-only, bug-bash, specialist-review,
+   and human-boundary work, including exhausted task budgets.
+5. `npm run check` and `./scripts/validate.sh` pass after the final mutation.

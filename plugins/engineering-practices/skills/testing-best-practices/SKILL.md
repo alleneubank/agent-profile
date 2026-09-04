@@ -16,8 +16,10 @@ one that measures the real goal.
   map each to the cheapest evidence that can expose it. Floors gate the
   interior; never outsource to a person or generative critic what a
   deterministic check can decide. Use a task-based dogfood or bug bash when the
-  risk lives in assembled behavior. Use specialized review only for a named
-  property that execution cannot decide.
+  risk lives in assembled behavior. The ADF high-risk classes default to a
+  matching bounded specialist review unless the human records a PLAN waiver
+  with faithful alternative evidence; other changes use one only for a named
+  property execution cannot decide.
 - Few, well-crafted, broad-coverage: build the surface's harness, not the
   task's check — the next feature reuses it for free. Build cheap verifiers
   freely; propose expensive ones. A deterministic harness proves known

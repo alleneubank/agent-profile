@@ -23,7 +23,7 @@ reproducible:
 - evidence to capture before diagnosis (logs, screenshots, traces, exported
   state, timestamps), with secret-bearing fields excluded;
 - a severity scale with a blocking floor, plus a time or task budget and the
-  terminal states `green`, `findings`, and `blocked`.
+  terminal states `green`, `findings`, `blocked`, and `budget-exhausted`.
 
 Keep the task set small and high-yield. A scripted E2E suite can establish known
 contracts before the bash; it does not replace exploratory use of the assembled
@@ -36,7 +36,11 @@ when a fresh, disinterested participant receives only the charter, build, and
 allowed environment—not the implementation diff, the author's reasoning, or a
 list of suspected bugs. The participant can be another agent when the full user
 path is automatable. A required physical device, biometric, live credential, or
-subjective human reaction stays at the declared Boundary.
+subjective human reaction stays at the declared Boundary. Freshness is a
+capability, not a requirement that every harness provide subagents: when no
+fresh participant can execute the path, keep author dogfood labeled discovery
+and hand the terminal task to the Boundary rather than treating the author as
+independent.
 
 ## Execute through the public surface
 
@@ -73,17 +77,21 @@ reproducer is observed red before the change, the targeted task passes after it,
 and the affected task set is rerun. If a cheap deterministic check could have
 caught the defect, add that regression floor.
 
-Below-floor observations remain concise follow-up notes; they do not keep a
-severity-floor terminal open. If the required build or environment is genuinely
-unavailable, finish `blocked` with the failed preflight evidence and what would
-unblock it. Static review is not a substitute for a bug bash that never ran.
+`green` means every required task ran on the named artifact with no finding at or
+above the blocking floor. `findings` means at least one such finding remains.
+Below-floor observations remain concise follow-up notes and do not keep the gate
+open. If the required build or environment is genuinely unavailable, finish
+`blocked` with the failed preflight evidence and what would unblock it. If the
+budget ends with required tasks unrun, finish `budget-exhausted`, name those
+tasks, and keep the gate non-green. Static review is not a substitute for a bug
+bash that never ran.
 
 ## Report
 
-Lead with `Bug bash: green | findings | blocked`, then name the artifact and
-environment, tasks completed versus chartered, blocking findings, evidence, and
-untested boundaries. A green report claims only the tasks and state transitions
-that actually ran.
+Lead with `Bug bash: green | findings | blocked | budget-exhausted`, then name
+the artifact and environment, tasks completed versus chartered, blocking
+findings, evidence, and untested boundaries. A green report claims only the
+tasks and state transitions that actually ran.
 
 ## Red flags
 

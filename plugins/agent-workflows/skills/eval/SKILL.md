@@ -116,7 +116,8 @@ than diluting the sample.
   evidence in its native system, and did stale evidence stop keeping gates or
   rubric items green?
 - **Attention routing** — could the operator identify `decide`, `bugbash`,
-  `publish`, `watch`, and `recover` work without using activity proxies?
+  specialized `review`, `publish`, `watch`, and `recover` work without using
+  activity proxies?
 - **Evidence allocation** — did the agent spend its verification budget on the
   highest-risk observable behavior, or cycle through generic review findings
   after the harness and product tasks had already answered the material question?
