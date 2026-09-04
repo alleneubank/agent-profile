@@ -19,14 +19,14 @@ wiki mirror, a list of absolutes, or a harness-specific procedure.
   generic capability advice are absent.
 - **Portability** — a skill works from its installed files in every supported
   harness without private paths or unavailable tools.
-- **Coherence** — the two skills agree with `AGENTS.md`, language-specific skills,
+- **Coherence** — the skills agree with `AGENTS.md`, language-specific skills,
   and each other.
 
 ## Floors
 
-- Contract fidelity: A fresh-context task runner applies
-  `tests/engineering-practices-scenarios.md` and reports no material-or-higher
-  finding on its declared severity scale.
+- Contract fidelity: A fresh-context task runner applies both fixed engineering
+  scenario suites and reports no material-or-higher finding on its declared
+  severity scale.
 - Parsimony: The scenario runner's bounded consistency pass finds no rule in the
   loaded skills that merely restates another rule or teaches generic model
   capability without changing a named decision.
@@ -52,7 +52,8 @@ wiki mirror, a list of absolutes, or a harness-specific procedure.
   context.
 - A prose rule whose named legitimate neighboring behavior becomes forbidden.
 - Runtime dependence on the external wiki or a private checkout path.
-- A release mutation or publish action inside this campaign.
+- A release mutation or publish action without explicit authorization naming
+  the artifact and ref.
 - Weakening a floor or removing a failing scenario without a dated waiver
   Decision and replacement.
 
@@ -70,6 +71,12 @@ wiki mirror, a list of absolutes, or a harness-specific procedure.
 - One fresh-context scenario run plus one fix-up rerun is the campaign's
   behavioral-verification budget; no open-ended approval loop. (2026-09-03,
   provisional)
+- Agent operability has one dedicated skill; evidence freshness remains in
+  testing guidance, and the external wiki remains provenance rather than a
+  runtime dependency. (2026-09-03, ratified)
+- Engineering-practices 4.1.0 and agent-workflows 4.1.0 publication plus fleet
+  rollout are authorized for the current agentic-engineering campaign.
+  (2026-09-03, ratified)
 
 ## Boundary — requires the human
 

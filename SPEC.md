@@ -202,3 +202,60 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
 4. Gate-routing scenarios distinguish harness-only, bug-bash, specialist-review,
    and human-boundary work, including exhausted task budgets.
 5. `npm run check` and `./scripts/validate.sh` pass after the final mutation.
+
+## Agentic engineering mechanics
+
+### Requirements
+
+- REQ-AGENTIC-001 — **Agent-operable surfaces:** a focused skill translates the
+  existing deterministic, idempotent, observable, evented, contextual, and safe
+  default laws into CLI/API/control-plane mechanics: inspectable state, stable
+  machine-readable output, explicit targets, bounded waits, and independently
+  verifiable effects.
+- REQ-AGENTIC-002 — **Evidence freshness:** verifier guidance binds evidence to
+  the revision, dirty state, artifact, environment, and task it observed; a
+  mutation invalidates every downstream result it can affect.
+- REQ-AGENTIC-003 — **Destructive boundary:** process cleanup remains interior
+  only for attributed disposable processes and resources. Volume deletion,
+  factory reset, or another data-bearing action is a separately inventoried and
+  explicitly authorized operation; routine examples cannot imply otherwise.
+- REQ-AGENTIC-004 — **Instruction epistemics:** model intuition may nominate a
+  hypothesis, never serve as its evidence. Instruction changes distinguish
+  coverage, compliance, over-strength, and tooling; cite observed behavior and a
+  legitimate neighboring behavior before codification, then use fingerprints
+  and post-rollout sessions to judge the result.
+- REQ-AGENTIC-005 — **Portable verification:** fixed scenarios cover agent
+  operability, stale evidence, destructive cleanup, direct secret requests,
+  instruction activation, and weight-derived hypotheses across harness-neutral
+  primitives. Existing check and validation gates remain green.
+
+### Invariants
+
+- The runtime profile does not depend on the engineering wiki at execution
+  time; the wiki is provenance and synthesis, while this repository carries the
+  smallest operational form.
+- No new always-loaded law duplicates mechanics already owned by a skill.
+- Direct secret values never enter scenario fixtures, transcripts, or docs.
+- The post-v4 TDD-soak decision remains open and is not smuggled into this work.
+
+### Decisions
+
+- Treat the engineering wiki as the explanatory source layer and agent-profile
+  as its compressed, versioned operational derivative. (2026-09-03, ratified by
+  the user's request)
+- Add `agent-operability` as the one new skill; extend `eval`,
+  `writing-skills`, `testing-best-practices`, and `code-law` only with mechanics
+  they already own. (2026-09-03, ratified by the user's request)
+- Correct the `host-tidy` and OrbStack destructive examples in this release;
+  defer the TDD policy choice until post-release soak evidence exists.
+  (2026-09-03, ratified by the user)
+
+### Acceptance
+
+1. `tests/agentic-engineering-scenarios.md` receives a fresh-context run with no
+   material-or-higher finding.
+2. All skill descriptions use trigger-shaped `Use when...` language, while
+   validated provenance metadata remains legal.
+3. Ordinary cleanup examples contain no implicit volume deletion or factory
+   reset path.
+4. `npm run check` and `./scripts/validate.sh` pass after the final mutation.

@@ -47,6 +47,11 @@ if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name):
     raise SystemExit(f"invalid skill name in {skill_md}: {name!r}")
 if not description:
     raise SystemExit(f"missing skill description in {skill_md}")
+if not description.startswith("Use when"):
+    raise SystemExit(
+        f"skill description must start with 'Use when' in {skill_md}: "
+        f"{description!r}"
+    )
 if "<" in description or ">" in description:
     raise SystemExit(f"skill description contains angle brackets in {skill_md}")
 
@@ -234,6 +239,45 @@ print("pi package ok")
 PY
 }
 
+# Destructive commands shown in routine code blocks are executable advice. Keep
+# data deletion in separately explained boundary prose rather than allowing an
+# example to bypass the surrounding authority rule.
+check_destructive_examples() {
+  python3 - "$ROOT" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+files = (
+    root / "plugins/agent-workflows/skills/host-tidy/SKILL.md",
+    root / "plugins/engineering-practices/skills/orbstack-best-practices/SKILL.md",
+)
+forbidden = re.compile(
+    r"(?:\b(?:docker\s+)?compose\s+down\b[^\n]*\s-v(?:\s|$)|"
+    r"\bdocker\s+volume\s+(?:rm|prune)\b|\borb\s+reset\b)"
+)
+errors = []
+
+for path in files:
+    in_fence = False
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if line.lstrip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence and forbidden.search(line):
+            errors.append(f"{path}:{line_number}: destructive routine example: {line.strip()}")
+
+if errors:
+    print("destructive example check FAILED:", file=sys.stderr)
+    for error in errors:
+        print(f"  - {error}", file=sys.stderr)
+    raise SystemExit(1)
+
+print("destructive examples ok")
+PY
+}
+
 # Release-tag gate. Plugin versions are consumed by tag (`<plugin>-v<version>`),
 # so a release commit that never got its tag publishes nothing — the marketplace
 # advertises a version no consumer can resolve. Four such tags were missing and
@@ -340,6 +384,7 @@ require_json "$ROOT/package.json"
 
 check_manifest_parity
 check_pi_package
+check_destructive_examples
 check_release_tags
 
 if command -v claude >/dev/null 2>&1; then

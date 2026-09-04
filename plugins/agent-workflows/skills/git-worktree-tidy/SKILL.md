@@ -1,6 +1,6 @@
 ---
 name: git-worktree-tidy
-description: Fetch latest from origin, prune remote-tracking refs, delete stale local branches and worktrees, and fast-forward important branches. Use when tidying up a worktree-based repo layout.
+description: Use when fetching and pruning a worktree-based repository, removing stale local branches or worktrees, or fast-forwarding its important branches.
 ---
 
 # git-worktree-tidy

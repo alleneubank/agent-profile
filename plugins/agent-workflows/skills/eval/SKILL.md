@@ -25,6 +25,10 @@ and a set of proposed amendments — never silent law edits.
   SessionStart hook emits `instruction-fingerprint: agent-profile@<sha> ...`).
   Sessions without a fingerprint can still be audited; they just can't be
   bucketed by version for A/B.
+- A parser-completeness check for every harness in scope: enumerate each
+  harness's indexed session total and successfully parsed total before treating
+  search results as the population. A broken or lagging parser is a tooling gap,
+  not evidence of behavior absence.
 
 ## Workflow
 
@@ -33,6 +37,8 @@ and a set of proposed amendments — never silent law edits.
    target? An eval without hypotheses drifts into anecdote collection.
    For mission-command changes, run after one to two weeks and name the
    rollout campaign (and mission, if declared) being evaluated.
+   Model intuition may nominate a hypothesis or a counterexample class, but it
+   is not evidence that the behavior occurs or that a rule helps.
 2. **Sample or forward-run.** For a soak eval, use `recall list` / `recall
    search` for substantive sessions in the
    window (skip trivial Q&A). Stratify before reading: attended vs unattended
@@ -46,6 +52,10 @@ and a set of proposed amendments — never silent law edits.
 3. **Depth-audit each session.** `recall show <id>`, read the actual turns, and
    score the rubric below. Record concrete moments (quotes, commands run), not
    impressions.
+   For skill-discovery hypotheses, score the action immediately before the
+   governed work: whether the skill loaded before acting, after a failure, or
+   never. Session-level mention counts cannot distinguish activation from
+   cleanup after the fact.
 4. **Attribute each miss.** Four buckets with different fixes:
    - *Compliance gap* — instructions already forbid it; the agent did it anyway.
      Fix: sharpen wording, add a red flag, or accept a model limitation.
@@ -123,6 +133,10 @@ than diluting the sample.
   after the harness and product tasks had already answered the material question?
 - **Gate latency and early stops** — how long did campaigns wait at human
   boundaries, and did budget or structural non-convergence stop them early?
+- **Action-conditioned activation** — for each governed action, did the matching
+  skill load before the action, only after a miss, or not at all? Report the
+  denominator of applicable actions, not just sessions containing the skill
+  name.
 
 ## Red Flags
 
@@ -133,6 +147,10 @@ than diluting the sample.
   (evidence-of-absence applies to the eval itself).
 - Committing AGENTS.md edits as part of the eval — amendments ship only after
   explicit human ratification.
+- Promoting agreement among models or a plausible weight-derived intuition as
+  evidence without an observed task, session, or sourced external contract.
+- Reporting cross-harness rates before verifying that every harness's parser and
+  instruction fingerprint are present enough to support the comparison.
 - Attributing every miss to under-constraint — corrections in the opposite
   direction are gaps too, and an amendment set that only ever strengthens
   drifts toward overfit.

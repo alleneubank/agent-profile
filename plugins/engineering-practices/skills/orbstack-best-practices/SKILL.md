@@ -15,7 +15,7 @@ orb list                               # List machines
 orb create ubuntu:noble myvm           # Create (distro:version name)
 orb create --arch amd64 ubuntu x86vm  # x86 emulation via Rosetta
 orb create ubuntu myvm -c cloud.yml   # With cloud-init
-orb start/stop/restart/delete myvm
+orb start/stop/restart myvm
 orb default myvm                       # Set default machine
 
 # Shell and exec
@@ -31,7 +31,7 @@ orb push -m vm ~/f.txt /tmp/  # Specific machine + path
 # Docker/K8s
 orb restart docker            # Restart Docker engine
 orb logs docker               # Docker engine logs
-orb start k8s / orb delete k8s
+orb start k8s
 
 # Config
 orb config set memory_mib 8192
@@ -104,9 +104,31 @@ ORBENV=AWS_PROFILE:EDITOR orb ./deploy.sh  # Forward env vars
 orb report              # Generate diagnostic report
 orb logs myvm           # Machine boot logs
 orb restart docker      # Restart Docker engine
-orb reset               # Factory reset (deletes everything)
 docker context use orbstack  # Fix "cannot connect to Docker daemon"
 ```
+
+Try diagnostics, context selection, and the narrowest service or machine restart
+before any data-bearing action. Verify which machine, Docker context, or engine
+is unhealthy rather than treating a global symptom as proof that all OrbStack
+state is disposable.
+
+### Machine and cluster deletion are data-bearing
+
+`orb delete <machine>` deletes that machine's filesystem; `orb delete k8s`
+deletes the local cluster and may delete its workloads and persistent data.
+Before either action, resolve the exact target, inventory retained data and its
+recovery source, and obtain explicit authorization unless the resource's
+declared lifecycle already proves it disposable. Re-check the target just before
+deletion.
+
+### Factory reset is a destructive boundary
+
+`orb reset` deletes all OrbStack machines, containers, images, and volumes. It
+is never a routine troubleshooting step or an inferred escalation. Inventory
+the affected machines and Docker data, state what is unbacked-up, exhaust or
+report narrower recovery paths, and obtain explicit authorization naming this
+factory reset. Re-check that inventory immediately before running it; changed
+state resets the authorization.
 
 **Rosetta x86 error**: `sudo dpkg --add-architecture amd64 && sudo apt install libc6:amd64`
 
