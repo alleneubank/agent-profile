@@ -14,6 +14,11 @@ skills without taking ownership of private local overrides.
 - `plugins/engineering-practices` contains language, tooling, and quality skills.
 - `plugins/agent-workflows` contains reusable workflow skills.
 
+The [engineering wiki](https://github.com/alleneubank/eng-wiki) is the
+explanatory source and synthesis layer for reusable engineering doctrine. This
+repository carries its sparse, versioned operational derivative: only mechanics
+that change an agent's decision, with no runtime dependency on the wiki.
+
 Private notes do not belong in this repo. Use `~/.codex/AGENTS.override.md`,
 `~/.claude/CLAUDE.local.md`, or another local-only file outside this repository.
 

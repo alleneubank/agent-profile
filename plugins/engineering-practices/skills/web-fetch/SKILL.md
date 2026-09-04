@@ -1,6 +1,6 @@
 ---
 name: web-fetch
-description: Fetches web content as clean markdown by preferring markdown-native responses and falling back to selector-based HTML extraction. Use for documentation, articles, and reference pages at http/https URLs.
+description: Use when fetching documentation, articles, or reference pages from HTTP or HTTPS URLs as clean Markdown.
 ---
 
 # Web Content Fetching

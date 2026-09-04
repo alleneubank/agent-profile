@@ -28,6 +28,12 @@ Create or update a skill when:
 - The technique is reusable across tasks
 - The agent repeatedly misses the same judgment call
 - A short document can prevent recurring mistakes
+- An observed task/session or sourced external contract demonstrates the gap and
+  a legitimate neighboring behavior bounds the weakest valid rule
+
+Model intuition and convergence across frontier models may nominate a candidate
+gap or counterexample. They do not establish frequency, harm, or the effect of a
+proposed instruction; gather behavioral or sourced evidence before codifying.
 
 Do not create a skill for:
 - One-off project context
@@ -48,9 +54,13 @@ Prefer one concise `SKILL.md`. Add supporting files only for heavy reference mat
 
 ## Metadata Rules
 
-Frontmatter supports only:
+Frontmatter requires:
 - `name`
 - `description`
+
+Additional provenance or harness metadata is valid only when every target
+harness accepts or preserves it and the repository validator exercises that
+shape. Unknown metadata must not be required for discovery or runtime behavior.
 
 Description rules:
 - Start with `Use when...`
@@ -80,10 +90,17 @@ Description rules:
 
 Validate the skill against realistic tasks:
 
-1. Observe baseline behavior on a representative request.
-2. Write or revise the skill to address the real failure.
-3. Re-run the task and compare behavior.
-4. Tighten wording only where the skill still leaves loopholes.
+1. Freeze representative tasks and at least one legitimate neighboring
+   behavior the rule must preserve.
+2. Observe the baseline failure or cite the external contract that establishes
+   it; record the candidate profile fingerprint.
+3. Write or revise the skill to address that failure.
+4. Re-run the same tasks in fresh context and compare the decision or action,
+   not prose similarity.
+5. After rollout, sample action-conditioned activation: whether the skill loaded
+   before the governed action, after a miss, or never.
+6. Tighten wording only where evidence still shows a loophole; weaken or remove
+   a rule that blocks the neighboring behavior.
 
 Use subagents for testing only when they add signal. They are optional, not the point.
 
@@ -97,3 +114,5 @@ Use subagents for testing only when they add signal. They are optional, not the 
 - Skills that restate AGENTS.md law or doctrine entries — skills carry
   mechanics and point at law
 - Vendor tool names or harness-only paths in a shared skill
+- Rules justified only by model agreement, intuition, or imagined failure
+- Eval claims based on skill mentions without the applicable-action denominator

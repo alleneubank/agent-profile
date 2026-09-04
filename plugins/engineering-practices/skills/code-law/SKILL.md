@@ -90,6 +90,10 @@ violation is what holds. Build the detector when you name the property.
   generality is not.
 - Wrap an external API when doing so clearly bounds change or gives the domain a
   better contract; do not wrap familiar standard types by reflex.
+- When a CLI, API, control plane, or automation surface is operated by agents,
+  load `agent-operability`. Its inspect/plan/apply/verify contract is the public
+  expression of this skill's deterministic, idempotent, atomic, observable,
+  evented, and contextual properties—not a second implementation path.
 
 ## Properties
 
@@ -155,10 +159,12 @@ identify the failing operation and state.
 **Floor:** cause the failure, then diagnose it using only the emitted logs,
 metrics, and traces — without re-running and without adding instrumentation.
 
-### Evented — react to state change, don't poll or nap
+### Evented — react to state change, don't mistake time for state
 
-Wait on a condition, not a duration. A bare `sleep` used as synchronization
-is the defect. Two pairings matter more than the property itself:
+Wait on a condition, not a duration. A duration-only sleep used as proof that a
+condition now holds is the defect. Bounded backoff before rechecking a condition
+is valid when no event source exists; the condition and deadline, never elapsed
+time alone, decide success. Two pairings matter more than the property itself:
 
 - **Level-triggered, edge-woken.** Pure edge-triggered systems drop events
   and never recover. The event says *when* to reconcile; the desired-state
@@ -166,8 +172,9 @@ is the defect. Two pairings matter more than the property itself:
 - **Delivery is at-least-once, so consumers must be idempotent.** Evented
   without idempotent is a duplicate-effect bug waiting for its first retry.
 
-**Floor:** ban bare sleeps structurally; assert the teardown or convergence
-latency, not the sleep duration.
+**Floor:** reject duration-only success; assert the condition and a deadline.
+Where polling is unavoidable, perturb the backoff and prove the same terminal
+state.
 
 ### Contextual — the call carries what dictates its possibilities
 

@@ -1,5 +1,5 @@
 ---
-description: Patterns for invoking the GitHub CLI (gh) from agents. Covers structured output, pagination, repo targeting, search vs list, gh api fallback.
+description: Use when invoking the GitHub CLI for structured output, pagination, repository targeting, search, or API fallbacks.
 metadata:
     github-path: skills/gh
     github-ref: refs/tags/v2.94.0

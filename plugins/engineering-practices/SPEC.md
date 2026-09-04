@@ -20,6 +20,9 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 - A **scenario oracle** gives a fresh-context task runner fixed engineering
   choices and observes whether the skills produce the intended judgment without
   access to the author's reasoning.
+- An **agent-operable surface** exposes a public inspect/plan/apply/verify loop
+  whose effects and evidence remain safe, resumable, and attributable without
+  prose scraping or private implementation access.
 
 ## Requirements
 
@@ -57,6 +60,21 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   apply where their failure modes exist; configurable choices are distinguished
   from fixed invariants; plans include post-green refactoring and an independently
   green prefactor unit when existing structure fights the behavior change.
+- **REQ-DOCTRINE-010 — Agent operability:** `agent-operability` defines the
+  stable output, explicit targeting, precondition, retry, async-operation,
+  authority, secret-channel, and evidence mechanics needed to operate a CLI,
+  API, or control plane through its public surface.
+- **REQ-DOCTRINE-011 — Evidence identity:** testing guidance binds results to
+  source and dirty state, built artifact, target environment, and verifier task;
+  affected downstream evidence becomes stale after a mutation while unchanged
+  identity remains reusable.
+- **REQ-DOCTRINE-012 — Destructive examples:** routine host and OrbStack
+  guidance never treats volume deletion or factory reset as an inferred
+  escalation; data-bearing targets require a separate inventory and explicit
+  authorization.
+- **REQ-DOCTRINE-013 — Trigger contracts:** every skill description starts with
+  `Use when...`; portable provenance metadata remains legal when every target
+  harness and repository validation accept it.
 
 ## Invariants
 
@@ -67,28 +85,29 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   preserves named legitimate behavior.
 - Coverage percentage is never completion evidence, and intermittent behavior is
   never classified solely from retry history.
-- Skill names, descriptions, and discovery behavior remain stable.
-- No version, tag, push, marketplace publication, or other release action occurs
-  in this campaign.
+- Skill names remain stable, descriptions are trigger-shaped, and discovery
+  behavior remains portable.
+- Release actions occur only under explicit per-artifact authorization.
 
 ## Non-goals
 
 - Rewriting language-specific or workflow skills.
 - Copying or citing private local paths from the wiki into runtime instructions.
 - Building an LLM-backed test runner into the deterministic repository harness.
-- Publishing engineering-practices 2.0.0.
+- Making the runtime skills depend on a reachable wiki checkout or service.
 
 ## Decisions
 
 - Testing and code law form one campaign because the selected scope is the
   combined eng-wiki doctrine distillate. (2026-08-29, ratified)
-- The two existing skills are revised in place; no new runtime skill is created.
-  (2026-08-29, ratified)
+- Existing skills are revised in place for mechanics they already own;
+  agent-operability has one dedicated runtime skill. (2026-09-03, ratified;
+  supersedes the 2026-08-29 no-new-skill decision on new field evidence)
 - Behavioral scenario execution complements, rather than enters, the
   deterministic `npm` and validation gates. (2026-08-29, ratified)
-- The next published release is major because existing behavioral guidance
-  changes incompatibly; release work remains a separate boundary action.
-  (2026-08-29, ratified)
+- A new skill is a backward-compatible capability and releases as a minor
+  version; publication still requires per-artifact authorization. (2026-09-03,
+  ratified)
 
 ## Acceptance criteria
 
@@ -102,6 +121,11 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 - [x] `./scripts/validate.sh` passes.
 - [x] Fresh-context scenario execution covers REQ-DOCTRINE-007 through
       REQ-DOCTRINE-009 with no material-or-higher finding.
+- [x] `tests/agentic-engineering-scenarios.md` covers REQ-DOCTRINE-010 through
+      REQ-DOCTRINE-013 with no material-or-higher finding in fresh context.
+- [x] Routine host cleanup and OrbStack troubleshooting contain no implicit
+      data-deletion path.
+- [x] The description-shape gate passes for every shipped skill.
 
 ## Test traceability
 
@@ -110,3 +134,6 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   findings.
 - REQ-DOCTRINE-006 through REQ-DOCTRINE-009 — `npm run check`,
   `./scripts/validate.sh`, and the fixed scenario oracle.
+- REQ-DOCTRINE-010 through REQ-DOCTRINE-013 —
+  `tests/agentic-engineering-scenarios.md`, `./scripts/validate.sh`, and the
+  fresh-context scenario oracle.

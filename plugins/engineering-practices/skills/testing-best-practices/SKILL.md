@@ -16,10 +16,9 @@ one that measures the real goal.
   map each to the cheapest evidence that can expose it. Floors gate the
   interior; never outsource to a person or generative critic what a
   deterministic check can decide. Use a task-based dogfood or bug bash when the
-  risk lives in assembled behavior. The ADF high-risk classes default to a
-  matching bounded specialist review unless the human records a PLAN waiver
-  with faithful alternative evidence; other changes use one only for a named
-  property execution cannot decide.
+  risk lives in assembled behavior. When always-loaded law selects a specialist
+  gate, the QA design names its one risk, severity floor, and round budget; it
+  remains complementary to execution of observable contracts.
 - Few, well-crafted, broad-coverage: build the surface's harness, not the
   task's check — the next feature reuses it for free. Build cheap verifiers
   freely; propose expensive ones. A deterministic harness proves known
@@ -30,6 +29,26 @@ one that measures the real goal.
   dependency-fidelity order under Integration / contract tests. Visual/UI floors
   are the change observed on the live surface. Before done: would this survive a
   manual walkthrough?
+
+## Evidence identity and freshness
+
+A verifier result is bound to the state it observed, not merely to a command or
+a timestamp. Record enough identity to prevent a green result from migrating to
+another candidate:
+
+- source revision plus a digest of relevant dirty state;
+- built artifact, package, or image digest when execution consumes generated
+  output rather than the source tree directly;
+- resolved environment and target resource identifiers;
+- verifier/task id, charter or input version, terminal status, and retained
+  artifact locations.
+
+A mutation invalidates every downstream result it can affect: source changes
+invalidate builds and later gates; a rebuilt artifact invalidates assembled
+behavior evidence; environment changes invalidate target-specific execution.
+Rerun from the earliest affected gate. Conversely, unchanged identity needs no
+ceremonial rerun—compare and record the identities. An evidence store should
+reject an attachment whose candidate, artifact, target, or task does not match.
 
 ## Test layering policy
 

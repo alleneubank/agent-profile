@@ -21,8 +21,9 @@ attribution does.
 - **Prefer the project's sanctioned teardown** over hand-killing PIDs and
   containers. A stack's own `down` command knows about halves you have not
   found yet.
-- **Never remove a compose-managed container individually.** Tear the
-  project down; a hand-removed member leaves the project wedged.
+- **Never remove one compose-managed member as an isolated fix.** Tear down the
+  complete attributed project as a group; leaving hand-selected members behind
+  wedges the project.
 - **Proven orphans are interior — clear them and report.** Anything
   ambiguous, data-bearing, or shared batches into one confirmation.
 - **An approval is bound to the evidence it was given on.** Attribution
@@ -30,8 +31,10 @@ attribution does.
   live after it was approved, the approval is void — stop, say which
   evidence changed, and re-ask. Approval granted on a wrong premise is not
   authorization.
-- **Disk reclaim is always opt-in and separate.** Never fold volume/image
-  pruning into a process cleanup; volumes are the one irreversible step.
+- **Data reclaim is always opt-in and separate.** Never fold volume/image
+  pruning, database deletion, or a factory reset into process cleanup. Inventory
+  exact targets and the data they hold, then obtain explicit authorization for
+  that deletion alone.
 - **Shared hosts belong to other people too.** Confirm before clearing
   anything you did not start.
 
@@ -132,7 +135,7 @@ Discover the sanctioned teardown before improvising (`package.json` scripts,
 `Makefile`, the project's README):
 
 ```bash
-# example shape: supervisor down -> compose down -v -> generated env cleanup
+# example shape: supervisor down -> compose down -> generated runtime cleanup
 <pkg-runner> run localnet:down
 ```
 
@@ -141,7 +144,9 @@ routinely ship a graduated pair — a `down` that stops the workload but
 *keeps* the cluster, and a `clean`/`purge` that adds `--delete-cluster`. On
 a host you are reclaiming, `down` leaves the multi-GB half you came for
 still running. Check the script's own definition rather than guessing from
-the verb.
+the verb. Also inspect whether a wrapper expands to `compose down -v`, volume
+removal, database deletion, or reset. Process-cleanup authority does not cover
+those effects: use a non-data-deleting level or stop at the data boundary.
 
 Use the project's own package runner, not a habitual one — a repo whose
 lockfile belongs to a different package manager will refuse to run, and the
@@ -156,17 +161,40 @@ side-stacks defined in a second compose file are routinely missed:
 docker ps -a --format '{{.Names}}' | grep '<project-prefix>'
 ```
 
-Only when no sanctioned teardown exists, remove the project by label:
+When no sanctioned teardown wrapper exists, first recover the Compose working
+directory and config-file labels and invoke Compose against that exact project.
+If those inputs no longer exist, build and print a project-scoped manifest of
+every container and network, verify their labels immediately before acting, and
+remove the group—not a fresh query result and not selected members. This fallback
+still excludes volumes:
 
 ```bash
-docker rm -f $(docker ps -aq --filter "label=com.docker.compose.project=$P")
-docker volume rm -f $(docker volume ls -q --filter "label=com.docker.compose.project=$P")
-docker network rm $(docker network ls -q --filter "label=com.docker.compose.project=$P")
-k3d cluster delete <cluster>      # the other half
+docker inspect -f '{{json .Config.Labels}}' <reviewed-container-id>
+docker rm -f <reviewed-project-container-ids>
+docker network rm <reviewed-project-network-ids>
 ```
 
 Omit `-v` on `docker rm` when a container has **anonymous** volumes you did
-not prove disposable — the process dies, the data survives on disk.
+not prove disposable — the process dies, the data survives on disk. A local
+cluster may carry databases or persistent volumes; delete it only when inventory
+proves it disposable or separate authorization names that data-bearing target.
+
+### Data reclaim is a separate boundary
+
+After compute cleanup, inventory retained data without deleting it:
+
+```bash
+docker volume ls --filter "label=com.docker.compose.project=<project>"
+docker volume inspect <volume-name>
+docker system df -v
+```
+
+For each exact volume, image set, database, or reset target, report ownership,
+attachments, size, and what recovery source exists. Ask for one authorization
+that names those targets and the data loss. Immediately before deletion,
+re-check identity and attachments; changed evidence voids the authorization.
+Delete only the approved names—never a fresh query result, wildcard, or global
+prune—and verify what remains afterward.
 
 ### 6) Kill with verify-before-signal, then escalate
 
@@ -225,10 +253,13 @@ symptom of an unfixed structural leak.
 ## Red flags
 
 - Killing by age, name pattern, or process count without attribution
-- `docker rm` on a container carrying `com.docker.compose.*` labels
+- Removing selected `com.docker.compose.*` containers while leaving other
+  project members behind
 - Clearing the compose half and leaving the cluster + registry half up
 - Running the `down` level when only `clean` deletes the cluster
 - Bundling `docker volume prune` into a process cleanup
+- Running `compose down -v`, `docker volume rm`, a database purge, or a factory
+  reset under process-cleanup authority
 - Re-issuing a hung `docker`/`kubectl` call on a starved daemon
 - Declaring victory from the 1-minute load average alone
 - Reusing a previous sweep's exclusion rule (a path prefix, a PID list)
