@@ -29,6 +29,20 @@ never reaches the command that needs it.
 Unlocking 1Password is biometric: the human's boundary. When the real
 command fails to authorize, report it and stop.
 
+### Embedded SDK clients use a separate channel
+
+A successful `op` request proves the CLI path only. A tool that embeds the
+1Password SDK opens its own desktop-app channel, so it can fail with a closed
+connection while `op read` succeeds. Diagnose the client that actually failed;
+do not send the human back through CLI-integration troubleshooting.
+
+When the project documents an existing scoped service account for that client,
+inject its reference with `op run` as the fallback. Never create or rotate a
+credential just to route around the desktop channel. Embedded clients may also
+use a different account identifier format than `op --account`; follow the
+client's schema, and do not configure mutually exclusive desktop and service-
+account modes together.
+
 ## Law 2 — A secret value never enters the transcript
 
 Preference order, strongest first:
@@ -175,6 +189,7 @@ and anything else raises a prompt there.
 |---|---|---|
 | `account is not signed in` from `whoami` | Status probe, not a request | Ignore it — run the real command |
 | `op` root help text dumped | No configured account / app integration off | Human enables 1Password → Settings → Developer → CLI integration |
+| Embedded client reports a closed desktop connection while `op read` works | Its SDK channel failed; CLI auth is healthy | Use the project's documented SDK fallback; do not repeat CLI troubleshooting |
 | Command hangs ~30-60s then fails | Biometric/approval prompt nobody answered | Report and stop; the human approves |
 | `too many '/'` | Item title contains `/` | Use item ID with `op item get` |
 | `"X" isn't a vault in this account` | Right vault name, wrong account (or typo) | Re-resolve the account — do not retry other accounts |
