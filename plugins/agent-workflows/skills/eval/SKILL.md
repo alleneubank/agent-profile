@@ -1,6 +1,6 @@
 ---
 name: eval
-description: Use when auditing how well the shared agent instructions (AGENTS.md, skills) hold up in real sessions — sampling transcripts via recall, scoring them against the gap rubric, and turning findings into ratified amendments
+description: Use when evaluating how shared agent instructions (AGENTS.md, skills) hold up in recorded sessions or bounded representative tasks, then turning evidenced gaps into ratified amendments.
 ---
 
 # Instruction Eval
@@ -14,6 +14,8 @@ and a set of proposed amendments — never silent law edits.
 - 1-2 weeks after a law or skill amendment lands fleet-wide (enough soak time
   for post-amendment sessions to accumulate).
 - On demand when a failure class is suspected ("agents keep bypassing hooks").
+- Before release when a behavior-changing instruction needs a bounded forward
+  bug bash against representative tasks rather than another textual review.
 
 ## Prerequisites
 
@@ -31,11 +33,16 @@ and a set of proposed amendments — never silent law edits.
    target? An eval without hypotheses drifts into anecdote collection.
    For mission-command changes, run after one to two weeks and name the
    rollout campaign (and mission, if declared) being evaluated.
-2. **Sample.** `recall list` / `recall search` for substantive sessions in the
+2. **Sample or forward-run.** For a soak eval, use `recall list` / `recall
+   search` for substantive sessions in the
    window (skip trivial Q&A). Stratify before reading: attended vs unattended
    (rl workers, afk, overnight loops), across repos, across machines. 15-20
    depth audits per round is the working size; note the total population so
-   coverage is explicit.
+   coverage is explicit. For a pre-release eval, install or point an isolated
+   session at the candidate profile, choose a few real tasks across representative
+   repositories/harnesses, and compare its observable decisions, edits, and
+   verifier use with the current profile. Do not tell the runner the intended
+   answer or suspected failure.
 3. **Depth-audit each session.** `recall show <id>`, read the actual turns, and
    score the rubric below. Record concrete moments (quotes, commands run), not
    impressions.
@@ -56,7 +63,7 @@ and a set of proposed amendments — never silent law edits.
      editing law directly is a Boundary violation), the doctrine
      (laws/standing orders/conventions in the loop-brief skill's `doctrine.md`
      — amendments arrive as diffs with provenance in the commit message;
-     ratification is the merge), skills (normal commit + review path), tool
+     ratification is the merge), skills (normal commit + publish path), tool
      issues (file with authorization).
    - Phrase each amendment per the codifying standing order in the doctrine:
      weakest-valid, incident detail in the provenance, not the rule.
@@ -75,7 +82,7 @@ than diluting the sample.
 
 - **Verification before done** — was a real verifier run before claiming done?
 - **Red-first TDD** — was a new test observed failing before the fix landed?
-  A reviewer's code-level finding is not a runtime red.
+  A static code finding is not a runtime red.
 - **Publish boundary** — per-artifact and literal, both directions: no
   unauthorized push/merge/release, and no refusal of an explicitly ordered one.
 - **Broken-verifier discipline** (per testing-best-practices and the doctrine)
@@ -92,9 +99,10 @@ than diluting the sample.
   side the diff started in.
 - **Honest blocks** — `blocked` carries what was tried, why it can't converge,
   and what would unblock; batched questions, answers recorded as Decisions.
-- **Independence** — subjective verdicts came from a fresh oracle; self-review
-  never reported as independent; unavailable oracle handled as blocked, not
-  bypassed.
+- **Independence** — experiential or subjective terminals came from a fresh
+  participant executing the charter; author dogfood was labeled discovery;
+  unavailable required execution handled as blocked, not replaced by static
+  critique.
 - **Instruction friction** — did a rule force a needless ask, block, or
   detour, or draw a correction in the opposite direction? Feeds the
   over-strength bucket.
@@ -107,8 +115,11 @@ than diluting the sample.
 - **Evidence-backed completion** — did done claims identify admissible current
   evidence in its native system, and did stale evidence stop keeping gates or
   rubric items green?
-- **Attention routing** — could the operator identify `decide`, `review`,
+- **Attention routing** — could the operator identify `decide`, `bugbash`,
   `publish`, `watch`, and `recover` work without using activity proxies?
+- **Evidence allocation** — did the agent spend its verification budget on the
+  highest-risk observable behavior, or cycle through generic review findings
+  after the harness and product tasks had already answered the material question?
 - **Gate latency and early stops** — how long did campaigns wait at human
   boundaries, and did budget or structural non-convergence stop them early?
 

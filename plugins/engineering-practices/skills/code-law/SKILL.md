@@ -7,8 +7,8 @@ description: Use when writing or changing code in any language — the craft law
 
 The craft law for code. `AGENTS.md` keeps the law whose violation is
 unrecoverable — boundary, secrets, publish, self-approval, done-claims.
-This skill carries the law whose violation the harness and the review gate
-catch.
+This skill carries the law whose violation the harness and behavior-first
+verification catch.
 
 **A property you want held gets a detector, not a paragraph.** A sentence
 saying "be deterministic" changes nothing; the floor that reddens on a
@@ -45,10 +45,13 @@ violation is what holds. Build the detector when you name the property.
   and bounded retries with backoff; handle edge cases explicitly.
 - Refactor with clean breaks: update all callers, complete the migration,
   delete superseded code — supersession is the default; confirm
-  replace-vs-add in one line only when genuinely ambiguous. Review findings
-  never restructure a PR or rollout without confirmation. An unshipped feature
-  has no compatibility surface: its experimental behavior is not a contract, so
-  it earns no shim, no dual path, and no deprecation window. Tests that redden
+  replace-vs-add in one line only when genuinely ambiguous. When existing
+  structure fights the requested change, make a behavior-preserving prefactor
+  unit first when it can stay independently green and focused. Local unpublished
+  work may be regrouped this way; changing declared scope, rollout, or a
+  published contract still requires confirmation. An unshipped feature has no
+  compatibility surface: its experimental behavior is not a contract, so it
+  earns no shim, no dual path, and no deprecation window. Tests that redden
   under a supposedly behavior-preserving refactor are first suspected of having
   caught a regression it introduced; only the ones asserting the old call
   sequence rather than an outcome are change detectors, and those are part of
@@ -64,8 +67,9 @@ violation is what holds. Build the detector when you name the property.
   ordering or safety constraint. Replace narration of what code does with clearer
   names or structure, and replace enforceable assumptions with assertions.
   Public API comments state the contract, not implementation details.
-- Declare variables at the smallest scope, computed closest to use. Extract
-  configuration immediately: magic values live in config, not code.
+- Declare variables at the smallest scope, computed closest to use. A value the
+  environment, operator, or caller must choose belongs in configuration; a fixed
+  domain invariant belongs in a clearly named constant or type.
 
 ## Interfaces and abstraction
 
@@ -89,9 +93,13 @@ violation is what holds. Build the detector when you name the property.
 
 ## Properties
 
-Determinism, hermeticity, idempotency, isolation, and observability are law:
-an instance that cannot hold one carries a waiver. Evented and contextual are
-defaults: they yield to a named alternative, and no waiver is owed.
+Apply each property where its failure mode exists; non-applicability needs no
+waiver. Builds and deterministic test harnesses owe determinism, hermeticity,
+and isolation. Retried effects, reconcilers, and at-least-once consumers owe
+idempotency. Operations that can expose partial state owe atomicity. Side-
+effecting and live surfaces owe observability. Async coordination should be
+evented, and authority-bearing effects should be contextual. When an applicable
+property cannot hold, carry a waiver.
 
 ### Deterministic — same inputs, same outputs, same interleaving
 
@@ -188,6 +196,6 @@ permanent exemption. Debt names what would remove it.
 // <property>: <why this instance cannot hold it>. <Debt — removed by X | Permanent — X makes it impossible.>
 ```
 
-A waiver is written prose a reviewer can judge, never a suppression flag. A
+A waiver is written prose a maintainer can evaluate, never a suppression flag. A
 waiver list that grows without its debt entries shrinking means the property
 was stated too strongly — weaken the property, don't grow the list.

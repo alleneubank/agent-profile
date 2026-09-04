@@ -16,7 +16,8 @@ BOUNDARY`, with an optional `.mission/mission.yaml` above LOOP only when an
 outcome spans campaigns or repositories. One `LOOP.md` owns one bounded
 attempt and targets named SPEC requirements, BRIEF floors, or mission rubric
 ids; successive attempts never share a loop. Evidence stays in its native
-verifier, CI, review, or release system; git is the archive.
+verifier, CI, bug-bash, specialized-review, or release system; git is the
+archive.
 
 ## Laws
 
@@ -33,8 +34,9 @@ verifier, CI, review, or release system; git is the archive.
 - Verify exhaustion before terminating on it: a budget or quota block
   requires the authoritative source (`rl quota`); remaining capacity means
   keep going.
-- Never route the oracle role to a provider known broken — a broken
-  reviewer is worse than a rationed one.
+- Never replace a required real-use gate with a static reviewer because the
+  build, environment, or executor is unavailable; that substitution answers a
+  different question and fails closed.
 - Use the designated tool, script, or skill for its domain; when it
   resists, debug the usage — never silently fall back to raw commands.
   Bypasses such as `--no-verify` are never a shortcut.
@@ -48,12 +50,10 @@ verifier, CI, review, or release system; git is the archive.
 
 ## Standing orders
 
-- Reviewer capacity degraded → ration the healthy provider's remainder
-  (limits reset; 20% is workable).
-- Independent oracle genuinely unavailable → interior work continues on
-  floors alone up to the next review gate; that gate is a clean stop plus
-  handoff — never cross it unreviewed or under a degraded oracle, and
-  never re-dispatch per iteration against a dead broker.
+- Independent required executor genuinely unavailable → interior work
+  continues on deterministic floors up to the experiential gate; that gate is
+  a clean stop plus handoff. Do not re-dispatch per iteration against a dead
+  broker or substitute generative critique for product use.
 - Defect escaped a gate → root-cause twice: the bug, and the instruction,
   check, or harness that should have caught it; propose the amendment that
   closes the gap.
@@ -65,26 +65,25 @@ verifier, CI, review, or release system; git is the archive.
   — weaken the rule rather than growing the carve-out list. Boundary and
   secrets law is exempt: where failure is irreversible, deliberate
   over-strength is the correct choice.
-- Review finding the harness could have caught → the fix ships with the
-  new floor that catches its class; a patch without the floor leaves the
-  gap open. This is how the review budget shrinks over time instead of
-  growing.
+- Bug-bash finding the harness could have caught → the fix ships with the new
+  floor that catches its class; a patch without the floor leaves the gap open.
+  The bash then spends its finite budget on unknown behavior instead of known
+  regressions.
 - Behavior-preserving refactor reddens the suite → the failing tests are
   suspects, not chores. Mechanically re-syncing them to the new call
   sequence launders a change detector; rewrite them against observable
   behavior or delete them, and say which in the report.
-- Dispatching a review of intermediate work → state the deferred set in
-  the review's context, not just in your head; an undeclared deferral
-  reads to the reviewer as a defect, and the round spent arguing it is
-  the driver's fault, not the oracle's.
-- Reviewer re-flags a ratified Decision → do not spend rounds re-arguing;
-  carry the Decision in the review's context, and where the surface
-  compiles no context, put the override rationale in code the reviewer can
-  see — decisions change on the ladder, not in the review loop.
+- Chartering a bug bash of intermediate work → state the built behavior and
+  deferred set as task preconditions. A task that depends on declared deferred
+  work is out of charter, not a product finding.
+- A bug bash contradicts a ratified expected behavior → preserve the observed
+  usability or operability evidence, but do not silently rewrite the contract.
+  Route a genuine product-direction change to the Boundary.
 - Workaround chain growing mid-delivery → stop investing; finish the real
   remaining phase, then remove the kludges in the same effort.
-- Mixed-severity review findings on a PR → fix correctness-class findings
-  now and ship; improvements go to follow-up PRs.
+- Mixed-severity bug-bash findings → findings at or above the chartered floor
+  block; lower-severity improvements go to follow-up work unless they are
+  trivial and remain in scope.
 - Verified findings in-session → fix now; the gate verifies the fix, it
   does not license it. Unless the handoff says report-only.
 - About to invent a component the spec does not name → stop and re-derive
@@ -103,9 +102,9 @@ verifier, CI, review, or release system; git is the archive.
   to SPEC/BRIEF, cite evidence on any linked mission rubric items, delete the
   loop; never merge a later attempt into the same `LOOP.md`. Compact at
   milestones so the loop stays a bounded working set, never a journal.
-- Human review capacity varies by repository and surface → declare its measure
-  and limit in the campaign contract; never replace it with a global line,
-  issue, or effort limit.
+- Bug-bash capacity varies by repository and surface → declare its task or time
+  budget and severity floor in the campaign contract; never replace it with a
+  global issue count or an open-ended "until approval" loop.
 - Secret provisioning → scaffold the full structure (items, references,
   wiring); the human injects only the secret material.
 - Agreed plan about to execute → restate the scope as a self-contained

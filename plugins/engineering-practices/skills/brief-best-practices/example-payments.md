@@ -34,8 +34,9 @@ moves funds the sender did not authorize** — or it does not ship.
 ## Oracle
 
 - **Pre-ship:** property + integration suite in CI (the independent judge for Correctness/Idempotency);
-  a fresh-context reviewer who did not write the change reviews the AuthZ matrix and the ledger math;
-  a staging run against forked production state exercises the happy path and the partial-failure path.
+  a fresh participant uses the shipped client against forked staging state to
+  execute sender, non-owner, duplicate-submission, and partial-failure tasks;
+  a security specialist reviews the AuthZ model only when that named risk changes.
 - **Post-ship (live):** dashboards + alerts on ledger-imbalance count (must stay 0), duplicate-effect
   rate, authz-denial anomalies, and p95 latency. These are the continuing oracle for a live system —
   the harness was the proxy; production is the final gate.

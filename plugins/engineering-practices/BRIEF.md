@@ -24,21 +24,22 @@ wiki mirror, a list of absolutes, or a harness-specific procedure.
 
 ## Floors
 
-- Contract fidelity: A fresh-context reviewer applies
+- Contract fidelity: A fresh-context task runner applies
   `tests/engineering-practices-scenarios.md` and reports no material-or-higher
   finding on its declared severity scale.
-- Parsimony: Independent review finds no rule that merely restates another rule
+- Parsimony: The scenario run finds no rule that merely restates another rule
   or teaches generic model capability without changing a named decision.
-- Portability: `./scripts/validate.sh` passes and review finds no runtime
+- Portability: `./scripts/validate.sh` passes and the task run finds no runtime
   dependency on `eng-wiki`, a private path, or a harness-only primitive.
-- Coherence: `npm run check` passes and review finds no contradiction between
+- Coherence: `npm run check` passes and the task run finds no contradiction between
   the revised skills or with always-loaded law.
 
 ## Oracle
 
-- **Behavioral:** A fresh-context, disinterested reviewer sees only the revised
-  skills, fixed scenarios, contract, and declared deferrals. The author neither
-  supplies expected answers inline nor grades the result.
+- **Behavioral:** A fresh-context, disinterested task runner sees only the
+  revised skills, fixed scenarios, contract, and declared deferrals, then makes
+  the engineering decisions the scenarios require. The author neither supplies
+  expected answers inline nor grades the result.
 - **Mechanical:** `npm run check` and `./scripts/validate.sh` run from the
   repository root after the final mutation.
 
@@ -60,8 +61,12 @@ wiki mirror, a list of absolutes, or a harness-specific procedure.
   test contract. (2026-08-29, ratified)
 - `AGENTS.md` stays unchanged unless evidence shows a doctrine failure is
   unrecoverable when a skill does not load. (2026-08-29, ratified)
-- Two fresh-context review rounds are the campaign's review-capacity limit.
-  (2026-08-29, ratified)
+- The user's behavior-first direction and session evidence satisfy that
+  exception: always-loaded verification routing moves to bug bash, and the
+  workflow plugin gains the `bugbash` skill. (2026-09-03, ratified)
+- One fresh-context scenario run plus one fix-up rerun is the campaign's
+  behavioral-verification budget; no open-ended approval loop. (2026-09-03,
+  provisional)
 
 ## Boundary — requires the human
 

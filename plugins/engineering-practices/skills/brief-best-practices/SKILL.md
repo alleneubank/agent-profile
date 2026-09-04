@@ -7,7 +7,7 @@ description: Use when creating, reviewing, or updating a BRIEF.md (the quality l
 
 A `BRIEF.md` is the **verifier's spec** — the codified taste that says what "good" means for a surface, so an agent can verify its own iterations and run a loop without guessing or interrupting. Where `SPEC.md` is the contract (*what* to build: `REQ-*`, invariants), the brief is the bar (*what "good" is*, and *who judges*).
 
-It is the **BRIEF** rung in the stack `VISION → SPEC + BRIEF → HARNESS → LOOP → BOUNDARY`: the brief is what makes a surface's autonomous loop trustworthy, because the harness runs the brief's floors and the oracle judges against them. An optional `.mission/mission.yaml` owns strategic success when an outcome spans campaigns; BRIEF owns surface quality and never duplicates a mission rubric.
+It is the **BRIEF** rung in the stack `VISION → SPEC + BRIEF → HARNESS → LOOP → BOUNDARY`: the brief is what makes a surface's autonomous loop trustworthy, because the harness runs objective floors and the oracle exercises or judges the dimensions the harness cannot. An optional `.mission/mission.yaml` owns strategic success when an outcome spans campaigns; BRIEF owns surface quality and never duplicates a mission rubric.
 
 ## When to author one
 
@@ -26,7 +26,18 @@ The contract is that all seven *concerns* are present, in this order — not a f
 1. **Bar** — one sentence: what "shippable" means for this surface. The north-star "done."
 2. **Dimensions** — the few axes "good" decomposes into (correctness, idempotency, auditability, security, latency, recognizability…). Keep it short; these are the quality factors, not a feature list. A surface with side effects carries **observability** as a dimension by default — its floor is that a failure is diagnosable from emitted artifacts alone, without re-running.
 3. **Floors** — the minimum on each dimension *with how it's measured* (a floor without a measurement method is useless: "p95 < 200ms, measured via X"). The gate, **not the ceiling** — passing the floor licenses ship, not perfection.
-4. **Oracle** — the independent verifier: what runs, who judges, and **why it can't be gamed** (maker ≠ judge). Pick the pattern that fits the surface: property tests or a staging run against forked state (objective surfaces); a **deterministic simulator over fixed golden/archetypal inputs** whose emitted trajectory a domain expert reads (pure engines — the inputs are fixed, so tuning to flatter one case visibly shifts the others); a **blind human-judge quorum** — fresh-context judges, ideally across vendors, naming the artifact with no context (subjective/taste surfaces, where no automated check can decide). For live systems the oracle extends past ship into **telemetry** — the prod signals that confirm it stays good.
+4. **Oracle** — the independent verifier: what runs, who executes or judges, and
+   **why it can't be gamed** (maker ≠ terminal judge). Pick the pattern that fits
+   the surface: property tests or a staging run against forked state (objective
+   surfaces); a **fresh-participant bug bash** whose charter names the exact
+   artifact, environment, roles, representative tasks, expected outcomes,
+   evidence, severity floor, and budget (operable applications and systems); a
+   **deterministic simulator over fixed golden/archetypal inputs** whose emitted
+   trajectory a domain expert reads (pure engines); or a **blind human-judge
+   quorum** for subjective first impressions. Author-run dogfood is discovery,
+   not an independent terminal. Use specialized static review only when the
+   named quality cannot be exercised. For live systems the oracle extends past
+   ship into **telemetry** — the signals that confirm it stays good.
 5. **Never** — outcomes that are always a fail regardless of everything else (the safety invariants / "never events"). Concrete and absolute.
 6. **Decisions** — calls already made, the **tradeoff/priority policy** ("security > latency; security can force a redesign, latency cannot"), and assumptions, so the agent never re-asks. This section **grows**, in two tiers: **ratified** (human-confirmed) and **provisional** (a reversible interior call the driver made via the unblocking ladder — dated, with rationale, ratified or overturned at the boundary). This is where mid-loop questions go to die.
 7. **Boundary** — what requires the human: publish, biometric, live secrets, and genuine unknowns. Naming it tells the agent exactly what it may and may not do unattended.
@@ -41,13 +52,16 @@ Open every brief with a one-line law statement, e.g.:
 
 ## Authoring rules
 
-- **Match the house first.** If the repo already has ratified briefs, copy *their* shape — section names, voice, any closing coda — over this skeleton. Consistency across the brief set beats the generic template; the seven concerns are the fallback when no house dialect exists yet. A reviewer judges a brief against the house dialect, and must not reject it for matching the repo's own law.
+- **Match the house first.** If the repo already has ratified briefs, copy *their* shape — section names, voice, any closing coda — over this skeleton. Consistency across the brief set beats the generic template; the seven concerns are the fallback when no house dialect exists yet. Evaluate a brief against the house dialect; matching the repo's own law is not a defect.
 - **Evidence-based.** Ground Dimensions and Floors in the real surface; cite reference exemplars. Do not invent thresholds, signals, or behaviors.
 - **No strategic duplication.** Link mission rubric ids when the surface serves
   a declared mission, but do not restate outcome criteria as BRIEF dimensions or floors.
   A mission asks whether the outcome succeeded; a BRIEF asks whether this
   surface is good enough.
-- **The oracle must be independent.** Maker ≠ judge for any subjective dimension. Name *why* it can't be gamed — without independence the gate is theater.
+- **The oracle must be independent where judgment is experiential or
+  subjective.** Maker ≠ terminal judge. A fresh bug-bash participant receives
+  the task charter and artifact, not the author's reasoning or suspected bugs.
+  Name why the gate cannot be gamed.
 - **Floors are gates, not ceilings.** A passing artifact may still owe refinement; say so. Never weaken a floor to pass a gate — an infeasible item gets the nearest-feasible alternative plus a dated waiver Decision naming the blocker, and the gap stays on record.
 - **Calibrate claims to enforcement.** Match absolutist words ("never", "cannot") to what the oracle actually proves. Overclaiming invites reject cycles.
 - **Parsimony.** Few, well-crafted floors that cover the cases beat a long brittle list. The brief is read every loop; every line earns its place.
@@ -62,7 +76,12 @@ Open every brief with a one-line law statement, e.g.:
 
 ## How the brief drives the loop
 
-The brief is inert until it runs: the **harness** runs the Floors and emits pass/fail with evidence; the **oracle** judges the subjective Dimensions independently; the **OODA loop** iterates against them to `done` or a bounded, honest `blocked`. In a campaign, LOOP.md targets this brief's floors by name (`targets.brief`) and carries the loop's live state and decisions.
+The brief is inert until it runs: the **harness** runs objective Floors and emits
+pass/fail with evidence; the **oracle** executes real-use tasks or judges the
+remaining Dimensions independently; the **OODA loop** iterates against them to
+`done` or a bounded, honest `blocked`. In a campaign, LOOP.md targets this
+brief's floors by name (`targets.brief`) and carries the loop's live state and
+decisions.
 
 ## References
 

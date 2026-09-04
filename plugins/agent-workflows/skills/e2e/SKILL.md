@@ -5,13 +5,20 @@ description: Use when running e2e tests, debugging test failures, or fixing flak
 
 # E2E Testing
 
+Scripted E2E encodes known contracts; a bug bash explores the assembled surface
+through real user or operator tasks. When the request is to dogfood, bug-bash,
+or make a behavior-first readiness call, load the `bugbash` skill. Use this skill
+to run and repair the scripted E2E floor that supports that work.
+
 ## Failure Taxonomy
 
-Every e2e failure is exactly one of:
+Treat these as diagnostic hypotheses, not labels inferred from pass/fail history:
 
-**A. Flaky** (test infrastructure issue)
-- Race conditions, timing-dependent assertions, stale selectors, missing waits
-- Symptom: passes on retry, fails intermittently
+**A. Flaky** (test or environment nondeterminism without a product defect)
+- Uncontrolled test clocks, shared fixtures, stale selectors, missing waits, or
+  infrastructure variance
+- A retry may provide evidence, but a pass on retry does not prove flakiness; an
+  intermittent product race remains a product bug
 
 **B. Outdated** (test no longer matches implementation)
 - Test asserts old behavior that was intentionally changed; selectors reference removed elements
@@ -22,6 +29,10 @@ Every e2e failure is exactly one of:
 - **Only classify as bug when a spec exists to validate against**
 - If no spec exists, classify as "unverified failure" and report to the user
 
+Locate the uncontrolled input or contract mismatch before choosing a category.
+Repeated failure does not prove determinism, and intermittent failure does not
+exonerate the product.
+
 ## Fix Rules by Category
 
 **Flaky fixes:**
@@ -31,6 +42,8 @@ Every e2e failure is exactly one of:
 - Fix mock/route setup ordering (before navigation)
 - **Never add arbitrary delays** - fix the underlying wait
 - **Never add retry loops around assertions** - use the framework's built-in retry
+- Fix the owner of the nondeterminism: product races are product fixes; shared
+  fixture, clock, selector, and synchronization defects belong to the harness
 
 **Outdated fixes:**
 - Update test assertions to match current (correct) behavior
@@ -56,7 +69,9 @@ The human is the most expensive verifier — spend them last, and once.
 
 1. Trace a reported failure downstream with tooling first: API probes (curl/grpcurl), database reads, service logs, targeted test runs.
 2. Fix everything tooling can find before asking the human to manually retest; each retest round costs their attention and a context switch.
-3. When a manual pass is genuinely needed (visual, UX, device-specific), batch every open check into one request with concrete steps — never serial one-fix-one-retest rounds.
+3. When a manual pass is genuinely needed (visual, UX, device-specific), charter
+   it as one bounded bug bash and batch every open check into one request — never
+   serial one-fix-one-retest rounds.
 
 ## Workflow
 
@@ -85,7 +100,10 @@ Parse failures into:
 
 ### Step 3: Categorize
 
-For each failure: read the test file, read the source code it exercises, check for a corresponding spec file, assign category (flaky / outdated / bug / unverified).
+For each failure: read the test and source it exercises, check the corresponding
+contract, locate the source of nondeterminism or mismatch, then assign a category
+(flaky / outdated / bug / unverified). Retry outcome is evidence, not the
+classification rule.
 
 ### Step 4: Fix by Category
 

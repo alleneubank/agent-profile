@@ -5,7 +5,7 @@ description: Use when preparing clean, logical git commits from an existing work
 
 # Git Commit
 
-Prepare focused commits that are easy to review and revert.
+Prepare focused commits that are easy to verify and revert.
 
 ## Workflow
 
@@ -21,8 +21,10 @@ Prepare focused commits that are easy to review and revert.
 - Never include unrelated drift just because it is present.
 - Do not rewrite or discard user changes unless explicitly asked.
 - If the tree contains multiple unrelated changes, create multiple commits.
+- When a behavior-preserving prefactor and the behavior change are each green on
+  their own, keep them as separate logical commits; do not split a change into
+  invalid intermediate states merely to make it smaller.
 - Mention uncommitted leftovers after committing.
 - Keep `.hunk/` out of the commit. A `.hunk/agent-context.json` review sidecar is
   written only on request (see `hunk-notes`); when one is requested, it lands
   before the commit so its line numbers match the working-tree diff.
-
