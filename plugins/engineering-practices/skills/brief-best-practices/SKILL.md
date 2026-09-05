@@ -17,7 +17,7 @@ Subjective surfaces (a docs page, a report, a visual artifact) get a **mini-brie
 
 ## Naming & placement
 
-Always `BRIEF.md`, colocated with the surface it governs: root for project scope, `apps/foo/BRIEF.md`, `packages/bar/BRIEF.md`, or a docs subtree (e.g. `docs/toys/BRIEF.md`). Working memory never lives beside the brief as sidecar docs — the `DELTA.md` / `DEVIATIONS.md` pattern is retired: per-round gaps and iteration facts belong to the campaign's LOOP.md State (loop-brief skill), and an infeasible floor's waiver is law, not working memory — it lives in the brief's own Decisions, dated, naming the floor, the blocker, and the nearest-feasible alternative in force. A surviving sidecar dissolves (dissolve-docs skill). The brief is present-tense law; git is the changelog.
+Always `BRIEF.md`, colocated with the surface it governs: root for project scope, `apps/foo/BRIEF.md`, `packages/bar/BRIEF.md`, or a docs subtree (e.g. `docs/toys/BRIEF.md`). Working memory never lives beside the brief as sidecar docs: per-round gaps and iteration facts belong to the campaign's LOOP.md State (loop-brief skill), and an infeasible floor's waiver is law, not working memory — it lives in the brief's own Decisions, dated, naming the floor, the blocker, and the nearest-feasible alternative in force. A sidecar such as `DELTA.md` or `DEVIATIONS.md` dissolves (dissolve-docs skill). The brief is present-tense law; git is the changelog.
 
 ## The seven slots (required concerns, adaptable shape)
 

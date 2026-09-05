@@ -99,8 +99,7 @@ bash -c 'echo LEAKED 2>&1 >/dev/null | head'                   # (nothing)
 
 This is a property of the shell, not of any one tool: it applies to `op
 read`, `fnox get`, `aws`, and anything else that prints a credential on
-stdout. On 2026-08-27 it put a live Stripe test key into a session
-transcript, and the key had to be rotated.
+stdout.
 
 The lesson is not "get the redirection right" — that framing invites another
 attempt, and the safe form differs per shell. It is: **never construct a

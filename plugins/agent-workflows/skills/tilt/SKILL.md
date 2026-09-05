@@ -153,14 +153,12 @@ fi
 tilt get uiresources -o json | jq -r '.items[] | "\(.metadata.name): runtime=\(.status.runtimeStatus) update=\(.status.updateStatus)"'
 ```
 
-## Critical: Never Restart for Code Changes
+## Tilt live-reloads
 
-Tilt live-reloads automatically. **Never suggest restarting `tilt up`** for:
-- Tiltfile edits
-- Source code changes
-- Kubernetes manifest updates
-
-Restart only for: Tilt version upgrades, port/host changes, crashes, cluster context switches.
+Tilt picks up Tiltfile edits, source changes, and Kubernetes manifest updates
+without a restart, so restarting is not a fix for any of them. Restart `tilt up`
+only for Tilt version upgrades, port/host changes, crashes, or cluster context
+switches.
 
 After editing, verify the existing Tilt run picked up the change:
 
