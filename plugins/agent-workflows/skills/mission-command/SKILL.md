@@ -65,10 +65,11 @@ prepare again after any edit.
 ## Close at a terminal
 
 A loop closes only from `done` (every gate green), `budget-exhausted`, or
-`superseded`. `close prepare` lists every unit not done (`complete` | `drop`),
-every decision (`route:spec` | `route:brief` | `drop`), every blocker, every
-body section (`drop` | `migrated`), and — when a mission is linked — each
-targeted rubric item (`met` with evidence, `open`, `waived` with reason).
+`superseded`. `close prepare` lists every unit not done (`complete` | `drop`;
+a dropped unit is filed as a tracker issue first), every decision
+(`route:spec` | `route:brief` | `drop`), every blocker, every body section
+(`drop` | `migrated`), and — when a mission is linked — each targeted
+rubric item (`met` with evidence, `open`, `waived` with reason).
 `close apply` routes, updates the mission, and deletes `LOOP.md`. Git is the
 archive: no copy, no ledger, no sidecar. A later attempt starts a fresh loop.
 

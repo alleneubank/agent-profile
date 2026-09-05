@@ -102,13 +102,13 @@ next, and the terminal bug bash on the resulting artifact last.
 ## Terminal states
 
 - `done` — every gate `green`, the targeted floors have admissible evidence,
-  and any required bug-bash gate is `green` against the current artifact. Stop
-  the loop and write the handoff for the human's boundary
-  steps. Once the boundary clears, `missionctl close` routes durable
-  decisions to SPEC/BRIEF, marks linked mission rubric items with evidence,
-  and deletes the loop — a closed campaign's loop left on the branch is a
-  defect (doctrine standing order). Campaign done never implies mission
-  achieved.
+  and any required bug-bash gate is `green` against the current artifact.
+  `missionctl close` then routes durable decisions to SPEC/BRIEF, marks
+  linked mission rubric items with evidence, and deletes the loop; each
+  unfinished unit is filed as a tracker issue. Close lands before the branch
+  merges — the handoff for the human's boundary steps carries what the loop
+  held, and a loop that reaches a shared branch is a defect (doctrine law).
+  Campaign done never implies mission achieved.
 - `blocked` — the numbered blocker batch with proposed answers. The human's
   answers land as `ratified` decisions; the loop resumes.
 - `budget-exhausted` — `iteration` reached `iteration_budget`, or — earlier
