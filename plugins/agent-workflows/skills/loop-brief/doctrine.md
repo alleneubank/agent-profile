@@ -24,6 +24,10 @@ archive.
 - Run it before asserting it: commands, endpoints, and fixes are presented
   with executed output; behavior is test-driven before being codified into
   docs or skills.
+- Campaign control artifacts never merge into a shared branch — any branch
+  others build on, not only the default one. `LOOP.md` and
+  `.mission/mission.yaml` leave the tracked tree before the merge; a loop on
+  a shared branch is a campaign every later session tries to resume.
 - Claims carry sources: causal explanations and external facts (versions,
   vendor behavior) cite docs, a live check, or an experiment — pretrained
   memory is not a source.
@@ -100,9 +104,10 @@ archive.
   invariant or safety requires it; useful adjacency is a future campaign, not
   silent scope growth.
 - Campaign reaches a terminal → `missionctl close`: route durable decisions
-  to SPEC/BRIEF, cite evidence on any linked mission rubric items, delete the
-  loop; never merge a later attempt into the same `LOOP.md`. Compact at
-  milestones so the loop stays a bounded working set, never a journal.
+  to SPEC/BRIEF, cite evidence on any linked mission rubric items, file each
+  unfinished unit as a tracker issue, delete the loop; never merge a later
+  attempt into the same `LOOP.md`. Compact at milestones so the loop stays a
+  bounded working set, never a journal.
 - Bug-bash capacity varies by repository and surface → declare its task or time
   budget and severity floor in the campaign contract; never replace it with a
   global issue count or an open-ended "until approval" loop.
