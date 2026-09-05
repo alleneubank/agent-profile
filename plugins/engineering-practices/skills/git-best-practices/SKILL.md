@@ -13,14 +13,9 @@ When this skill is loaded, follow these directives for all git operations:
 2. **Conventional commits** — every commit uses `type(scope): description` format
 3. **Stage explicitly** — add files by name so only intended changes are committed
 4. **Protect shared history** — use `--force-with-lease` for force pushes, never plain `--force`; a force push is routine only when the ordered work requires it and a backup ref exists — force-pushing a shared or deploy-tracked ref belongs to the user
+5. **Push per-ref** — discover which refs deploy pipelines track before pushing (CI/CD config, repo docs). A push to a non-deploying branch is a proposal; a push to a deploy-tracked ref — or any push in a direct-push repo — is a publish and belongs to the user (rules of engagement). Force-with-lease only for rewritten history
 
 ## Agent Git Workflow
-
-1. **Check state** — run `git status` and `git diff HEAD`
-2. **Discover branches** — identify default/current/(optional) production branch names (see Branch Discovery)
-3. **Stage by name** — `git add path/to/file` for each file; verify with `git status`
-4. **Write a conventional commit** — `type(scope): description` with optional body
-5. **Push safely** — discover which refs deploy pipelines track before pushing (CI/CD config, repo docs). Pushes to non-deploying branches are routine proposals; a push to a deploy-tracked ref — or any push in a direct-push repo — is a publish and belongs to the user (rules of engagement). Use `git push --force-with-lease origin {branch}` only for rewritten history
 
 ### Checkpoint Commits
 
@@ -164,10 +159,8 @@ split an inherently atomic change into invalid intermediate states.
 
 ### PR Creation
 
-Use repo-native PR tooling (`gh pr create`, GitLab CLI, or web UI) with:
-- Short title under 70 characters
-- Summary section with 1-3 bullet points
-- Test plan as a bulleted checklist
+Use repo-native PR tooling (`gh pr create`, GitLab CLI, or web UI) with a short
+title, a summary that says what changed and why, and a test plan as a checklist.
 
 ### Merge Readiness
 

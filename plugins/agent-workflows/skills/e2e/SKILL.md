@@ -75,41 +75,19 @@ The human is the most expensive verifier — spend them last, and once.
 
 ## Workflow
 
-### Step 1: Discover Test Infrastructure
-
-1. Find e2e config: `playwright.config.ts`, `vitest.config.ts`, or project-specific setup
-2. Read `package.json` for the canonical e2e command
-3. Check if dev server or Tilt environment is required and running
-4. Find spec files: `*.spec.md`, `docs/*.spec.md` - source of truth for bug decisions
-
-### Step 2: Run Tests
-
-```bash
-# Playwright
-yarn playwright test --reporter=line
-
-# Or project-specific
-yarn test:e2e
-```
-
-Parse failures into:
+Run the repo's own e2e command (its package or task-runner script, with a
+minimal reporter) once any required dev server or Tilt environment is up. The
+colocated `SPEC.md`, and the supporting `*.spec.md` files it links, is the source
+of truth for bug decisions. Parse failures into:
 
 | Test | File | Error | Category |
 |---|---|---|---|
 | `login flow` | `auth.spec.ts:42` | timeout waiting for selector | TBD |
 
-### Step 3: Categorize
-
 For each failure: read the test and source it exercises, check the corresponding
 contract, locate the source of nondeterminism or mismatch, then assign a category
 (flaky / outdated / bug / unverified). Retry outcome is evidence, not the
-classification rule.
-
-### Step 4: Fix by Category
-
-Apply fixes in order: flaky first (unblocks other tests), then outdated, then bug.
-
-### Step 5: Re-run and Report
+classification rule. Fix by category, re-run, and report:
 
 ```
 ## E2E Results

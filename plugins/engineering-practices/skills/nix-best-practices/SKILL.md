@@ -282,34 +282,6 @@ export NIXPKGS_ALLOW_UNFREE=1
 use flake --impure
 ```
 
-## Common Commands
-
-```bash
-# Update all inputs
-nix flake update
-
-# Update specific input
-nix flake update some-input
-
-# Check flake validity
-nix flake check
-
-# Show flake metadata
-nix flake metadata
-
-# Enter dev shell
-nix develop
-
-# Run command in dev shell
-nix develop -c <command>
-
-# Build package
-nix build .#packageName
-
-# Run package
-nix run .#packageName
-```
-
 ## Troubleshooting
 
 ### "unexpected argument" Error

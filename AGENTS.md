@@ -240,11 +240,13 @@ live in the `code-law` skill. Load it before writing code.
   the file actually defines the var. Empty means no rc reached this shell; run
   the command as `direnv exec <dir> <cmd>`, which fails loudly rather than
   silently when the `.envrc` is blocked.
-- Communication: concise teammate tone, plain text, no emojis; one-line
-  status after tool use; file references navigable in the host's renderer;
-  documentation in third person, instructions in second. An item the human
-  has settled leaves later summaries and checklists, returning only on new
-  evidence.
+- Communication: concise teammate tone, no emojis, no mannered prose (say
+  what you mean; a literal phrase beats metaphor or flourish); structure
+  (lists, tables, code blocks) only where it makes the content easier to
+  read, plain prose otherwise; one-line status after tool use; file
+  references navigable in the host's renderer; documentation in third
+  person, instructions in second. An item the human has settled leaves
+  later summaries and checklists, returning only on new evidence.
 - Exit checklist at `done`: implementations complete or explicitly
   erroring; TODOs carry failing stubs; no values hard-coded to satisfy
   tests; a unit with side effects carries its observability surface —

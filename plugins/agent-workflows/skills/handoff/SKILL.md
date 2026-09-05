@@ -29,7 +29,7 @@ sessions; its Decisions reference the loop's rather than forking them.
    - `missionctl context` output when a loop exists: loop id, current unit,
      red gates, blockers, and the evidence pointers already earned
 2. Write to `~/.handoffs/handoff-<repo>-<shortname>-<timestamp>.md`.
-3. Front-load the next action in the first 10 lines.
+3. Front-load the next action: the title and opening lines answer "what do I do now."
 4. Include concrete file paths, commands, identifiers, and constraints.
 
 ## Output Shape
@@ -37,7 +37,7 @@ sessions; its Decisions reference the loop's rather than forking them.
 ```markdown
 # <what to do next>
 
-<2-4 sentence state summary>
+<short state summary>
 
 ## What's done
 
@@ -79,7 +79,7 @@ sessions; its Decisions reference the loop's rather than forking them.
 - Link to the one campaign `LOOP.md` (and `.mission/mission.yaml` when one
   is declared); never merge a later campaign's notes into the handoff or
   treat campaign completion as mission achievement.
-- Keep the handoff short enough to scan; target 60-100 lines.
+- Keep the handoff short enough to scan in one sitting.
 - Do not include secrets or pasted secret values.
 - State publish, push, deploy, and approval boundaries explicitly.
 - If a `.hunk/agent-context.json` rationale sidecar exists, note whether it still
