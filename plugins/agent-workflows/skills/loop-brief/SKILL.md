@@ -35,6 +35,9 @@ worker, or a human-started session told to continue the campaign.
 - `missionctl inspect` reports `legacy-untyped` or `legacy-mission-control`
   → `missionctl adopt --write`, review the draft, then proceed. Legacy loops
   are adopted deliberately, never treated as comparable.
+- Driven by a recurring scheduler → a terminal state ends the schedule; a
+  later tick that finds no `LOOP.md` after `close` stops instead of
+  authoring a new campaign.
 
 ## Authoring
 
@@ -117,6 +120,15 @@ next, and the terminal bug bash on the resulting artifact last.
   converge. Raising the budget is the human's.
 - `superseded` — a named replacement campaign takes over; close this loop
   with its evidence dispositions and start the replacement fresh.
+
+Every terminal shares one write-back, whichever state it is. Settle the loop
+(`close` for `done` and `superseded`; write back and commit for `blocked` and
+`budget-exhausted`, which resume after the human acts). Clean up what the
+campaign started — processes, fixtures, containers, worktrees, untracked
+scratch files — so nothing outlives it that the next session did not ask
+for. Save non-obvious findings to persistent memory, when the harness has
+one. Then report a sitrep (sitrep skill): attended, the reply is the report;
+unattended, it also lands in `~/.handoffs/` so it outlives the session.
 
 ## Red flags
 
