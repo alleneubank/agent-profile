@@ -14,17 +14,48 @@ verification catch.
 saying "be deterministic" changes nothing; the floor that reddens on a
 violation is what holds. Build the detector when you name the property.
 
+The detector is the toolchain's, not a bespoke script. Craft rules a mainstream
+linter or compiler already checks (function length, complexity, warnings as
+errors, unchecked results, unused values) are enforced through that tool's
+configuration and, where it has one, its custom-rule engine. A rule with no such
+checker is a review-list item applied by a reviewer who did not write the code;
+a review comment that recurs is uplifted into the project's style document, not
+repeated. Hand-written checker scripts are code with no tests of their own and
+are not added.
+
 ## Craft
 
+- Write for a human maintainer who has neither this conversation nor the
+  author. Reading healthy code should be almost as easy as reading prose in
+  the reader's native language; a reviewer who struggles for more than a few
+  seconds has found a defect in the code, not in themselves. Nothing from the
+  task leaks in: no names, comments, or structure that refer to the request,
+  the conversation, the change's history (`new`, `v2`, `fixed`, `updated`,
+  `refactored`), or the author's reasoning. When a plain form and a clever
+  form are both correct, the plain form ships.
 - Types first: define types and data models before logic; make illegal
   states unrepresentable; schema changes drive implementation.
 - Assert the invariants code relies on. Programmer errors (violated
   invariants) are asserted and crash; operating errors (bad input,
-  timeouts) are handled and reported — never confuse the two. Assert
-  positive and negative space; pair assertions across independent points;
-  prefer the cheaper rung (compile-time > runtime > test). Put a limit on
-  everything: every loop, queue, buffer, cache, retry, and recursion
-  carries an explicit bound; intentionally infinite loops assert it.
+  timeouts) are handled and reported — never confuse the two. Assertions
+  stay on in production: a failed assertion converts a correctness failure
+  into an availability failure, which is the cheaper of the two. The unit
+  that crashes is the smallest restartable unit that shares no mutable state
+  with its neighbours (a request, a feature, an actor); where no such unit
+  can be named, it is the process — catching a panic inside shared mutable
+  state is not recovery, it is corruption. Assert positive and negative
+  space; pair assertions across independent points; prefer the cheaper rung
+  (compile-time > runtime > test).
+- Put a limit on everything. Every input has a named bound decided at design
+  time — message size, batch size, connection count, queue depth — and every
+  loop, queue, buffer, cache, retry, and recursion carries an explicit bound
+  derived from it; intentionally infinite loops assert it. When the honest
+  bound is "the disk" or "the user", pick a number anyway: exceeding a bound
+  is an operating error the caller handles, never a growth event. Where the
+  inputs are bounded, capacities follow from them, so long-running services
+  and data planes size their structures from the bounds at startup and do not
+  allocate on the hot path; a structure that is full says so instead of
+  growing.
 - Optimize for the reader's cognitive load. Keep each function at one level of
   abstraction; order statements with their data flow; keep relevant details
   close and hide only details whose abstraction reduces what the reader must
@@ -32,9 +63,12 @@ violation is what holds. Build the detector when you name the property.
   resulting contract is clearer.
 - Prefer immutability and pure functions; isolate side effects at system
   boundaries; push `if`s up and `for`s down — parents own control flow and
-  state, leaves stay pure. Use guard clauses for exceptional paths and short
-  cases; use `else` when complementary branches are both core logic. Break up
-  nested control flow and mixed boolean expressions into named decisions.
+  state, leaves stay pure. Every branch accounts for its complement: a guard
+  clause is right for an exceptional path or short case when the guard itself
+  handles or asserts the negative space; use `else` when complementary
+  branches are both core logic; an `if` whose other case nothing handles,
+  asserts, or rules out by type is the defect. Break up nested control flow
+  and mixed boolean expressions into named decisions.
 - Errors are handled or propagated, never swallowed. Keep the failure region
   narrow: wrap only the operation whose failure is handled, catch only the error
   meant to be handled, and preserve the original cause when adding context.

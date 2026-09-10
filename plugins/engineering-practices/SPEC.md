@@ -41,6 +41,21 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 - **REQ-DOCTRINE-004 — Code structure:** `code-law` governs cognitive load,
   hard-to-misuse interfaces, safe defaults, narrow failure regions, precise
   naming and comments, and evidence-based abstraction.
+- **REQ-DOCTRINE-016 — Human reader:** `code-law` names the reader as a human
+  maintainer without the authoring conversation, sets the bar at prose-like
+  readability with reviewer struggle as a code defect, and forbids task,
+  conversation, history, or reasoning artifacts in names, comments, or
+  structure.
+- **REQ-DOCTRINE-014 — Bounds and assertions:** `code-law` requires a named
+  bound on every input decided at design time, capacities derived from those
+  bounds with exceedance handled as an operating error, assertions that stay
+  on in production with the crash boundary at the smallest restartable unit
+  sharing no mutable state, and branches that account for their complement.
+- **REQ-DOCTRINE-015 — Checker placement:** checkable craft rules are enforced
+  through the toolchain's own configuration or custom-rule engine; rules with
+  no such checker are review-list items and recurring review comments are
+  uplifted into the project style document; bespoke checker scripts are not
+  introduced.
 - **REQ-DOCTRINE-005 — Portability and parsimony:** both skills remain
   harness-agnostic, self-contained, and concise; `eng-wiki` is provenance rather
   than a runtime dependency.
@@ -108,6 +123,14 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 - A new skill is a backward-compatible capability and releases as a minor
   version; publication still requires per-artifact authorization. (2026-09-03,
   ratified)
+- Assertions are never compiled out for production; what varies per system
+  is the crash boundary, and the precondition for any boundary smaller than
+  the process is state isolation. (2026-09-10, provisional — from the
+  eng-wiki TigerStyle/matklad ingest)
+- Checkers come from the toolchain's rule engine and configuration, never
+  from hand-written scripts; a rule the toolchain cannot check is applied at
+  review. Bespoke scripts became change detectors and token sinks in
+  practice. (2026-09-10, provisional)
 
 ## Acceptance criteria
 
