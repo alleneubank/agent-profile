@@ -197,7 +197,7 @@ it stops being a test and becomes a mirror.
 - **Liveness-check before killing** a slow verifier run: is it progressing (log output, CPU, intermediate artifacts)? Killing a run seconds before completion costs a full rerun.
 - **Cap restarts of a structurally failing verifier at 2.** Then stop retrying and record the failure output as evidence. A next-cheapest independent gate (targeted suite, isolated file run, control-worktree differential) may stand in for the objective harness — but the done claim names the substitution; the substitute is not the named floor. A genuinely unavailable independent oracle is a clean stop plus handoff, never substituted.
 - **Wait event-driven with a timeout** — watch modes, CI wait commands, background completion notifications.
-- **Never bypass a gate.** `--no-verify` and equivalents are never a shortcut (doctrine law); a gate that is wrong gets fixed, or waived by the human at the boundary — never bypassed in-flight.
+- **Never bypass a gate.** `--no-verify` and equivalents are never a shortcut (shared AGENTS.md law); a gate that is wrong gets fixed, or waived by the human at the boundary — never bypassed in-flight.
 
 ## Contract and risk discovery
 

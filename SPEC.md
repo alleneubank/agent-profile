@@ -1,5 +1,62 @@
 # SPEC — agent-profile runtime and maintenance contracts
 
+## Default instruction efficiency
+
+The universal `AGENTS.md` carries cross-task law. Discoverable skills carry
+action-specific mechanics; campaign references load only when their operation
+is needed. `tee-up` prepares the agreement and `kickoff` executes or resumes it.
+
+### Requirements
+
+- REQ-PROFILE-001 — **Default discovery:** runtime instructions and skill
+  guidance do not advertise RL or the retired `loop-brief` skill. Explicit
+  on-demand tools remain the user's choice; this repository does not uninstall
+  binaries or erase session history.
+- REQ-PROFILE-002 — **Campaign ownership:** `kickoff` owns seed selection,
+  bounded execution, recovery, evidence, and terminals. Its references hold the
+  template and necessary doctrine; `mission-command` owns missionctl operations.
+  `afk` changes human availability without inventing a campaign or scope.
+- REQ-PROFILE-003 — **Proportional work:** bounded attended changes may use
+  existing requirements and a session plan; persistent campaign documents are
+  required only when unattended multi-session work or recovery needs them.
+  Direct implementation is allowed; delegation serves independent work or a
+  required independent verification gate.
+- REQ-PROFILE-004 — **No repeated ceremony:** existing execution authorization
+  survives scope restatement and changes in human presence. Skills load before
+  the governed action, not on incidental file discovery; already available
+  instructions are reused. Evidence remains admissible while its source,
+  artifact, environment, and task identities match.
+- REQ-PROFILE-005 — **Preserved safety:** independent experiential terminals,
+  high-risk approval and bounded specialist review, publish scope, secrets,
+  fail-closed verification, and direnv trust boundaries remain enforced.
+- REQ-PROFILE-006 — **Measurable context:** universal `AGENTS.md` stays at or
+  below 1,300 whitespace-delimited words, from a 2,325-word baseline. This is a
+  size constraint, not proof of behavior; fresh scenarios judge decision quality.
+
+### Invariants and non-goals
+
+No duplicate public execution skill, implicit publication, plugin version bump,
+or missionctl schema change belongs to this consolidation. Repository-local
+guidance is not counted as universally loaded context.
+
+### Decisions
+
+- 2026-09-09 — Adopt `tee-up` → `kickoff`, retire ambient RL and the separate
+  loop-authoring skill, and reduce global process while preserving verification
+  and authority boundaries. **ratified (human)**
+- 2026-09-09 — Cap the shared profile at 1,300 words and use state identity,
+  rather than iteration number, for evidence reuse. **provisional (driver)**
+
+### Acceptance
+
+- [ ] `scripts/validate-instructions.py` checks the default catalog, retired
+  references, local Markdown links, and universal word budget.
+- [ ] `tests/bugbash-routing-scenarios.md` compares baseline and candidate
+  decisions for bounded attended work, fresh kickoff, AFK continuation,
+  unchanged evidence, high-risk work, and honest blocked terminals; no material
+  or critical regression remains.
+- [ ] `npm run check` and `./scripts/validate.sh` pass on the final state.
+
 `missionctl` is a separately versioned PATH dependency. This repository owns
 the shared doctrine, not the reducer, executable, or lifecycle adapter.
 
@@ -133,7 +190,7 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
 - REQ-BUGBASH-001 — **Evidence selection:** `AGENTS.md` starts verification
   from material user/operator risks and chooses the cheapest faithful evidence.
   Generic generative code review is not a default delivery gate. Specialized
-  review is bounded to a named risk and severity floor; ADF high-risk classes
+  review is bounded to a named risk and severity floor; shared high-risk classes
   receive the matching review by default unless the human records a PLAN waiver.
 - REQ-BUGBASH-002 — **Real-use gate:** an operable application or system uses a
   task-based bug bash when lower-level checks cannot expose its assembled

@@ -1,10 +1,13 @@
 # Behavior-first gate-routing scenarios
 
-Read root `AGENTS.md` and the behavior-first section of root `SPEC.md`, plus only
-these runtime skills:
+Read root `AGENTS.md` and the behavior-first section of root `SPEC.md`, plus
+these runtime skills and the references or execution skills that version routes
+to. Do not read implementation notes or the source diff:
 
 - `plugins/agent-workflows/skills/bugbash/SKILL.md`
-- `plugins/agent-workflows/skills/loop-brief/SKILL.md`
+- `plugins/agent-workflows/skills/kickoff/SKILL.md`
+- `plugins/agent-workflows/skills/tee-up/SKILL.md`
+- `plugins/agent-workflows/skills/afk/SKILL.md`
 - `plugins/agent-workflows/skills/writing-plans/SKILL.md`
 - `plugins/engineering-practices/skills/testing-best-practices/SKILL.md`
 
@@ -17,6 +20,12 @@ applicable gate or campaign terminal. Report a finding when the instructions
 over-trigger generic review or bugbash, under-protect a high-risk change, permit
 stale evidence, or leave no honest terminal. The run is green only when every
 scenario is answered and no finding is material or critical.
+
+For baseline/candidate comparison, give each fresh runner only that version's
+runtime instructions and these same tasks. Record the decisions, required
+questions, document creation, skill reads, verifier runs, and boundary actions;
+compare counts alongside correctness. Word reduction alone cannot make the run
+green. Missing tooling and unavailable execution remain explicit limitations.
 
 1. A pure parsing library changes one deterministic transformation. Unit and
    property tests can decide every named risk; it has no installable or operable
@@ -45,3 +54,26 @@ scenario is answered and no finding is material or critical.
    Claude, and Pi. Deterministic validation can check packaging and references,
    while fixed fresh-context tasks can expose routing behavior and a bounded
    instruction-system pass can inspect non-executable coherence.
+10. The user says "fix this parser edge case now; keep it local." Existing
+    requirements and a fast harness cover the bounded attended change. The
+    source file happens to mention a deployment tool. State the next actions,
+    required documents, skill reads, delegation, and any question before work.
+11. During that authorized fix the user says "stepping away, keep going."
+    There is no LOOP.md; the remaining implementation and checks fit in the
+    current session. State how presence changes the workflow and its terminal.
+12. In a fresh session the user invokes kickoff with a tee-up-prepared seed,
+    an iteration budget of four, and a local-only boundary. The seed resolves
+    objective, acceptance, and targets. No LOOP.md exists. State the first
+    actions and whether scope restatement requires another go-ahead.
+13. A resumed campaign has green harness and bug-bash evidence with matching
+    source, dirty-state, artifact, environment, and task identities. Only the
+    campaign's administrative iteration counter advanced. Decide what to run
+    and record. Then repeat the decision after the deployed test environment
+    changes while source and artifact remain identical.
+14. The user asks tee-up to refine a draft kickoff invocation. Its seed and
+    budget exist; a named skill is already present in the current context.
+    State what to read, whether to create LOOP.md, and the deliverable.
+15. A kickoff campaign lacks a required fresh executor after the deterministic
+    gates pass. Two attempts establish that its execution service is unavailable.
+    State what work continues, how to report the terminal, and whether a static
+    review or a new iteration can make the missing gate green.

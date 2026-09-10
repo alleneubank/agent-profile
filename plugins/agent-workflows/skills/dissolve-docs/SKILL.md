@@ -5,7 +5,7 @@ description: Use when the user calls a docs cleanup, a campaign has shipped, or 
 
 # Dissolve Docs
 
-Mechanics for the doctrine standing order (loop-brief `doctrine.md`):
+Mechanics for the [campaign doctrine](../kickoff/references/doctrine.md):
 narrative, planning, and loop docs dissolve — anything important,
 necessary, or authoritative migrates into the standing docs, the rest is
 deleted. The standing-doc surface is the only durable documentation, and

@@ -156,9 +156,15 @@ versions managed under Releasing below.
 ./scripts/validate.sh
 ```
 
-## Typed mission command
+## Campaign workflow
 
-The `loop-brief` and `mission-command` skills consume the separately
+`tee-up` prepares an objective, acceptance, seed, budget, and boundary without
+executing the draft. `kickoff` executes that agreement in a fresh session or
+resumes an existing loop; its references hold campaign execution, the template,
+and doctrine. `afk` changes human availability without adding scope or forcing
+a bounded attended task into a campaign.
+
+The `kickoff` and `mission-command` skills consume the separately
 versioned `missionctl` executable from `PATH` (one compact `LOOP.md` per
 campaign, optional `.mission/mission.yaml`); agent-profile does not vendor or
 release that tool or register its `SessionStart` loop-context hook. Fleet
@@ -168,12 +174,19 @@ plugin from `github:alleneubank/missionctl`.
 The old `codex-reviewer` and `ralph-reviewed` Claude hook plugins are retired.
 For an operable application or system, use the `bugbash` skill as the default
 behavior-first readiness gate: exercise the built surface through realistic
-user or operator tasks and capture reproducible findings. Use `rl` review or
-another bounded specialist review when explicitly requested, for the ADF's
+user or operator tasks and capture reproducible findings. Use a bounded
+specialist review when explicitly requested, for the shared profile's
 high-risk classes unless the human records a PLAN waiver, or when the QA design
 names another non-executable risk such as code comprehensibility. Run that
 review before the final bug bash so its fixes do not stale the experiential
 evidence.
+
+`AGENTS.md` is the universal instruction source. It keeps scope, authority,
+secrets, verification, and operational safety; action-specific procedures load
+through the skill catalog when needed. The instruction validator enforces the
+1,300-word universal budget and checks local links and retired default guidance.
+`tests/bugbash-routing-scenarios.md` evaluates routing and process costs; word
+count is not a behavioral verifier.
 
 When this repository is also the installed global profile, Codex would normally
 discover the same `AGENTS.md` once globally and once at the project root.

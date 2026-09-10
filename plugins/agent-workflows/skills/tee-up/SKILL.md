@@ -5,7 +5,8 @@ description: Use when the user shares a draft prompt or slash-command invocation
 
 # Tee Up
 
-Review a draft prompt or slash invocation and return a refined one. The
+Prepare the agreement for `kickoff`: review a draft prompt or slash invocation
+and return a refined one. The
 draft is the text following the skill invocation. The output is the refined
 prompt in a code block plus a short list of what changed and why. Report and
 stop: the refined prompt runs in a fresh session so the executor does not
@@ -15,7 +16,8 @@ inherit this review's context.
 
 Wording cannot be graded until what it already inherits is known.
 
-- Read the `SKILL.md` of every skill the draft names; note what each already
+- Read the `SKILL.md` of each skill the draft names unless already available
+  in context; note what each already
   mandates (presence, budgets, terminal states, boundaries, cleanup).
 - Read the seed the draft points at — `LANE.md`, `LOOP.md`, an issue, a
   handoff — and note what it already declares.
@@ -31,14 +33,23 @@ Mark each item `covered-by-skill` (name the skill), `covered-by-draft`, or
 
 - Presence: attended or unattended.
 - Seed or objective: what the work starts from.
+- Acceptance: the observable outcome and the verifier that can decide it.
+- Scope and non-goals: what the execution is authorized to change.
 - Budget: iterations, time, or tasks.
 - Skills to load before the governed actions.
-- Boundary restated: publish, push, merge, issue close, deploy.
+- Boundary and existing authorization: concrete artifacts/refs, publication,
+  issue operations, and any required high-risk plan decision. Do not reset
+  authorization already given.
 - What "clean up" means: processes, fixtures, containers, worktrees,
   untracked files.
 - Outputs bound to every terminal state, with a location that survives the
   session.
 - Memory write-back of non-obvious findings.
+
+Classify high-risk work and the required evidence while preparing the agreement;
+settled approval carries into execution. Load detailed references only for an
+unresolved argument or requirement, not every implementation step the executor
+might eventually take.
 
 ## Refine
 

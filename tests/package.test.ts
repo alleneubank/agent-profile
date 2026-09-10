@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -42,6 +43,14 @@ function referencesOnLine(path: string, marker: string): string[] {
 }
 
 describe("public skill catalog", () => {
+  it("keeps the runtime catalog retired-tool-free, linked, and within its context budget", () => {
+    expect(() => execFileSync("python3", [resolve(ROOT, "scripts/validate-instructions.py")], {
+      encoding: "utf8",
+      timeout: 10_000,
+      stdio: "pipe",
+    })).not.toThrow();
+  });
+
   it("keeps references out of recursive skill discovery", () => {
     const nestedEntrypoints = SKILL_ROOTS.flatMap(filesBelow).filter(
       (path) => path.endsWith("/references/SKILL.md") || path.includes("/references/") && path.endsWith("/SKILL.md"),

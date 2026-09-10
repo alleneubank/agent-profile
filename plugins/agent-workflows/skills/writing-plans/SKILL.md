@@ -27,7 +27,9 @@ Do not use this skill when:
 
 1. Read the relevant code, docs, and existing specs.
 2. Confirm the scope is one coherent unit of work.
-3. Stop and clarify if the plan would depend on guessed requirements.
+3. Investigate missing facts and existing decisions. Clarify only unresolved
+   requirements that materially change scope, acceptance, or a boundary;
+   reversible implementation choices remain the driver's.
 
 If the request covers multiple independent changes, split it into separate plans or clearly separated task groups.
 
@@ -39,9 +41,10 @@ rubric ids it advances (`targets`). A unit that advances no target is omitted
 unless a SPEC invariant or safety requirement makes it necessary; cite that
 requirement in the unit.
 
-Otherwise, save the plan where the user asked. If they did not specify a location, use:
-
-`docs/plans/YYYY-MM-DD-<topic>.md`
+Otherwise, use a concise session plan or the harness's plan mechanism for
+bounded attended work. Save a document only when the user requests one or
+cross-session recovery needs it; use the requested location, an existing
+handoff, or kickoff's LOOP.md. Do not create a docs tree for ordinary work.
 
 Start with:
 
@@ -90,10 +93,11 @@ Then include:
 - Include commands that can actually be run from the repo.
 - Keep steps concrete: "add parser for X in `foo.ts`", not "improve parsing".
 - Keep unrelated refactors out unless they are required to make the change safe.
-- Give each task a risk class; the ADF law defines the high-risk set and its approval requirement.
+- Give each task a risk class; shared AGENTS.md defines the high-risk set and
+  its approval requirement. Existing approval is not requested again.
 - Include a back-of-envelope resource sketch for data-plane work (per-request/per-item hot paths).
 - For an operable surface, keep the bug-bash artifact, environment, task or time
-  budget, and severity floor explicit. High-risk ADF classes default to a
+  budget, and severity floor explicit. The shared high-risk classes default to a
   matching bounded specialist review unless the human records a PLAN waiver;
   other classes add one only for a named risk that execution cannot decide. Put
   selected review before the terminal bug bash and never invent an open-ended
@@ -106,9 +110,9 @@ If the plan will be executed in the same session:
 - Keep one task in progress at a time
 - Revise the plan if implementation reveals real gaps
 
-Independent sidecar work may run as parallel bounded subagents with
-non-overlapping ownership; the critical path defaults to the packetized
-delegation stream (rules of engagement).
+Implement directly or delegate bounded independent work where useful, with
+non-overlapping file ownership. Reserve fresh independent executors for the
+gates that require them; implementation delegation is not itself a gate.
 
 ## Red Flags
 

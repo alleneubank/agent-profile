@@ -385,6 +385,7 @@ require_json "$ROOT/package.json"
 check_manifest_parity
 check_pi_package
 check_destructive_examples
+python3 "$ROOT/scripts/validate-instructions.py"
 check_release_tags
 
 if command -v claude >/dev/null 2>&1; then

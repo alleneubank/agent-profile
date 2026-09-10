@@ -42,7 +42,7 @@ and a set of proposed amendments — never silent law edits.
 2. **Sample or forward-run.** For a soak eval, use `recall list` / `recall
    search` for substantive sessions in the
    window (skip trivial Q&A). Stratify before reading: attended vs unattended
-   (rl workers, afk, overnight loops), across repos, across machines. 15-20
+   (background workers, afk, overnight loops), across repos, across machines. 15-20
    depth audits per round is the working size; note the total population so
    coverage is explicit. For a pre-release eval, install or point an isolated
    session at the candidate profile, choose a few real tasks across representative
@@ -71,7 +71,7 @@ and a set of proposed amendments — never silent law edits.
      evidence session ids, what changed since the last round.
    - Proposed amendments, split by destination: AGENTS.md law (human ratifies —
      editing law directly is a Boundary violation), the doctrine
-     (laws/standing orders/conventions in the loop-brief skill's `doctrine.md`
+     (standing orders in kickoff's [doctrine](../kickoff/references/doctrine.md)
      — amendments arrive as diffs with provenance in the commit message;
      ratification is the merge), skills (normal commit + publish path), tool
      issues (file with authorization).
@@ -137,6 +137,10 @@ than diluting the sample.
   skill load before the action, only after a miss, or not at all? Report the
   denominator of applicable actions, not just sessions containing the skill
   name.
+- **Context and process cost** — compare unnecessary questions, repeated skill
+  reads, unnecessary campaign documents, and reruns on unchanged evidence.
+  Report counts alongside missed gates and boundary errors; smaller prompts or
+  fewer calls alone do not establish an improvement.
 
 ## Red Flags
 

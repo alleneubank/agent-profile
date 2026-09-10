@@ -1,48 +1,55 @@
 ---
 name: kickoff
-description: Use when the user wants to start or resume an unattended campaign on the current branch from a seed (LANE.md, LOOP.md, or the branch's issue) with an iteration budget, or asks to see the kickoff prompt without running it.
+description: Use when the user wants to start or resume a bounded unattended or multi-session campaign, execute a tee-up-prepared prompt, create a LOOP.md, or preview a kickoff without running it.
 ---
 
 # Kickoff
 
-The baked unattended-campaign prompt, parameterized. It composes `afk`
-(presence constraint), `loop-brief` (authoring, iteration protocol, terminal
-states), and `sitrep` (the terminal report); load them rather than
-re-deriving what they mandate.
+Execute the agreed campaign in the current session. `tee-up` prepares the
+objective, acceptance, seed, budget, and boundary; kickoff owns execution and
+recovery. Existing authorization survives scope restatement. Review-only requests
+and `--dry-run` stop after printing the prepared prompt.
 
-## Arguments
+## Resolve the agreement
 
-Parsed from the text following the skill invocation.
+- **Seed:** an explicitly supplied prompt, file, handoff, or issue. Otherwise
+  use root `LANE.md`, then the current branch's issue. Read the actual seed;
+  never invent one. A valid existing `LOOP.md` is resumed, not re-seeded.
+- **Budget:** the explicit iteration cap, else the existing loop's cap. If both
+  are absent, ask once while attended; unattended, record the missing budget
+  and stop before starting a campaign. Do not silently raise a cap.
+- **Presence:** unattended by default; an explicit attended request wins.
+- **Boundary:** preserve the agreed scope and authorization. The default is
+  local work only: no push, PR, merge, deploy, release, or issue close. An
+  explicit authorization in the agreement overrides that default for its named
+  artifact and ref only.
+- **Outputs:** every terminal gets a sitrep. When unattended, also save it to
+  `~/.handoffs/sitrep-<repo>-<branch>-<date>.md`.
 
-- **seed** — where `LOOP.md` is authored from. Default: `LANE.md` at the
-  repo root when present, else the branch's issue on the forge. An existing
-  `LOOP.md` is resumed per `loop-brief`, never re-seeded.
-- **budget** — the numeric `iteration_budget`. Default: the value an existing
-  `LOOP.md` declares. With neither, ask once before starting — the kickoff
-  moment is attended even though the campaign is not.
-- **`--dry-run`** — print the prompt that would run, fully substituted, and
-  stop. No `LOOP.md` is created, no file is edited, no skill is loaded.
+If a fact is missing, investigate the seed and existing contract first. A real
+missing seed is `blocked` before iteration 1, with the missing input named.
 
-## The prompt
+## Preview or execute
 
+For `--dry-run`, print the fully resolved prompt below and stop. Unresolved
+arguments are explicitly labeled; do not invent values. No files are edited,
+no campaign runs, and no other skill is loaded just to preview the prompt.
+
+```text
+Run kickoff from <seed>, <presence>, with an iteration budget of <n>.
+Outcome and acceptance: <resolved agreement or canonical seed reference>.
+Boundary: <authorized actions and remaining boundary>.
+Report every terminal; when unattended, save the sitrep under ~/.handoffs/.
 ```
-Unattended. Seed LOOP.md from <seed>; set an iteration budget of <n>.
-Load code-law and testing-best-practices before writing code or tests.
-Stop at the Boundary: no push, PR, merge, or issue close.
-On any terminal state (done, blocked, budget-exhausted, superseded) follow
-loop-brief's terminal write-back: settle the loop, clean up what the
-campaign started, save non-obvious findings to memory, then write the
-sitrep to ~/.handoffs/sitrep-<repo>-<branch>-<date>.md and print it.
-```
 
-Without `--dry-run`, substitute the arguments and act on the prompt as the
-campaign's operation order in this session: load `afk` and `loop-brief`,
-author or resume `LOOP.md`, and run iterations until a terminal state.
+For execution, briefly state the resolved outcome and proceed. Read
+[execution.md](references/execution.md) for authoring, iteration, and terminal
+handling. Read the [template](references/template.md) only when creating a loop;
+consult the [doctrine](references/doctrine.md) when resolving an unsettled
+campaign decision. Load `mission-command` for lifecycle operations, `bugbash`
+when its gate is needed, and `sitrep` at reporting time. Domain skills load
+before the governed action. Kickoff does not pre-load the entire workflow stack.
 
-## Red flags
-
-- Starting the loop when `--dry-run` was given.
-- Inventing a seed when neither `LANE.md` nor a branch issue exists — that
-  is a `blocked` before iteration 1, reported in the sitrep.
-- A terminal reached with no sitrep file: an unattended campaign's only
-  output is what survives the session.
+A recurring scheduler that finds the campaign already closed stops; it never
+starts another attempt from the old seed. A fresh attempt needs its own
+agreement and loop.

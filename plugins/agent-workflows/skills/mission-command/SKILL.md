@@ -37,7 +37,7 @@ meaning) before continuing.
 
 ## One campaign, one loop
 
-Authoring and iterating a loop is the `loop-brief` skill. The contract is in
+Authoring and iterating a loop is the `kickoff` skill. The contract is in
 [references/schema.md](references/schema.md): frontmatter is the machine
 contract, the body is working notes. Direct edits are supported like edits to
 `Cargo.toml`; missionctl is not an exclusive generator.
@@ -75,8 +75,8 @@ archive: no copy, no ledger, no sidecar. A later attempt starts a fresh loop.
 
 ## Declare a mission only when earned
 
-Create `.mission/mission.yaml` when the outcome is multi-campaign, unattended
-multi-phase, or cross-repository. Its rubric items are the enduring floors
+Create `.mission/mission.yaml` when the outcome spans campaigns or repositories.
+Unattended or multi-phase work alone does not require one. Its rubric items are the enduring floors
 campaigns advance through `targets.mission`; their `status` moves through
 `close` dispositions, and `evidence` is a reference into the native verifier,
 CI, review, or release system — never a narrative. A cross-repository loop
@@ -87,6 +87,8 @@ mission.
 
 ## Boundary
 
-Publishing, tracked-ref merges, release tags, live secrets, biometrics, and
-genuine unknowns remain human actions. Local validation, projection,
-compaction, closure, and adoption remain interior work.
+Apply the shared per-artifact publish and secret boundaries. Local validation,
+projection, compaction, closure, and adoption remain interior work. A closure
+that needs a tracker issue honors existing posting authorization; without it,
+prepare the issue content and report pending closure rather than posting or
+dropping the unit silently.

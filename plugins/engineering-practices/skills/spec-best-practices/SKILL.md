@@ -1,6 +1,6 @@
 ---
 name: spec-best-practices
-description: Use when creating, reviewing, updating, interviewing for, completing, or finding gaps in SPEC.md files, or entering the ADF SPEC gate.
+description: Use when creating, reviewing, updating, interviewing for, completing, or finding gaps in SPEC.md files.
 ---
 
 ## Modes
@@ -45,7 +45,7 @@ Specs are freeform markdown. No rigid template, no YAML frontmatter, no required
 - [ ] Rate limiter rejects >100 req/min per IP
 ```
 
-**Risk tags** (conditional) -- flag high-risk items (schema migrations, auth changes, public API contracts, infra changes) when those risks exist or the ADF `PLAN` gate requires approval.
+**Risk tags** (conditional) -- flag high-risk items (schema migrations, auth changes, public API contracts, infra changes) when those risks exist; shared AGENTS.md governs plan approval and specialist review.
 
 **Test traceability** (conditional) -- `REQ-*` to test file:line mapping. Added during/after TDD, not at initial authoring. The mapped test asserts the requirement, not the code that implements it -- a test traceable only to a call sequence proves the implementation exists, not that the requirement holds.
 
@@ -59,7 +59,7 @@ Specs are freeform markdown. No rigid template, no YAML frontmatter, no required
 
 **External-API integrations**: before locking requirements for an integration with an external provider, run a recall sweep for prior findings on that provider/API and fetch the provider's current docs — do not spec against remembered API shapes; deprecations and legacy endpoints invalidate them. Treat unexplained existing config (keys, scopes, endpoints) as an investigation trigger, not dead code.
 
-**Mutation policy**: the spec is the human+agent contract — do not reshape it without direction, and a component the spec does not name is a scope change, not an implementation detail. A reversible interior call that refines spec territory may land as a dated provisional Decisions entry, ratified at the boundary. When spec/implementation drift is found, surface it immediately — the user decides whether to update spec or code.
+**Mutation policy**: the spec is the human+agent contract — do not reshape the agreed outcome without direction. A new app, service, or product capability outside that outcome changes scope; internal implementation choices within it remain the driver's. A reversible interior call that refines spec territory may land as a dated provisional Decisions entry, ratified at the boundary. When spec/implementation drift is found, investigate against existing authorization; surface unresolved contract changes for the human instead of silently changing the expected behavior.
 
 **Spec vs. plan**: specs describe what and why; plans describe how and when. Plans are ephemeral. Absorb durable decisions into the spec; delete the plan doc.
 
