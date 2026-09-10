@@ -1,13 +1,21 @@
 ---
-description: Use when invoking the GitHub CLI for structured output, pagination, repository targeting, search, or API fallbacks.
+description: Use when invoking the GitHub CLI for repository inspection, issues, pull requests, attachments, release assets, projects, or API access.
 metadata:
     github-path: skills/gh
-    github-ref: refs/tags/v2.94.0
+    github-ref: refs/tags/v2.100.0
     github-repo: https://github.com/cli/cli
-    github-tree-sha: 08c15bb61582f50ccf76df4cf71de3a68512070f
+    github-tree-sha: 5cf8c343d459cc0fdd839100c02b6fbb1ddda8e1
 name: gh
 ---
 # Reference
+
+Checked against GitHub CLI **2.100.0** on 2026-09-10, incorporating the
+[upstream skill](https://github.com/cli/cli/blob/v2.100.0/skills/gh/SKILL.md)
+with local delivery guidance. The metadata identifies that upstream source,
+not a byte-identical copy. Check `gh version` and the relevant command's
+`--help` before assuming a capability is unavailable. For a refresh, resolve
+[the latest release](https://github.com/cli/cli/releases/latest) and merge its
+changes into this source; preserve local additions.
 
 ## Interactivity policy
 
@@ -52,12 +60,22 @@ Pass `--repo OWNER/REPO` (`-R`) to override the resolved CWD repo.
 
 - `gh search issues|prs|code|repos|commits|users` uses GitHub's search
   index and accepts the full search syntax (`is:open`, `author:`,
-  `label:`, `repo:owner/name`, `in:title`, ...). Pass the entire query as
-  one quoted string, the same way you would for `--search`:
-  `gh search issues "is:open author:foo repo:cli/cli"`. Prefer it for
+  `label:`, `repo:owner/name`, `in:title`, ...). Pass raw qualifiers as
+  separate arguments: `gh search issues repo:cli/cli is:open`. Quoting that
+  entire query as one argument can turn it into `repo:"cli/cli is:open"`
+  and fail. Quote multi-word free text or an individual qualifier value;
+  dedicated flags such as `--repo` and `--author` also work. Prefer search for
   anything cross-repo or filtered by author/label.
 - `gh issue list --search "..."` and `gh pr list --search "..."` accept
-  the same syntax but are scoped to one repo.
+  the query as one quoted flag value and are scoped to one repo.
+- For GitHub App authors use `--app dependabot` on issue/PR list and search,
+  or `--author 'dependabot[bot]'`; `--author dependabot` targets a different
+  identity.
+- `gh search issues --search-type semantic` searches natural-language meaning;
+  `hybrid` blends semantic and keyword ranking, and `lexical` is the default.
+  Semantic/hybrid search is issues-only on GitHub.com/GHEC, returns one page,
+  and cannot combine with `--sort` or `--order`. It is not an exhaustive
+  inventory; use lexical queries and account for result limits when counting.
 
 ## Issue types, sub-issues, and relationships
 
@@ -86,6 +104,80 @@ blocked-by/blocking relationships.
 - GHES: issue types and sub-issues need 3.17+; blocked-by/blocking
   relationships need 3.19+.
 
+## Attachments and evidence archives
+
+### Images and videos (`--attach`, 2.99+)
+
+Use native `--attach` on `gh issue` / `gh pr` **create, edit, and comment**
+when the file and host are supported:
+
+```sh
+gh issue comment 12 --repo OWNER/REPO --body-file comment.md \
+  --attach './before.png#Before the fix' --attach ./after.mp4
+```
+
+- Accepts `png`, `jpg`, `jpeg`, `gif`, `webp`, `svg`, `mp4`, `mov`, `webm`,
+  with at most 50 attachments per invocation. **ZIP, JSON, text, and PDF are
+  not accepted by this flag**, even when GitHub's web uploader accepts them.
+- A matching local Markdown path in the body is replaced with its uploaded
+  URL; otherwise the attachment is appended. Paths resolve from the command's
+  working directory. Image alt text follows `#`; videos cannot take alt text.
+- Uploads require GitHub.com/GHEC, an OAuth token or classic/fine-grained PAT,
+  and repository write/maintain/admin permission. GHES and GitHub App tokens
+  are unsupported. Do not change credential configuration to work around this.
+- `--attach` cannot combine with `--web`; PR creation also disallows
+  `--dry-run`. Issue edit accepts one issue when attaching. Comment attachment
+  works with `--edit-last`, but not `--delete-last`.
+- A later upload failure can leave earlier attachments **posted despite a
+  non-zero exit**. Inspect the returned issue/PR and current body before
+  retrying; resume only the missing work.
+
+### ZIPs and other files (release assets)
+
+For durable evidence in an authorized repository, `gh release create` and
+`gh release upload` accept ZIPs and other asset files. If release storage fits
+the requested outcome and audience, use it and link the returned release URL
+from the issue. If the user specifically needs an issue attachment, use the
+web uploader instead; a release asset is a different storage location.
+
+A dedicated **draft** can preserve evidence without publishing a software
+release. Drafts require repository **push access** to view, so they do not
+serve read-only collaborators. Resolve the repository, intended audience,
+unused archive identifier, and exact source commit first. For an authorized
+archive and notes, with `archive_tag` and `source_commit` set to those values:
+
+```sh
+shasum -a 256 evidence.zip > evidence.zip.sha256
+gh release create "$archive_tag" evidence.zip evidence.zip.sha256 \
+  --repo OWNER/REPO --draft --latest=false --target "$source_commit" \
+  --title 'Evidence archive (keep unpublished)' --notes-file archive-notes.md
+gh release view "$archive_tag" --repo OWNER/REPO \
+  --json url,isDraft,tagName,targetCommitish,assets
+gh release download "$archive_tag" --repo OWNER/REPO \
+  --pattern 'evidence.zip*' --dir fresh-download
+cmp evidence.zip.sha256 fresh-download/evidence.zip.sha256
+(cd fresh-download && shasum -a 256 -c evidence.zip.sha256)
+```
+
+- Draft URLs can contain `untagged-…`; use the returned `url`, not a URL
+  guessed from the requested tag. Verify `isDraft` and the uploaded assets.
+- Without `--draft`, creation publishes; a missing tag can be created from
+  `--target` or the default branch. Inspect tag/deploy triggers before a
+  published release. `--latest=false` alone does not prevent publication.
+- For an existing authorized release use `gh release upload TAG FILE...`.
+  `--clobber` deletes the old asset before uploading and can lose it if upload
+  fails; inspect existing assets and prefer a new name for new evidence.
+- Compare the fresh download's digest against the independently retained local
+  digest, then run the archive's integrity/manifest checks. Linking a release
+  proves location, not byte integrity or the claims inside its evidence.
+- Published assets in public repositories can be downloaded without login
+  (2.96+); private repositories and drafts retain their access requirements.
+
+References: [media attachment rules](https://github.com/cli/cli/blob/v2.100.0/skills/gh/SKILL.md#attaching-images-and-videos),
+[release creation](https://cli.github.com/manual/gh_release_create),
+[release upload](https://cli.github.com/manual/gh_release_upload), and
+[draft visibility](https://docs.github.com/en/rest/releases/releases#list-releases).
+
 ## Discussions (`gh discussion`)
 
 Preview command set, subject to change. Subcommands:
@@ -113,6 +205,38 @@ Preview command set, subject to change. Subcommands:
 - `--json`/`--jq`/`--template` are available on `list` and `view` only;
   `create` and `edit` print the discussion URL. `comment` prints the discussion comment (or reply) URL.
 
+## Read repository contents without cloning (2.95+)
+
+`gh repo read-file` and `gh repo read-dir` are preview commands. Both accept
+`--repo` and `--ref <branch|tag|commit>`; omission means the default branch.
+
+```sh
+gh repo read-file README.md --repo OWNER/REPO --ref "$source_commit"
+gh repo read-dir docs --repo OWNER/REPO --ref "$source_commit" \
+  --json name,path,type,gitSHA
+```
+
+- `read-file --output PATH` saves bytes (`--clobber` permits overwrite);
+  `--output` and `--json` are mutually exclusive. JSON `content` is base64,
+  alongside `name`, `path`, `gitSHA`, `size`, `type`, and `encoding`.
+- `read-dir --json` returns an object with `entries`, not a bare entry array;
+  use `.entries[]` with `--jq`. Fields include file type, mode, size, Git SHA,
+  and submodule information. Non-TTY text output is tab-separated.
+- `read-file` rejects terminal escape sequences by default; `--output` writes
+  raw bytes. Use file output when exact bytes matter rather than weakening
+  terminal-output protection. Binary stdout is allowed when piped, not on a TTY.
+
+## Projects by field name (2.97+)
+
+- `gh project item-edit 1 --owner OWNER --url ISSUE_OR_PR_URL --field Status
+  --value 'In Progress'` selects the project by owner/number and the item by
+  its issue/PR URL. The item URL's owner can differ from the project's owner.
+- `gh project item-list 1 --owner OWNER --field Status --field Priority`
+  adds named columns; `--query` filters with Projects syntax. Projects use
+  `--format json`, not `--json`.
+- Node-ID flags remain available for scripts. An edit changes one field at a
+  time; do not confuse a project URL with the item URL.
+
 ## Fall back to `gh api` for anything `--json` doesn't expose
 
 Sometimes useful data isn't on the typed commands. Examples:
@@ -129,6 +253,12 @@ Sometimes useful data isn't on the typed commands. Examples:
 - `gh auth status` prints the active host(s), user, and which env var (if
   any) is being honored.
 - `gh auth status --json` is supported.
+- Experimental `api_host` routing (2.100+) can be inspected with
+  `gh config get api_host --host github.com`. It routes API requests through
+  a configured gateway while the original host still owns auth, Git remotes,
+  and browser URLs. It is not a security boundary: some requests may still
+  reach the original host. Change it only for an intended gateway setup, not
+  as an authentication repair. See the [2.100 release notes](https://github.com/cli/cli/releases/tag/v2.100.0).
 
 ## PR state and destructive edits
 
@@ -164,6 +294,11 @@ numbers, commit SHAs) resolve before linking them.
 
 - `gh pr checkout <n>` switches branches. Use `gh pr diff <n>` or
   `gh pr view <n>` if you only need to read.
+- `gh pr checkout <n> --worktree <path>` (2.98+) checks the PR out in a
+  worktree instead of switching the current checkout.
+- `gh issue develop <n> --checkout --worktree <path>` (2.99+) creates a
+  linked branch and checks it out in a worktree. `--worktree` requires
+  `--checkout`, a nonblank path, and cannot combine with `--list`.
 - `NO_COLOR`, `CLICOLOR_FORCE`, and `GH_FORCE_TTY` are honored. Set
   `GH_FORCE_TTY=1` if you want TTY-style output (colors, tables, the
   pager, interactivity) inside an agent harness; leave it unset unless needed.
