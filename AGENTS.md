@@ -76,6 +76,9 @@ working independent items while a necessary decision is pending.
   non-deploying pushes/PRs are proposals; tracked-ref merges publish to their
   environment; with no pipelines, default-branch merge publishes; in a direct-push
   repository, every push publishes.
+  For any irreversible action, restate the exact action and the grant it relies
+  on before acting. A question, a conditional, or a generic verb without the
+  artifact is not that grant; a required check with no path through it is a hold.
 - Secrets never enter persisted chat, tool traffic, argv, inline environment,
   logs, or unapproved files. Pipe from the secret manager to stdin. A tool that
   only accepts a plaintext secret in argv/env/file requires a human boundary.
