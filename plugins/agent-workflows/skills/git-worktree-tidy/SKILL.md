@@ -1,13 +1,13 @@
 ---
 name: git-worktree-tidy
-description: Use when fetching and pruning a worktree-based repository, removing stale local branches or worktrees, or fast-forwarding its important branches.
+description: Use when fetching and pruning a worktree-based repository, removing stale local branches or worktrees, or bringing its important branches up to date.
 ---
 
 # git-worktree-tidy
 
 Routine hygiene for bare-repo + worktree layouts. Fetches origin, prunes
-gone branches and orphaned worktrees, and fast-forwards important local
-branches.
+gone branches and orphaned worktrees, restores a missing default-branch
+checkout, and fast-forwards important branches.
 
 ## When to use
 
@@ -30,6 +30,11 @@ User asks to "fetch prune", "clean up stale branches/worktrees", or
   work under a new SHA, so a fully-shipped branch still shows commits "not in
   main" and a non-ancestor tip. Verify ship status against the forge's PR
   merge state (step 3a) before classifying a gone branch as unmerged.
+- Never switch a live or dirty worktree onto the default branch to restore
+  a checkout. Add a new worktree at the conventional path, or skip.
+- Auto-create a missing default-branch worktree only as a sibling of `.bare`
+  named after that branch (`../<default>` from `.bare`). In any other layout,
+  report the missing checkout and do not invent a path.
 
 ## Workflow
 
@@ -151,17 +156,41 @@ git branch -D <branch1> <branch2> ...
 git worktree prune -v
 ```
 
-### 9) Update important branches
+### 9) Restore and update important branches
 
-Identify which branches have dedicated worktrees for `main`, `dev`, or
-other important branches (user may specify). For each:
+Discover the default branch from the remote, not by guessing `main`:
 
 ```bash
-cd <worktree-path> && git pull --ff-only origin <branch>
+git rev-parse --abbrev-ref origin/HEAD    # origin/dev
+# if missing:
+git remote set-head origin -a
 ```
+
+The branch name is the part after `origin/`. If `origin/HEAD` is still
+unknown, report and skip restore rather than guessing.
+
+Restore a missing checkout only for the default branch. Fast-forward every
+worktree already on the default, `main`, `dev`, or a branch the user named.
+
+Inspect `git worktree list`:
+
+- Default (or other important) branch already checked out →
+  `cd <path> && git pull --ff-only origin <branch>`.
+  If that path is not the conventional `.bare` sibling, say so; do not try
+  to add a second checkout (git will refuse).
+- Default branch not checked out, git-common-dir is `.bare`, and
+  `../<default>` (relative to `.bare`) does not exist:
+  - local ref exists: `git worktree add ../<default> <default>`
+  - no local ref: `git worktree add ../<default> -b <default> origin/<default>`
+  - then ff-only pull
+  Creating that checkout is interior; report the path.
+- Default branch not checked out, but the conventional path exists or this
+  is not a `.bare` sibling layout → skip and report. Do not `git switch`
+  some other worktree onto the branch.
 
 If ff-only fails, report the divergence and ask for guidance.
 
 ### 10) Final status
 
-Show a summary: what was removed, what was updated, any items skipped.
+Show a summary: what was removed, what checkouts were restored, what was
+updated, any items skipped.
