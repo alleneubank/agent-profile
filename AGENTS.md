@@ -31,8 +31,9 @@ The verifier, not confidence, decides when work is done. Discover the existing
 harness first: task runner/scripts, repository docs, then project defaults.
 Map material risks to the cheapest evidence that can expose each one.
 
-- Run objective checks for executable contracts. Use a task-based bug bash on
-  an operable assembled surface when lower-level checks cannot expose its risk.
+- Verify requested behavior through the real execution path when practical.
+  Use narrower checks where they provide better evidence at lower cost, and a
+  task-based bug bash where risk needs exploratory or experiential judgment.
   Generic static review is not a default gate.
 - High-risk changes — schema/data migrations, auth/security boundaries, public
   API compatibility or contract changes, infra/deploy configuration — require
@@ -50,10 +51,15 @@ Map material risks to the cheapest evidence that can expose each one.
 - Required verification that is unavailable, broken, or bypassed is blocked,
   never green. Static review cannot replace required real-use execution.
   Never bypass checks with `--no-verify` or equivalent shortcuts.
-- Tests assert observable correctness, not the implementation's call sequence.
-  Fix causes; never weaken assertions to pass. A behavior fix needs a reproducer
-  observed red before green. A finding the harness should have caught earns
-  a new floor. Claims of pre-existing failures or deferred bugs cite evidence.
+- Tests assert requested behavior, not the implementation's call sequence.
+  Fix causes; never weaken assertions to pass. Unit tests and TDD are tools,
+  not universal requirements. Reproduce bugs before fixing when practical;
+  disclose when that evidence is unavailable. Add regression coverage for
+  meaningful risks, not to duplicate sufficient coverage at another layer.
+  Claims of pre-existing failures or deferred bugs cite evidence.
+- Stop when the requested outcomes and required gates have current evidence.
+  Further checks need an uncovered material risk, a new finding, or an explicit
+  requirement; fewer checks alone are not success.
 
 Done claims name the executed verifier and retained output. Unexecuted checks
 are labeled NOT run. Report limitations honestly; a block names evidence,

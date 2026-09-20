@@ -68,10 +68,10 @@ Then include:
 - Targets: `<REQ-ID | Floor | RUBRIC-ID>`
 - Outcome: <what is true when this task is done>
 - Steps:
-  - Write or update the failing test
-  - Run the targeted check and confirm the expected failure
+  - Define the expected outcome and cheapest faithful check
+  - Reproduce the reported failure when practical; use TDD if it helps
   - Implement the minimal change
-  - Re-run targeted verification
+  - Exercise the selected verification path
   - Apply the code-health law, refactor while green, and re-run the targeted check
   - Run broader regression checks if needed
 - Verification:
@@ -84,7 +84,8 @@ Then include:
 
 - Use exact file paths.
 - Prefer tasks that can be verified independently.
-- Encode test-first thinking when the task changes runtime behavior.
+- Select verification for changed behavior; do not prescribe test-first order
+  or an additional test layer without a task-specific benefit.
 - Start from a written QA design: map each material risk to the cheapest faithful
   evidence instead of filling every test layer by habit.
 - When the existing structure fights the feature, put a behavior-preserving

@@ -72,10 +72,11 @@ A finding needs observable evidence:
 
 Do not manufacture findings from speculative source concerns. After observation,
 trace the behavior through logs and code to locate the root cause. Fix findings
-only when the request or campaign authorizes fixes. A fix is complete when the
-reproducer is observed red before the change, the targeted task passes after it,
-and the affected task set is rerun. If a cheap deterministic check could have
-caught the defect, add that regression floor.
+only when the request or campaign authorizes fixes. Reproduce the failure before
+fixing when practical; disclose any limit. A fix needs the targeted task passing
+on the changed artifact and affected tasks rerun. Add repeatable regression
+coverage where it protects a meaningful risk; an existing E2E reproducer can
+supply it without an additional unit test.
 
 `green` means every required task ran on the named artifact with no finding at or
 above the blocking floor. `findings` means at least one such finding remains.

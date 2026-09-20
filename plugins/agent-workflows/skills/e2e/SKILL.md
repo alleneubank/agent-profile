@@ -54,14 +54,14 @@ exonerate the product.
 **Bug fixes:**
 - Quote the spec section that defines expected behavior
 - Fix the source code to match the spec
-- The TDD gate applies: the covering unit test is observed red before the fix (verifier law)
+- Reproduce the failure before fixing when practical. The E2E reproducer can supply regression coverage; add a narrower test only for a risk or diagnostic benefit it covers better.
 - Verifier integrity applies: never bend an e2e assertion toward buggy code (verifier law)
 - **Never change API contracts or interfaces** without spec backing
 - If no spec exists, climb the interior-decision ladder before asking: investigate (git log, linked tests, code intent), check the surface's Decisions and the doctrine, consult an independent model at a genuine fork. Still undecided: classify as unverified failure and batch the bug-vs-outdated question for the human — never block on it
 
 ## Source Code Boundary
 
-E2e test fixes must not change application logic, API contracts, database schemas, or configuration defaults. The only exception: bug fixes where a spec explicitly defines the correct behavior and unit tests cover the fix.
+E2e test fixes must not change application logic, API contracts, database schemas, or configuration defaults. The only exception: authorized bug fixes where a spec explicitly defines the correct behavior and faithful behavioral verification covers the fix. That verification may be the E2E test itself; no additional unit test is required solely for permission to fix the bug. High-risk approval and specialist gates still apply.
 
 ## Human Retest Ladder
 
@@ -103,8 +103,13 @@ classification rule. Fix by category, re-run, and report:
 ### Remaining Failures
 - UNVERIFIED: `settings.spec.ts:55` - no spec, needs user decision
 
-### Unit Tests Added
-- `src/transfer.test.ts` - amount validation edge cases (covers BUG fix)
+### Evidence
+- Artifact/environment: <tested revision, build and target>
+- `artifacts/transfer-trace.zip` - actual transfer outcome and error path
+- `artifacts/transfer-result.png` - visible result, not proof of settlement
+
+### Regression Coverage
+- <existing or added behavior check; omit additional tests when redundant>
 ```
 
 See `testing-best-practices` for async handling, flake classification, and preflight check patterns.

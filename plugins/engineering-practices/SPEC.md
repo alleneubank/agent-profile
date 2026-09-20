@@ -32,8 +32,9 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   distinct tests.
 - **REQ-DOCTRINE-002 — Test integrity:** testing guidance requires actionable
   scenario/outcome tests, literal and discriminating expectations, narrow
-  assertions, observed red for new tests, and deliberate red while refactoring
-  test code.
+  assertions, and evidence that new or materially changed verification paths
+  reject relevant failures. TDD and unit-test coverage are selected for their value, not required
+  for every change; test refactoring preserves failure sensitivity.
 - **REQ-DOCTRINE-003 — End-to-end scope:** E2E guidance covers important user
   workflows and important error classes while keeping the suite small; hermetic
   runs prefer ephemeral state and shared environments require idempotent,
@@ -59,9 +60,10 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 - **REQ-DOCTRINE-005 — Portability and parsimony:** both skills remain
   harness-agnostic, self-contained, and concise; `eng-wiki` is provenance rather
   than a runtime dependency.
-- **REQ-DOCTRINE-006 — Verification:** fixed scenarios are observed red against
-  the prior skills and pass a fresh-context task run after the revision; the
-  repository's mechanical gates remain green.
+- **REQ-DOCTRINE-006 — Verification:** fixed scenarios compare prior and revised
+  skills in fresh-context task runs, exposing the targeted gap while preserving
+  legitimate neighboring behavior; the repository's mechanical gates remain
+  green. An unobserved baseline failure is not claimed as reproduced.
 - **REQ-DOCTRINE-007 — Risk-driven QA:** test planning starts from public
   contracts and material product risks, maps them to the cheapest faithful
   evidence, treats coverage as a gap-discovery clue, and does not require a
@@ -90,6 +92,12 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 - **REQ-DOCTRINE-013 — Trigger contracts:** every skill description starts with
   `Use when...`; portable provenance metadata remains legal when every target
   harness and repository validation accept it.
+- **REQ-DOCTRINE-017 — Behavioral evidence:** verification exercises requested
+  behavior through the real execution path when practical, uses narrower checks
+  where they provide better evidence at lower cost, and adds permanent coverage
+  for meaningful regression risks rather than test-layer completeness. UI
+  screenshots establish visible state, not unobserved persistence or delivery;
+  completion evidence identifies the tested artifact and untested boundaries.
 
 ## Invariants
 
@@ -149,6 +157,15 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 - [x] Routine host cleanup and OrbStack troubleshooting contain no implicit
       data-deletion path.
 - [x] The description-shape gate passes for every shipped skill.
+
+### Optional-TDD candidate acceptance (pending)
+
+- [ ] Fresh baseline/candidate runs cover UI persistence, a service integration
+      failure, and a logic-heavy neighboring case where unit/property tests or
+      TDD remain useful; no material-or-higher regression remains.
+- [ ] A known-broken control demonstrates the acceptance verifier's sensitivity;
+      no implementation, screenshot, or model summary defines its own oracle.
+- [ ] `npm run check` and `./scripts/validate.sh` pass on the candidate.
 
 ## Test traceability
 

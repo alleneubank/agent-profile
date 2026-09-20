@@ -26,9 +26,10 @@ one that measures the real goal.
   gate when lower layers cannot expose the risk. A loop needing live secrets to
   verify is built at the wrong altitude.
 - Realism: integration over mocked units for data flow and permissions; use the
-  dependency-fidelity order under Integration / contract tests. Visual/UI floors
-  are the change observed on the live surface. Before done: would this survive a
-  manual walkthrough?
+  dependency-fidelity order under Integration / contract tests. Exercise changed
+  application behavior through its public UI, CLI, or API in a safe environment
+  when practical. Assert the promised effect, not merely successful startup or
+  an accepted request. Live execution does not authorize production mutations.
 
 ## Evidence identity and freshness
 
@@ -43,6 +44,13 @@ another candidate:
 - verifier/task id, charter or input version, terminal status, and retained
   artifact locations.
 
+Keep acceptance expectations grounded in the request and existing contracts,
+not inferred from what the implementation happens to do. In the existing test
+report or task summary, link the executed behavior, outcome, artifact identity,
+and untested boundaries. Screenshots show visible state; persistence, delivery,
+and access-control claims need corresponding outcome checks. Capture artifacts
+from that run, excluding secrets; a model's assurance is not an artifact.
+
 A mutation invalidates every downstream result it can affect: source changes
 invalidate builds and later gates; a rebuilt artifact invalidates assembled
 behavior evidence; environment changes invalidate target-specific execution.
@@ -56,7 +64,11 @@ Choose scope by the contract and the trade among **speed, maintainability,
 utilization, reliability, and fidelity**. No pyramid shape or layer count is
 universally correct. Improve any dimension that does not make another worse;
 spend slower, broader tests where their fidelity catches risks a smaller test
-cannot.
+cannot. TDD is optional: use it where it improves design or diagnosis. Direct
+execution or a focused E2E test can be sufficient without an additional unit
+test. Add permanent tests where repeatable regression protection earns their
+maintenance cost; scratch checks need not become committed test files. Existing
+repository-required checks remain required.
 
 ### Unit tests
 
@@ -147,11 +159,12 @@ it stops being a test and becomes a mirror.
   injection, package-scoped seams, stable automation IDs, or an interface with
   the test as a real consumer; the seam must preserve or improve the production
   contract rather than weaken it.
-- **Observe red.** A new test fails for the expected reason before the production
-  change makes it green; a compile failure counts when it proves the missing
-  contract. While refactoring test code, deliberately break the behavior under
-  test and keep the expected failure present so a deleted assertion cannot pass
-  silently; restore production behavior and finish green.
+- **Validate the verifier.** Establish failure sensitivity when introducing or
+  materially changing a verification path, using a representative known-broken
+  case, negative control, or safely introduced fault. Reuse matching evidence;
+  this need not precede implementation or repeat for every test case. When
+  choosing TDD, observe the expected failure before making it pass. When
+  refactoring tests, preserve evidence that a missing assertion would be detected.
 
 ## Execution guidance
 
@@ -222,31 +235,31 @@ Use markdown. Produce only the layers the QA design actually needs:
 
 **Test Cases** -- for checks that become tests, use `ID | Scope | Scenario | Input/state | Expected`. Case IDs are append-only; do not organize the matrix by function unless the function is itself the public contract.
 
-**Execution Plan** -- ordered red/green/refactor steps, exact commands, and any
-task-based bug bash or telemetry gate. A layer with no material risk to cover is
-omitted rather than filled ceremonially.
+**Execution Plan** -- implementation and verification steps, exact commands,
+and any task-based bug bash or telemetry gate. A layer with no material risk to
+cover is omitted rather than filled ceremonially.
 
 ## CI guidance
 
 ### Fast PR smoke lane
 
-- Unit tests + linting + type-check on every PR.
-- Subset of integration tests covering critical contracts.
+- Existing fast tests + linting + type-check on every PR.
+- Selected integration or E2E smoke tests covering critical contracts.
 - Target: under 5 minutes.
 
 ### Nightly full lane
 
-Full unit + integration + e2e suite with higher property-based iteration counts. Flag tests that pass on retry but failed initially.
+Selected slower suites and higher property-based iteration counts where useful. Flag tests that pass on retry but failed initially. These lanes organize existing coverage; they do not require creating every test layer.
 
 ## Workflow
 
-1. Spec or code defines the module behavior (types, constraints, API surface).
-2. This skill produces the QA design, selected test cases, and execution plan.
-3. The driver or a dispatched worker translates the plan to runnable tests,
-   observed red before the implementation lands.
-4. Implementation proceeds to green; apply the code-health law, refactor while
-   green, then rerun the affected verifier.
-5. Exercise an operable assembled surface through the declared E2E or bug-bash
-   tasks when the QA design selected that evidence.
-6. If implementation reveals missing cases, propose them first; append to spec
-   only when explicitly requested.
+1. Identify the requested behavior and material risks from existing contracts.
+2. Select the smallest faithful verification path. Reproduce a reported bug
+   before fixing when practical; record any limit rather than claiming a red.
+3. Implement and exercise the selected path; use TDD when it helps. Apply the
+   code-health law and rerun affected checks after a change.
+4. Retain the selected execution evidence and add useful regression coverage.
+   Run required independent or specialist gates; direct execution does not
+   waive them. Stop once the outcomes and required gates are evidenced.
+5. If implementation reveals missing requirements, surface them without
+   silently widening scope or rewriting the contract.

@@ -32,6 +32,15 @@ is needed. `tee-up` prepares the agreement and `kickoff` executes or resumes it.
 - REQ-PROFILE-006 — **Measurable context:** universal `AGENTS.md` stays at or
   below 1,300 whitespace-delimited words, from a 2,325-word baseline. This is a
   size constraint, not proof of behavior; fresh scenarios judge decision quality.
+- REQ-PROFILE-007 — **Verification proportionality:** unit tests and TDD are
+  optional techniques. Verification establishes requested outcomes through the
+  real execution path when practical, uses narrower checks where they provide
+  better evidence at lower cost, and does not require duplicate test layers.
+  Existing required gates remain required.
+- REQ-PROFILE-008 — **Completion boundary:** work stops when requested outcomes
+  and required gates have current evidence, unless a new finding, uncovered
+  material risk, or explicit requirement warrants further checks. Evidence
+  derives from executed checks of the contract, not the author's assurance.
 
 ### Invariants and non-goals
 
@@ -56,6 +65,10 @@ guidance is not counted as universally loaded context.
   unchanged evidence, high-risk work, and honest blocked terminals; no material
   or critical regression remains.
 - [ ] `npm run check` and `./scripts/validate.sh` pass on the final state.
+- [ ] A bounded baseline/candidate comparison covers UI persistence, service
+  integration, and concentrated logic, preserving useful unit tests/TDD and
+  rejecting false completion. Candidate artifacts identify the tested state;
+  screenshots do not substitute for checks of invisible effects.
 
 `missionctl` is a separately versioned PATH dependency. This repository owns
 the shared doctrine, not the reducer, executable, or lifecycle adapter.
@@ -293,7 +306,8 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   smallest operational form.
 - No new always-loaded law duplicates mechanics already owned by a skill.
 - Direct secret values never enter scenario fixtures, transcripts, or docs.
-- The post-v4 TDD-soak decision remains open and is not smuggled into this work.
+- Optional TDD does not waive verifier sensitivity, existing repository gates,
+  independent experiential judgment, or high-risk approval and review.
 
 ### Decisions
 
@@ -306,6 +320,11 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
 - Correct the `host-tidy` and OrbStack destructive examples in this release;
   defer the TDD policy choice until post-release soak evidence exists.
   (2026-09-03, ratified by the user)
+- Evaluate optional TDD and real-path verification through an isolated
+  baseline/candidate comparison before any fleet adoption. This replaces the
+  soak-only prerequisite above. The exact law amendment is ratified for this
+  isolated candidate; experiment execution and fleet adoption remain pending.
+  (2026-09-20, ratified by the user's "apply it"; no behavioral improvement measured)
 
 ### Acceptance
 
