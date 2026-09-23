@@ -25,6 +25,17 @@ Agents may create WIP checkpoint commits during long-running tasks, cleaned up b
 - Keep changes logically grouped even in WIP state
 - Run the `rewrite-history` skill before opening a PR to craft a clean narrative
 
+### Setting Work Aside
+
+Set uncommitted work aside as a commit on a `wip/<topic>` branch, not a stash.
+A branch is listed, pushable, and covered by branch hygiene; a stash is local,
+unlabeled, and invisible to later sessions.
+
+- A stash that is popped within the same operation (`--autostash`, a quick
+  stash/pop around a checkout) is fine
+- When the pop does not apply cleanly, commit the stashed work to a `wip/`
+  branch before continuing, and report the branch
+
 ### Commit Discipline
 
 - Stage files explicitly by name: `git add src/auth.ts src/auth.test.ts`
