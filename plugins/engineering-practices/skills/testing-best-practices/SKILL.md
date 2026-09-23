@@ -1,265 +1,52 @@
 ---
 name: testing-best-practices
-description: Use when designing tests, writing test cases, planning test strategy, building or judging a verifier, or attributing test failures. Covers verifier design, unit/integration/e2e layering, and verifier discipline (flake attribution, base-commit repro, broken-verifier handling).
+description: Use when choosing a verifier, diagnosing an unreliable test, or designing nontrivial regression coverage; routine execution of an established check needs no extra workflow.
 ---
 
-## Verifier design
+# Verification
 
-`AGENTS.md` holds the contract a verifier must satisfy — independent,
-fail-closed, integrity, done-claims-carry-evidence. This is how to build
-one that measures the real goal.
+Start with the requested behavior and the important ways it could fail. Use
+existing test commands and the smallest boundary that can expose those failures.
+For an assembled-behavior bug, try the public path early; for isolated logic,
+a focused example or property test may be sufficient. Record reproduction
+limits rather than claiming an unobserved failure.
 
-- **Faithful** — measures the real goal, not a gameable proxy; a loop
-  optimizes its verifier, so an unfaithful one polishes the wrong thing.
-- **Cheap and fast** — seconds-per-look, or the loop starves.
-- **Risk first, harness before judgment** — list the material product risks and
-  map each to the cheapest evidence that can expose it. Floors gate the
-  interior; never outsource to a person or generative critic what a
-  deterministic check can decide. Use a task-based dogfood or bug bash when the
-  risk lives in assembled behavior. When always-loaded law selects a specialist
-  gate, the QA design names its one risk, severity floor, and round budget; it
-  remains complementary to execution of observable contracts.
-- Few, well-crafted, broad-coverage: build the surface's harness, not the
-  task's check — the next feature reuses it for free. Build cheap verifiers
-  freely; propose expensive ones. A deterministic harness proves known
-  contracts; an operable product's assembled surface is the final pre-boundary
-  gate when lower layers cannot expose the risk. A loop needing live secrets to
-  verify is built at the wrong altitude.
-- Realism: integration over mocked units for data flow and permissions; use the
-  dependency-fidelity order under Integration / contract tests. Exercise changed
-  application behavior through its public UI, CLI, or API in a safe environment
-  when practical. Assert the promised effect, not merely successful startup or
-  an accepted request. Live execution does not authorize production mutations.
+## Choosing evidence
 
-## Evidence identity and freshness
+- Check effects, not proxies: persistence needs a fresh read; delivery needs the
+  destination's result; startup or a screenshot cannot establish either.
+- Prefer real dependencies, then behaviorally conformant fakes. Mock a boundary
+  you own when useful; do not build a simulated third-party contract to prove
+  the same simulation.
+- Keep tests understandable: name the scenario, make important inputs explicit,
+  and use discriminating expected results from the contract rather than the
+  implementation. Assert call order only when that interaction is itself the
+  promised behavior.
+- Unit tests, TDD, integration tests, and exploratory use are alternatives or
+  complements selected by risk, not a checklist of layers. Existing required
+  checks still run. Permanent tests earn their maintenance cost through useful
+  regression protection.
+- A bug fix gets one regression test that fails without the fix; add another
+  only for a named risk it would expose. A new checker ships a known-broken
+  case that shows it can fail.
 
-A verifier result is bound to the state it observed, not merely to a command or
-a timestamp. Record enough identity to prevent a green result from migrating to
-another candidate:
+## Reliable execution
 
-- source revision plus a digest of relevant dirty state;
-- built artifact, package, or image digest when execution consumes generated
-  output rather than the source tree directly;
-- resolved environment and target resource identifiers;
-- verifier/task id, charter or input version, terminal status, and retained
-  artifact locations.
+Give concurrent runs their own state. Control clocks, randomness, environment,
+and dependency versions where they affect repeatability. Wait for observable
+conditions with deadlines; never use elapsed sleep as proof of success. Avoid
+runtime test backdoors; explicit dependency injection is legitimate.
 
-Keep acceptance expectations grounded in the request and existing contracts,
-not inferred from what the implementation happens to do. In the existing test
-report or task summary, link the executed behavior, outcome, artifact identity,
-and untested boundaries. Screenshots show visible state; persistence, delivery,
-and access-control claims need corresponding outcome checks. Capture artifacts
-from that run, excluding secrets; a model's assurance is not an artifact.
+If a check fails, locate the cause before attributing it to the environment or
+a flake. Reproduce claimed pre-existing failures at the baseline. A retry is a
+diagnostic probe, not evidence of correctness; stop repeated structural failure
+and report the block. Inspect progress before killing a slow run.
 
-A mutation invalidates every downstream result it can affect: source changes
-invalidate builds and later gates; a rebuilt artifact invalidates assembled
-behavior evidence; environment changes invalidate target-specific execution.
-Rerun from the earliest affected gate. Conversely, unchanged identity needs no
-ceremonial rerun—compare and record the identities. An evidence store should
-reject an attachment whose candidate, artifact, target, or task does not match.
+Record which inputs a result covered: reuse it while they are unchanged, and
+not after they change. A new commit id, message, or squash alone does not
+invalidate it. Do not create a second report if the existing task record can
+link the evidence. After changes, rerun only the affected checks.
 
-## Test layering policy
-
-Choose scope by the contract and the trade among **speed, maintainability,
-utilization, reliability, and fidelity**. No pyramid shape or layer count is
-universally correct. Improve any dimension that does not make another worse;
-spend slower, broader tests where their fidelity catches risks a smaller test
-cannot. TDD is optional: use it where it improves design or diagnosis. Direct
-execution or a focused E2E test can be sufficient without an additional unit
-test. Add permanent tests where repeatable regression protection earns their
-maintenance cost; scratch checks need not become committed test files. Existing
-repository-required checks remain required.
-
-### Unit tests
-
-Purpose: verify public behaviors and invariants at a small, precise boundary.
-Do not assume one test per method or one test suite per implementation-detail
-class; test a detail directly only when its complexity or diagnostic precision
-earns the coupling.
-
-- **Data-driven**: use a parameterized table when every row is the same behavior
-  with the same setup, action, assertion shape, and failure interpretation.
-  Vary independent input dimensions independently unless their interaction is
-  the contract. Give distinct scenarios or outcomes, especially different error
-  contracts, separate tests even when a table would be shorter.
-- **Property-based**: fuzz invariants that must hold across all inputs (e.g., idempotency, sort stability, roundtrip serialization).
-- **Cross the boundary**: cover the transition from valid to invalid, not just samples of each — where data moves across the valid/invalid line is where the bugs live.
-
-### Integration / contract tests
-
-Purpose: verify interactions between components and external services.
-
-- **API envelope**: request/response shape, status codes, content types, pagination.
-- **Error contract**: error codes, error shapes, rate limiting, retries.
-- **Auth and scoping**: token validation, role-based access, tenant isolation.
-- **Eventual consistency**: verify convergence within bounded time; poll rather than sleep.
-- Reuse auth state across tests where possible; avoid redundant login flows.
-- Prefer, in order, the real dependency; a service-owner fake or hermetic local
-  server; a mock of an interface you own. Do not invent a third party's fake or
-  mocked contract. If no faithful implementation is practical, wrap that API in
-  an interface you own and test the wrapper against the real contract.
-- Prefer a shared behavioral contract suite that runs against both the real
-  implementation and its fake. Without conformance evidence, name fake drift as
-  a risk rather than assuming equivalence.
-
-### E2E tests
-
-Purpose: verify real user workflows through the full stack.
-
-- Exercise the real path and the highest-fidelity practical dependencies.
-- Keep the suite small: cover each important user workflow and one representative
-  of each important error class. Lower layers carry variations that do not need
-  the full stack.
-- **Hermetic environments**: provision isolated, ephemeral state and dispose of
-  it after the run; a clean namespace is a declared input, not an ambient
-  assumption.
-- **Shared environments**: use unique data, discover and tolerate prior state,
-  and make flows idempotent rather than depending on cleanup or a clean slate.
-- **Flow-oriented**: validate real data paths end-to-end rather than isolated assertions.
-
-## Hard rules
-
-A test is a **second, independent statement of the contract**. Every rule below
-follows from that: where the test stops being independent of the code it grades,
-it stops being a test and becomes a mirror.
-
-- **Name the scenario and outcome, not merely the method.** A failure should say
-  what condition was exercised and what behavior broke. One test covers one
-  scenario; one behavior may span methods and one method may need several tests.
-- **Make relevant details explicit and hide only noise.** Keep cause next to
-  effect. Builders and helpers may supply irrelevant boilerplate, but a test
-  writes every value or condition its expectation depends on even when it matches
-  a helper default. Prefer descriptive and meaningful phrases (DAMP) to DRY
-  indirection when readability and uniqueness conflict.
-- **Expected values are written down, not computed.** A test that derives its
-  expectation the way the implementation does passes by construction, and keeps
-  passing when both sides are wrong. Write the literal. The same failure at a
-  larger scale is a mock that grows into a simulator — past that point the suite
-  measures the simulator.
-- **Assertions are narrow and actionable.** Assert the field, property, or
-  interaction the behavior promises instead of incidental full-object equality.
-  Use literal, non-default, discriminating values, varying them where a swap,
-  reuse, or missing write must be exposed. The test name plus failure output is
-  enough to begin investigation.
-- **Tests assert observable behavior, not the call sequence that produced it.**
-  Mocking every collaborator and verifying the calls in order restates the
-  implementation in a second syntax — a change detector: it reddens on
-  behavior-preserving refactors of the code it mirrors, and a correct and an
-  incorrect implementation are equally likely to pass it. The tell is mechanical
-  maintenance: one edit applied across many tests to keep a no-op change green.
-  Such a test is negative value, not neutral — rewrite it against the outcome or
-  delete it. An interaction assertion is legitimate only where the interaction
-  *is* the contract (a retry budget, an audit emission, an exactly-once side
-  effect), and then it names the guarantee, not the call.
-- **Never invent signatures, source locations, or line numbers.** Only reference what you have read from the codebase.
-- **No fabricated fixtures.** Derive test data from actual schemas, types, or seed data in the repo.
-- **No test-only runtime behavior or backdoors in product code.** A branch such
-  as `if (process.env.TEST)` that changes product behavior is a defect in the
-  test setup. Legitimate production design may include explicit dependency
-  injection, package-scoped seams, stable automation IDs, or an interface with
-  the test as a real consumer; the seam must preserve or improve the production
-  contract rather than weaken it.
-- **Validate the verifier.** Establish failure sensitivity when introducing or
-  materially changing a verification path, using a representative known-broken
-  case, negative control, or safely introduced fault. Reuse matching evidence;
-  this need not precede implementation or repeat for every test case. When
-  choosing TDD, observe the expected failure before making it pass. When
-  refactoring tests, preserve evidence that a missing assertion would be detected.
-
-## Execution guidance
-
-### Preflight checks (before e2e)
-
-1. Verify the target environment is reachable (health endpoint, ping).
-2. Confirm required services are running (database, API, auth provider).
-3. Validate test user / credentials exist and are functional.
-4. Check for leftover state that could cause false failures; log it, do not fail on it.
-
-### Deterministic fixtures
-
-- Use seeded randomness for generated data (seeded faker, deterministic UUIDs).
-- Fixtures should be self-contained; avoid cross-test fixture dependencies.
-- Prefer factory functions over shared mutable fixture objects.
-
-### Async handling
-
-- Poll with bounded timeout and backoff; never use fixed `sleep`/`waitForTimeout`.
-- Set explicit timeout per operation; fail fast with a descriptive message on timeout.
-- Bound retry attempts (e.g., max 3 retries with exponential backoff).
-- Use the test framework's native waiting and async assertions over manual loops.
-
-### Flake handling
-
-- Use at most one infrastructure retry as a diagnostic probe, not a verdict. A
-  pass does not prove flake and two failures do not prove determinism; locate the
-  uncontrolled input and decide whether it belongs to product, test, or
-  environment.
-- On retry failure, collect diagnostics: screenshots, network logs, service health, timestamps.
-- Classify the failure (flaky / outdated / bug) before attempting a fix; a classification that waives or defers anything lands as a dated provisional Decision.
-- Never add arbitrary delays or retry loops as a flake "fix."
-
-### Failure attribution (before waiving anything)
-
-- **A failure that only reproduces on your branch is yours.** No "pre-existing" or "environmental" waiver without reproducing the failure at the base commit — a control worktree at the merge base is the cheap, decisive check.
-- **Proven-pre-existing failures get recorded, not skipped.** Add the failure to the campaign's LOOP.md "Known pre-existing failures" section when a charter exists (else the repo's known-flakes note), with its repro command and evidence; future waivers cite the entry instead of re-litigating.
-- **An empty or erroring query is not evidence of absence.** Enumerate the namespace first (list the tests, count the files, query totals) and validate the query shape against a known-present row before concluding "not found."
-- **Cross-subsystem changes run every touched side's harness.** A change spanning two toolchains is unverified until both sides' suites ran, no matter how green one side is.
-
-### When the verifier itself breaks
-
-- **Liveness-check before killing** a slow verifier run: is it progressing (log output, CPU, intermediate artifacts)? Killing a run seconds before completion costs a full rerun.
-- **Cap restarts of a structurally failing verifier at 2.** Then stop retrying and record the failure output as evidence. A next-cheapest independent gate (targeted suite, isolated file run, control-worktree differential) may stand in for the objective harness — but the done claim names the substitution; the substitute is not the named floor. A genuinely unavailable independent oracle is a clean stop plus handoff, never substituted.
-- **Wait event-driven with a timeout** — watch modes, CI wait commands, background completion notifications.
-- **Never bypass a gate.** `--no-verify` and equivalents are never a shortcut (shared AGENTS.md law); a gate that is wrong gets fixed, or waived by the human at the boundary — never bypassed in-flight.
-
-## Contract and risk discovery
-
-Before generating checks:
-- Read the SPEC, public surface, and user request to enumerate promised
-  behaviors, invariants, important failure modes, and state transitions.
-- Name the highest-impact ways the change could harm a user or operator,
-  including risks no code-coverage metric can see.
-- Confirm scope from inspected context; state conservative assumptions when
-  ambiguity is not load-bearing.
-- Map each contract or risk to the cheapest faithful mitigation: type or static
-  check, unit/property test, integration contract, E2E flow, task-based
-  dogfood/bug bash, telemetry, or a named specialized review.
-- Use coverage only after designing the checks, as a clue to missed paths; never
-  use a percentage as evidence that the risk is covered.
-
-## Output format
-
-Use markdown. Produce only the layers the QA design actually needs:
-
-**QA Design** -- table with `Risk or contract | Impact | Evidence | Why this is the cheapest faithful check`.
-
-**Test Cases** -- for checks that become tests, use `ID | Scope | Scenario | Input/state | Expected`. Case IDs are append-only; do not organize the matrix by function unless the function is itself the public contract.
-
-**Execution Plan** -- implementation and verification steps, exact commands,
-and any task-based bug bash or telemetry gate. A layer with no material risk to
-cover is omitted rather than filled ceremonially.
-
-## CI guidance
-
-### Fast PR smoke lane
-
-- Existing fast tests + linting + type-check on every PR.
-- Selected integration or E2E smoke tests covering critical contracts.
-- Target: under 5 minutes.
-
-### Nightly full lane
-
-Selected slower suites and higher property-based iteration counts where useful. Flag tests that pass on retry but failed initially. These lanes organize existing coverage; they do not require creating every test layer.
-
-## Workflow
-
-1. Identify the requested behavior and material risks from existing contracts.
-2. Select the smallest faithful verification path. Reproduce a reported bug
-   before fixing when practical; record any limit rather than claiming a red.
-3. Implement and exercise the selected path; use TDD when it helps. Apply the
-   code-health law and rerun affected checks after a change.
-4. Retain the selected execution evidence and add useful regression coverage.
-   Run required independent or specialist gates; direct execution does not
-   waive them. Stop once the outcomes and required gates are evidenced.
-5. If implementation reveals missing requirements, surface them without
-   silently widening scope or rewriting the contract.
+Use specialist review for the high-risk classes in shared instructions and
+`bugbash` when asked. A required check that cannot execute remains blocked,
+never replaced by static confidence. Stop when the selected check passes.

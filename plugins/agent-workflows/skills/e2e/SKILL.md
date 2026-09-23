@@ -76,9 +76,10 @@ The human is the most expensive verifier — spend them last, and once.
 ## Workflow
 
 Run the repo's own e2e command (its package or task-runner script, with a
-minimal reporter) once any required dev server or Tilt environment is up. The
-colocated `SPEC.md`, and the supporting `*.spec.md` files it links, is the source
-of truth for bug decisions. Parse failures into:
+minimal reporter) once any required dev server or Tilt environment is up and
+its services and test users respond; log leftover state instead of failing on
+it. The colocated `SPEC.md`, and the supporting `*.spec.md` files it links, is
+the source of truth for bug decisions. Parse failures into:
 
 | Test | File | Error | Category |
 |---|---|---|---|
@@ -112,4 +113,4 @@ classification rule. Fix by category, re-run, and report:
 - <existing or added behavior check; omit additional tests when redundant>
 ```
 
-See `testing-best-practices` for async handling, flake classification, and preflight check patterns.
+See `testing-best-practices` for condition waits and flake diagnosis.

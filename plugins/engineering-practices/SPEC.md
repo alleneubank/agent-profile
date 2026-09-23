@@ -27,14 +27,11 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 ## Requirements
 
 - **REQ-DOCTRINE-001 — Testing strategy:** `testing-best-practices` chooses test
-  scope by explicit quality tradeoffs, favors the highest-fidelity practical
-  dependency, and distinguishes homogeneous table cases from behaviorally
-  distinct tests.
-- **REQ-DOCTRINE-002 — Test integrity:** testing guidance requires actionable
-  scenario/outcome tests, literal and discriminating expectations, narrow
-  assertions, and evidence that new or materially changed verification paths
-  reject relevant failures. TDD and unit-test coverage are selected for their value, not required
-  for every change; test refactoring preserves failure sensitivity.
+  scope by risk and favors the highest-fidelity practical dependency.
+- **REQ-DOCTRINE-002 — Test integrity:** testing guidance requires scenario and
+  outcome tests with discriminating expectations. A bug fix gets one regression
+  test that fails without the fix, and a new checker shows it can fail. TDD and
+  unit tests are optional techniques selected by risk.
 - **REQ-DOCTRINE-003 — End-to-end scope:** E2E guidance covers important user
   workflows and important error classes while keeping the suite small; hermetic
   runs prefer ephemeral state and shared environments require idempotent,
@@ -64,10 +61,9 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   skills in fresh-context task runs, exposing the targeted gap while preserving
   legitimate neighboring behavior; the repository's mechanical gates remain
   green. An unobserved baseline failure is not claimed as reproduced.
-- **REQ-DOCTRINE-007 — Risk-driven QA:** test planning starts from public
-  contracts and material product risks, maps them to the cheapest faithful
-  evidence, treats coverage as a gap-discovery clue, and does not require a
-  matrix per function or a ceremonial entry in every test layer.
+- **REQ-DOCTRINE-007 — Risk-driven QA:** test planning starts from the requested
+  behavior and its likely failures, maps them to the cheapest faithful evidence,
+  and does not require a matrix per function or an entry in every test layer.
 - **REQ-DOCTRINE-008 — Causal diagnosis and seams:** retry outcome alone never
   classifies a flake; the owner of nondeterminism is located. Runtime test
   backdoors remain forbidden while explicit dependency injection,
@@ -81,10 +77,10 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   stable output, explicit targeting, precondition, retry, async-operation,
   authority, secret-channel, and evidence mechanics needed to operate a CLI,
   API, or control plane through its public surface.
-- **REQ-DOCTRINE-011 — Evidence identity:** testing guidance binds results to
-  source and dirty state, built artifact, target environment, and verifier task;
-  affected downstream evidence becomes stale after a mutation while unchanged
-  identity remains reusable.
+- **REQ-DOCTRINE-011 — Evidence reuse:** testing guidance records the inputs a
+  result covered; the result stays reusable while they are unchanged, a new
+  commit id alone does not invalidate it, and a change stales the results it can
+  affect.
 - **REQ-DOCTRINE-012 — Destructive examples:** routine host and OrbStack
   guidance never treats volume deletion or factory reset as an inferred
   escalation; data-bearing targets require a separate inventory and explicit
@@ -158,7 +154,10 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
       data-deletion path.
 - [x] The description-shape gate passes for every shipped skill.
 
-### Optional-TDD candidate acceptance (pending)
+### Optional-TDD candidate acceptance (not run)
+
+The 2026-09-22 lean-verification change adopted optional TDD on the user's call
+without the fresh baseline/candidate runs below.
 
 - [ ] Fresh baseline/candidate runs cover UI persistence, a service integration
       failure, and a logic-heavy neighboring case where unit/property tests or
