@@ -171,13 +171,10 @@ release that tool or register its `SessionStart` loop-context hook. Fleet
 installations manage the executable through mise and install the hooks-only
 plugin from `github:alleneubank/missionctl`.
 
-Use `bugbash` when realistic exploratory execution can expose remaining risks.
-Select a fresh participant when author knowledge or subjective judgment is a
-material risk, or the agreement requires independence. Use a bounded
-specialist review when explicitly requested, for the shared profile's
-high-risk classes unless the human records a PLAN waiver, or when the QA design
-names another non-executable risk such as code comprehensibility. Run that
-review before the final bug bash so its fixes do not stale the experiential
+Use `bugbash`, a fresh participant, or another independent review when the
+user or the agreement asks for one. The shared profile's high-risk classes
+still get a bounded specialist review unless the human waives it; run that
+review before any final bug bash so its fixes do not stale the bug-bash
 evidence.
 
 `AGENTS.md` is the universal instruction source. It keeps scope, authority,

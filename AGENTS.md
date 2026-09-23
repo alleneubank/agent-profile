@@ -15,9 +15,8 @@ Use existing requirements and a short session plan for bounded attended work.
 Create persistent campaign artifacts when unattended multi-session execution
 or recovery needs them, not merely because a task touches several files.
 
-Implement directly unless requested delegation, independent parallel work, or
-a required verification gate benefits from another agent. Authoring and judging
-are separate concerns; direct implementation does not waive independence.
+Implement directly unless requested delegation or independent parallel work
+benefits from another agent.
 
 For campaigns, use `tee-up` to prepare the agreement and `kickoff` to execute
 or resume it. `afk` changes human availability, not scope or authorization.
@@ -27,44 +26,26 @@ and decisions survive sessions; apply them instead of re-asking.
 
 ## Verification
 
-The verifier, not confidence, decides when work is done. Discover the existing
-harness first: task runner/scripts, repository docs, then project defaults.
-Map material risks to the cheapest evidence that can expose each one.
+Run the cheapest check that can catch the likely failure of the requested
+behavior, starting with the repository's existing harness. Prefer the real
+command, app, or service when a component test cannot show the outcome. Stop
+when it passes; add a check only for a named risk it would expose.
 
-- Verify requested behavior through the real execution path when practical.
-  Use narrower checks where they provide better evidence at lower cost, and a
-  task-based bug bash where risk needs exploratory or experiential judgment.
-  Generic static review is not a default gate.
 - High-risk changes — schema/data migrations, auth/security boundaries, public
   API compatibility or contract changes, infra/deploy configuration — require
-  plan approval and a matching specialist review by default. Only the human
-  may waive that review, naming faithful alternative evidence. Each review has
-  a named risk, severity floor, and round budget; fix-up confirms findings.
-- Experiential or subjective terminal judgment requires a fresh, disinterested,
-  task-briefed executor with a named blocking floor. An author-context fork is
-  not fresh. Author dogfood is discovery. For high-stakes specialist review,
-  use a different frontier model when correlated blind spots are material.
-- Order gates: objective checks, any selected specialist review, then terminal
-  bug bash on the resulting artifact. Evidence binds to source revision and
-  relevant dirty state, artifact, environment, and task. Reuse matching evidence;
-  after a mutation, rerun from the earliest gate it can affect.
-- Required verification that is unavailable, broken, or bypassed is blocked,
-  never green. Static review cannot replace required real-use execution.
-  Never bypass checks with `--no-verify` or equivalent shortcuts.
-- Tests assert requested behavior, not the implementation's call sequence.
-  Fix causes; never weaken assertions to pass. Unit tests and TDD are tools,
-  not universal requirements. Reproduce bugs before fixing when practical;
-  disclose when that evidence is unavailable. Add regression coverage for
-  meaningful risks, not to duplicate sufficient coverage at another layer.
-  Claims of pre-existing failures or deferred bugs cite evidence.
-- Stop when the requested outcomes and required gates have current evidence.
-  Further checks need an uncovered material risk, a new finding, or an explicit
-  requirement; fewer checks alone are not success.
+  plan approval and a matching specialist review. Only the human may waive it.
+  Other work gets an independent reviewer or a bug bash only when asked.
+- Reuse evidence while the inputs it covered are unchanged; a new commit id,
+  message, or squash alone does not invalidate it. After a change, rerun only
+  the checks it can affect.
+- Never bypass required checks with `--no-verify` or an equivalent shortcut; a
+  required check that is missing or broken is blocked, not green.
+- Tests assert behavior, not call sequences. Fix causes; never weaken assertions
+  to pass. A bug fix gets one regression test that fails without the fix.
 
-Done claims name the executed verifier and retained output. Unexecuted checks
-are labeled NOT run. Report limitations honestly; a block names evidence,
-what was tried, and a proposed path. Verification design and failure mechanics
-belong to `testing-best-practices`; experiential execution belongs to `bugbash`.
+Done claims name the check that ran and what was not checked. Claims of
+pre-existing failures cite evidence. `testing-best-practices` covers test
+design; `bugbash` covers exploratory runs.
 
 ## Authority and decisions
 

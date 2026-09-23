@@ -17,10 +17,9 @@ settled tradeoffs, and remaining human decisions. Examples help when words
 alone leave acceptance ambiguous; do not invent numeric thresholds to fill slots.
 
 Choose the verifier by the risk. Objective checks establish observable behavior;
-independent task execution or judgment is needed when author knowledge or
-subjectivity is a material risk, or the agreement requires it. Author dogfood
-is useful but never independent. Use `bugbash` for selected exploratory tasks
-and shared high-risk review requirements where applicable.
+add independent task execution or judgment only when the user asks for it.
+Author dogfood is useful but never independent. Use `bugbash` for requested
+exploratory tasks, and keep the shared high-risk review requirements.
 
 A passing check establishes only what it exercised. Do not weaken acceptance
 to make a failing artifact pass; surface an infeasible requirement and its

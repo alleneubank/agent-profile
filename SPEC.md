@@ -19,28 +19,28 @@ is needed. `tee-up` prepares the agreement and `kickoff` executes or resumes it.
 - REQ-PROFILE-003 — **Proportional work:** bounded attended changes may use
   existing requirements and a session plan; persistent campaign documents are
   required only when unattended multi-session work or recovery needs them.
-  Direct implementation is allowed; delegation serves independent work or a
-  required independent verification gate.
+  Direct implementation is allowed; delegation serves independent work.
 - REQ-PROFILE-004 — **No repeated ceremony:** existing execution authorization
   survives scope restatement and changes in human presence. Skills load before
   the governed action, not on incidental file discovery; already available
-  instructions are reused. Evidence remains admissible while its source,
-  artifact, environment, and task identities match.
-- REQ-PROFILE-005 — **Preserved safety:** independent experiential terminals,
-  high-risk approval and bounded specialist review, publish scope, secrets,
-  fail-closed verification, and direnv trust boundaries remain enforced.
+  instructions are reused. Evidence remains admissible while the inputs it
+  covered are unchanged; a new commit id, message, or squash alone does not
+  invalidate it.
+- REQ-PROFILE-005 — **Preserved safety:** high-risk approval and specialist
+  review, publish scope, secrets, fail-closed required checks, and direnv trust
+  boundaries remain enforced. Other independent review and bug bashes run only
+  when requested.
 - REQ-PROFILE-006 — **Measurable context:** universal `AGENTS.md` stays at or
   below 1,300 whitespace-delimited words, from a 2,325-word baseline. This is a
   size constraint, not proof of behavior; fresh scenarios judge decision quality.
-- REQ-PROFILE-007 — **Verification proportionality:** unit tests and TDD are
-  optional techniques. Verification establishes requested outcomes through the
-  real execution path when practical, uses narrower checks where they provide
-  better evidence at lower cost, and does not require duplicate test layers.
-  Existing required gates remain required.
-- REQ-PROFILE-008 — **Completion boundary:** work stops when requested outcomes
-  and required gates have current evidence, unless a new finding, uncovered
-  material risk, or explicit requirement warrants further checks. Evidence
-  derives from executed checks of the contract, not the author's assurance.
+- REQ-PROFILE-007 — **Verification proportionality:** verification runs the
+  cheapest check that can catch the likely failure of the requested behavior,
+  preferring the real execution path when a component test cannot show the
+  outcome. Unit tests and TDD are optional techniques; a bug fix gets one
+  regression test. Existing required gates remain required.
+- REQ-PROFILE-008 — **Completion boundary:** work stops when the selected
+  check passes; another check needs a named risk it would expose. Done claims
+  name the check that ran and what was not checked, not the author's assurance.
 
 ### Invariants and non-goals
 
@@ -55,6 +55,14 @@ guidance is not counted as universally loaded context.
   and authority boundaries. **ratified (human)**
 - 2026-09-09 — Cap the shared profile at 1,300 words and use state identity,
   rather than iteration number, for evidence reuse. **provisional (driver)**
+- 2026-09-22 — Adopt leaner verification on a hunch, without the pending
+  baseline/candidate comparison. Observed cost: the user reports agents
+  over-verify, and one Sox campaign spent 68 minutes rebuilding to re-prove
+  inputs that a new commit id had not changed. Evidence reuse follows the
+  inputs a result covered; independent review and bug bashes run when asked.
+  The human waived fresh-run evidence for this change; a week of post-rollout
+  sessions (token spend, user corrections) judges it, and a revert rolls it
+  back. **ratified (human)**
 
 ### Acceptance
 
@@ -205,22 +213,21 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   Generic generative code review is not a default delivery gate. Specialized
   review is bounded to a named risk and severity floor; shared high-risk classes
   receive the matching review by default unless the human records a PLAN waiver.
-- REQ-BUGBASH-002 — **Real-use gate:** an operable application or system uses a
-  task-based bug bash when lower-level checks cannot expose its assembled
-  behavior. The charter names the exact artifact and environment, roles, tasks,
-  expected outcomes, evidence, severity floor, budget, and boundaries.
-- REQ-BUGBASH-003 — **Independent terminal:** select a fresh, task-briefed
-  participant when author knowledge or subjective judgment is a material risk,
-  or when the agreement requires independence. Author execution is never
-  represented as independent. A required device, biometric, live secret, or
-  subjective human response remains a Boundary item.
+- REQ-BUGBASH-002 — **Real-use gate:** a requested bug bash exercises the
+  operable application or system through real tasks. The charter names the
+  exact artifact and environment, roles, tasks, expected outcomes, evidence,
+  severity floor, budget, and boundaries.
+- REQ-BUGBASH-003 — **Independent terminal:** use a fresh, task-briefed
+  participant when the request or agreement requires independence. Author
+  execution is never represented as independent. A required device, biometric,
+  live secret, or subjective human response remains a Boundary item.
 - REQ-BUGBASH-004 — **Findings and boundedness:** findings are observable and
   reproducible through the public surface. A run terminates `green`, `findings`,
   `blocked`, or `budget-exhausted`; skipped tasks and unavailable environments
   cannot silently pass, and no loop runs "until approval."
 - REQ-BUGBASH-005 — **Workflow coherence:** loop, brief, E2E, eval, planning,
-  and plugin guidance route assembled-behavior verification to `bugbash` while
-  retaining objective harnesses and explicitly selected specialist review.
+  and plugin guidance route requested exploratory verification to `bugbash`
+  while retaining objective harnesses and required specialist review.
 - REQ-BUGBASH-006 — **Wiki deltas:** test planning maps risks and public
   contracts to evidence rather than tests per function; retry outcome does not
   classify flakes; legitimate production test seams remain allowed; applicable
@@ -283,9 +290,10 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   default laws into CLI/API/control-plane mechanics: inspectable state, stable
   machine-readable output, explicit targets, bounded waits, and independently
   verifiable effects.
-- REQ-AGENTIC-002 — **Evidence freshness:** verifier guidance binds evidence to
-  the revision, dirty state, artifact, environment, and task it observed; a
-  mutation invalidates every downstream result it can affect.
+- REQ-AGENTIC-002 — **Evidence freshness:** verifier guidance records the
+  inputs a result covered; the result stays reusable while they are unchanged,
+  a new commit id alone does not invalidate it, and a change invalidates every
+  result it can affect.
 - REQ-AGENTIC-003 — **Destructive boundary:** process cleanup remains interior
   only for attributed disposable processes and resources. Volume deletion,
   factory reset, or another data-bearing action is a separately inventoried and
@@ -307,8 +315,8 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   smallest operational form.
 - No new always-loaded law duplicates mechanics already owned by a skill.
 - Direct secret values never enter scenario fixtures, transcripts, or docs.
-- Optional TDD does not waive verifier sensitivity, existing repository gates,
-  independent experiential judgment, or high-risk approval and review.
+- Optional TDD does not waive a new checker's known-broken case, existing
+  repository gates, or high-risk approval and review.
 
 ### Decisions
 
