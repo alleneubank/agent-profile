@@ -9,12 +9,12 @@ is needed. `tee-up` prepares the agreement and `kickoff` executes or resumes it.
 ### Requirements
 
 - REQ-PROFILE-001 — **Default discovery:** runtime instructions and skill
-  guidance do not advertise RL or the retired `loop-brief` skill. Explicit
-  on-demand tools remain the user's choice; this repository does not uninstall
-  binaries or erase session history.
+  guidance do not advertise retired reviewer or loop-authoring workflows.
+  This repository does not uninstall binaries or erase session history.
 - REQ-PROFILE-002 — **Campaign ownership:** `kickoff` owns seed selection,
   bounded execution, recovery, evidence, and terminals. Its references hold the
-  template and necessary doctrine; `mission-command` owns missionctl operations.
+  optional structured-loop template and doctrine; `mission-command` owns
+  missionctl operations only for agreements using that lifecycle.
   `afk` changes human availability without inventing a campaign or scope.
 - REQ-PROFILE-003 — **Proportional work:** bounded attended changes may use
   existing requirements and a session plan; persistent campaign documents are
@@ -50,7 +50,7 @@ guidance is not counted as universally loaded context.
 
 ### Decisions
 
-- 2026-09-09 — Adopt `tee-up` → `kickoff`, retire ambient RL and the separate
+- 2026-09-09 — Adopt `tee-up` → `kickoff`, retire ambient reviewer loops and the separate
   loop-authoring skill, and reduce global process while preserving verification
   and authority boundaries. **ratified (human)**
 - 2026-09-09 — Cap the shared profile at 1,300 words and use state identity,
@@ -209,10 +209,11 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   task-based bug bash when lower-level checks cannot expose its assembled
   behavior. The charter names the exact artifact and environment, roles, tasks,
   expected outcomes, evidence, severity floor, budget, and boundaries.
-- REQ-BUGBASH-003 — **Independent terminal:** author-run dogfood is discovery;
-  an experiential terminal uses a fresh, disinterested participant when the
-  path is automatable. A required device, biometric, live secret, or subjective
-  human response remains a Boundary item.
+- REQ-BUGBASH-003 — **Independent terminal:** select a fresh, task-briefed
+  participant when author knowledge or subjective judgment is a material risk,
+  or when the agreement requires independence. Author execution is never
+  represented as independent. A required device, biometric, live secret, or
+  subjective human response remains a Boundary item.
 - REQ-BUGBASH-004 — **Findings and boundedness:** findings are observable and
   reproducible through the public surface. A run terminates `green`, `findings`,
   `blocked`, or `budget-exhausted`; skipped tasks and unavailable environments
@@ -223,16 +224,16 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
 - REQ-BUGBASH-006 — **Wiki deltas:** test planning maps risks and public
   contracts to evidence rather than tests per function; retry outcome does not
   classify flakes; legitimate production test seams remain allowed; applicable
-  code properties are scoped to their failure modes; post-green refactoring and
-  independently green prefactoring are represented in delivery guidance.
+  code properties are scoped to their failure modes; refactoring is selected
+  when needed for a safe, understandable change, not required after every pass.
 - REQ-BUGBASH-007 — **Codex self-hosting instructions:** when Codex project
   override semantics apply, working in this repository does not load the
   canonical global `AGENTS.md` body twice. The override points contributors
   without the installed profile back to the canonical file; it makes no
   fleet-wide deduplication claim for other harnesses.
-- REQ-BUGBASH-008 — **Verification:** the skill catalog validates, fixed
-  engineering and gate-routing scenarios have no material-or-higher gap in a
-  fresh-context run, and `npm run check` plus `./scripts/validate.sh` pass.
+- REQ-BUGBASH-008 — **Verification:** the skill catalog validates,
+  `npm run check` plus `./scripts/validate.sh` pass, and changed behavior receives
+  fresh task execution. Decision scenarios alone do not prove delivery gains.
 
 ### Invariants
 

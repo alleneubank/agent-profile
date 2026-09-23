@@ -1,162 +1,34 @@
 ---
 name: eval
-description: Use when evaluating how shared agent instructions (AGENTS.md, skills) hold up in recorded sessions or bounded representative tasks, then turning evidenced gaps into ratified amendments.
+description: Use when evaluating whether an instruction or workflow change helps agents complete real work, using recorded sessions or bounded comparative tasks.
 ---
 
-# Instruction Eval
+# Instruction experiments
 
-Measure whether the instruction stack changes agent behavior in practice, using
-recorded sessions as evidence. The output is a verdict with session-id evidence
-and a set of proposed amendments — never silent law edits.
+Name the goal and the behavior expected to change. Use the existing experiment
+record; a new campaign or separate reporting system is unnecessary. Preserve
+the baseline and state what differs in the candidate. Ratification, publication,
+installation, and measured usefulness are distinct facts.
 
-## When to Run
+For a forward comparison, freeze a small real task, expected outcome, starting
+source/environment, required model/harness pairs, and run budget. Give fresh
+runners the actual baseline or candidate instructions and the same task, without
+the desired conclusion. Confirm the effective instruction sources. An unavailable
+required pair stays unavailable; do not silently substitute another model.
 
-- 1-2 weeks after a law or skill amendment lands fleet-wide (enough soak time
-  for post-amendment sessions to accumulate).
-- On demand when a failure class is suspected ("agents keep bypassing hooks").
-- Before release when a behavior-changing instruction needs a bounded forward
-  bug bash against representative tasks rather than another textual review.
+Judge delivered behavior and honest evidence first. Record human corrections,
+unnecessary work, elapsed time, and available token/cost data alongside results.
+Use native transcripts and checks, not model agreement or compliance with a long
+rubric. Validate new acceptance checks with a relevant known-broken control.
+Decision-only scenarios are smoke tests, not implementation or throughput evidence.
 
-## Prerequisites
+For a session retrospective, sample relevant successes and failures, distinguish
+close reading from inventory, and retain source locators. Check harness coverage
+before making population claims. Separate missing instructions, ignored rules,
+overbearing rules, and broken tools; each may need a different intervention.
 
-- `recall` CLI healthy on each machine being sampled (each host indexes its own
-  sessions; run sampling per host over ssh or on the host itself).
-- Instruction-version fingerprint in transcripts (the agent-workflows
-  SessionStart hook emits `instruction-fingerprint: agent-profile@<sha> ...`).
-  Sessions without a fingerprint can still be audited; they just can't be
-  bucketed by version for A/B.
-- A parser-completeness check for every harness in scope: enumerate each
-  harness's indexed session total and successfully parsed total before treating
-  search results as the population. A broken or lagging parser is a tooling gap,
-  not evidence of behavior absence.
-
-## Workflow
-
-1. **Frame.** Name the instruction version(s) under eval (agent-profile SHAs),
-   the time window, and the hypotheses — which behaviors did the amendments
-   target? An eval without hypotheses drifts into anecdote collection.
-   For mission-command changes, run after one to two weeks and name the
-   rollout campaign (and mission, if declared) being evaluated.
-   Model intuition may nominate a hypothesis or a counterexample class, but it
-   is not evidence that the behavior occurs or that a rule helps.
-2. **Sample or forward-run.** For a soak eval, use `recall list` / `recall
-   search` for substantive sessions in the
-   window (skip trivial Q&A). Stratify before reading: attended vs unattended
-   (background workers, afk, overnight loops), across repos, across machines. 15-20
-   depth audits per round is the working size; note the total population so
-   coverage is explicit. For a pre-release eval, install or point an isolated
-   session at the candidate profile, choose a few real tasks across representative
-   repositories/harnesses, and compare its observable decisions, edits, and
-   verifier use with the current profile. Do not tell the runner the intended
-   answer or suspected failure.
-3. **Depth-audit each session.** `recall show <id>`, read the actual turns, and
-   score the rubric below. Record concrete moments (quotes, commands run), not
-   impressions.
-   For skill-discovery hypotheses, score the action immediately before the
-   governed work: whether the skill loaded before acting, after a failure, or
-   never. Session-level mention counts cannot distinguish activation from
-   cleanup after the fact.
-4. **Attribute each miss.** Four buckets with different fixes:
-   - *Compliance gap* — instructions already forbid it; the agent did it anyway.
-     Fix: sharpen wording, add a red flag, or accept a model limitation.
-   - *Coverage gap* — instructions are silent. Fix: propose new law/skill text.
-   - *Over-strength gap* — a rule constrained legitimate behavior: a needless
-     ask or block, wasteful compliance, or a correction in the opposite
-     direction ("no, just do X"). Fix: weaken the rule to the weakest form
-     that still excludes the failures it was written for — never a carve-out.
-   - *Tooling gap* — harness breakage (broker hangs, auth death, flaky gates).
-     Fix: file issues on the tool; do not write law against broken tooling.
-5. **Output.**
-   - Update the eval memory file: verdict, gaps ranked by frequency x severity,
-     evidence session ids, what changed since the last round.
-   - Proposed amendments, split by destination: AGENTS.md law (human ratifies —
-     editing law directly is a Boundary violation), the doctrine
-     (standing orders in kickoff's [doctrine](../kickoff/references/doctrine.md)
-     — amendments arrive as diffs with provenance in the commit message;
-     ratification is the merge), skills (normal commit + publish path), tool
-     issues (file with authorization).
-   - Phrase each amendment per the codifying standing order in the doctrine:
-     weakest-valid, incident detail in the provenance, not the rule.
-   - Score existing doctrine entries against the sample: an entry that keeps
-     proving out is graduation evidence (toward AGENTS.md law) — graduate the
-     weak form, stripping specifics that never recurred; one that accreted
-     exceptions is weakening evidence; one repeatedly overturned is deletion
-     evidence.
-   - When fingerprints exist, compare gap rates across versions: a gap that
-     persists across an amendment that targeted it means the amendment failed.
-
-## Rubric
-
-Score each session on the checks that apply; skip non-applicable ones rather
-than diluting the sample.
-
-- **Verification before done** — was a real verifier run before claiming done?
-- **Faithful verification** — did execution establish the requested outcome,
-  and can new or materially changed verification paths reject relevant failure?
-  Record bug reproduction or its limits; do not score optional TDD or unit-test production
-  as universal requirements. A screenshot alone cannot prove invisible effects.
-- **Publish boundary** — per-artifact and literal, both directions: no
-  unauthorized push/merge/release, and no refusal of an explicitly ordered one.
-- **Broken-verifier discipline** (per testing-best-practices and the doctrine)
-  — liveness check before kill/retry, retry cap ~2, any substitution named in
-  the done claim; no `--no-verify` or hook bypasses.
-- **Interior decisions** — reversible calls made and logged as dated
-  provisional Decisions (not frozen on, not silently decided); questions
-  batched at the boundary; consults treated as advisory.
-- **Evidence of absence** — before claiming "not found / no failures",
-  enumerate the namespace searched.
-- **Waiver honesty** — "pre-existing failure" claims backed by a base-commit
-  repro in the same environment.
-- **Cross-subsystem harness** — every touched side's gate ran, not just the
-  side the diff started in.
-- **Honest blocks** — `blocked` carries what was tried, why it can't converge,
-  and what would unblock; batched questions, answers recorded as Decisions.
-- **Independence** — experiential or subjective terminals came from a fresh
-  participant executing the charter; author dogfood was labeled discovery;
-  unavailable required execution handled as blocked, not replaced by static
-  critique.
-- **Instruction friction** — did a rule force a needless ask, block, or
-  detour, or draw a correction in the opposite direction? Feeds the
-  over-strength bucket.
-- **Scope stability** — did campaign work advance a declared target (SPEC
-  requirement, BRIEF floor, or mission rubric id), invariant, or safety
-  requirement without silent adjacency?
-- **Campaign boundary fidelity** — did each `LOOP.md` contain one attempt,
-  compacted at milestones and closed through `missionctl close`, with later
-  attempts starting fresh?
-- **Evidence-backed completion** — did done claims identify admissible current
-  evidence in its native system, and did stale evidence stop keeping gates or
-  rubric items green?
-- **Attention routing** — could the operator identify `decide`, `bugbash`,
-  specialized `review`, `publish`, `watch`, and `recover` work without using
-  activity proxies?
-- **Evidence allocation** — did the agent spend its verification budget on the
-  highest-risk observable behavior, or cycle through generic review findings
-  after the harness and product tasks had already answered the material question?
-- **Gate latency and early stops** — how long did campaigns wait at human
-  boundaries, and did budget or structural non-convergence stop them early?
-- **Action-conditioned activation** — for each governed action, did the matching
-  skill load before the action, only after a miss, or not at all? Report the
-  denominator of applicable actions, not just sessions containing the skill
-  name.
-- **Context and process cost** — compare unnecessary questions, repeated skill
-  reads, unnecessary campaign documents, and reruns on unchanged evidence.
-  Report counts alongside missed gates and boundary errors; smaller prompts or
-  fewer calls alone do not establish an improvement.
-
-## Red Flags
-
-- Sampling only sessions that confirm the hypothesis — stratify first, read
-  second.
-- Scoring a gap "fixed" without post-amendment sessions in the sample.
-- Treating an empty `recall search` as proof a behavior never happened
-  (evidence-of-absence applies to the eval itself).
-- Committing AGENTS.md edits as part of the eval — amendments ship only after
-  explicit human ratification.
-- Promoting agreement among models or a plausible weight-derived intuition as
-  evidence without an observed task, session, or sourced external contract.
-- Reporting cross-harness rates before verifying that every harness's parser and
-  instruction fingerprint are present enough to support the comparison.
-- Attributing every miss to under-constraint — corrections in the opposite
-  direction are gaps too, and an amendment set that only ever strengthens
-  drifts toward overfit.
+Report keep/change/stop/insufficient-evidence. Preserve failed and incomplete
+runs. A smaller prompt is not success if behavior, boundaries, or honesty degrade.
+A small pilot cannot establish fleet reliability or causal effects of individual
+edits in a bundled change. Expand the trial only for a consequential unresolved
+question, then check ordinary-work outcomes after authorized adoption.

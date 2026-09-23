@@ -1,124 +1,20 @@
 ---
 name: writing-plans
-description: Use when requirements are clear enough to plan and the work spans multiple steps, files, or verification stages
+description: Use when the user requests an implementation plan, or unresolved dependencies make a brief execution plan useful before work.
 ---
 
-# Writing Plans
+# Implementation plans
 
-## Overview
+Inspect the relevant source, existing requirements, and harness. State the
+outcome, boundaries, concrete files or components, and the check that decides
+completion. Order dependent steps; make reversible implementation choices
+without turning them into permission requests.
 
-Turn requirements into an executable plan with concrete files, tests, and verification. A good plan removes guesswork without pretending the implementation is already done.
+Keep the plan in the conversation or existing task record. A standalone document
+is useful only when requested or needed for coordination or recovery. An existing
+campaign uses its own record rather than a second plan.
 
-**Core principle:** Every task should be specific enough that an engineer can execute it without inventing missing requirements.
-
-## When to Use
-
-Use this skill when:
-- The task spans multiple files, phases, or checks
-- Requirements are stable enough to plan
-- The work benefits from a written execution order
-
-Do not use this skill when:
-- The change is small enough to track directly in your harness's plan/progress mechanism, when one exists
-- Requirements are still ambiguous
-- The user asked to implement immediately and the work is trivial
-
-## Before Writing the Plan
-
-1. Read the relevant code, docs, and existing specs.
-2. Confirm the scope is one coherent unit of work.
-3. Investigate missing facts and existing decisions. Clarify only unresolved
-   requirements that materially change scope, acceptance, or a boundary;
-   reversible implementation choices remain the driver's.
-
-If the request covers multiple independent changes, split it into separate plans or clearly separated task groups.
-
-## Plan Format
-
-When a `LOOP.md` exists for the branch, the plan is its `units` list, not a
-separate doc. Each unit names the SPEC requirements, BRIEF floors, or mission
-rubric ids it advances (`targets`). A unit that advances no target is omitted
-unless a SPEC invariant or safety requirement makes it necessary; cite that
-requirement in the unit.
-
-Otherwise, use a concise session plan or the harness's plan mechanism for
-bounded attended work. Save a document only when the user requests one or
-cross-session recovery needs it; use the requested location, an existing
-handoff, or kickoff's LOOP.md. Do not create a docs tree for ordinary work.
-
-Start with:
-
-```markdown
-# <Topic> Implementation Plan
-
-**Goal:** <one sentence>
-**Scope:** <what this plan covers>
-**Non-goals:** <what this plan intentionally avoids>
-**Risks:** <key technical or rollout risks>
-```
-
-Then include:
-
-### Files
-- Create: `path/to/new_file`
-- Modify: `path/to/existing_file`
-- Test: `path/to/test_file`
-
-### Task N: <name>
-- Targets: `<REQ-ID | Floor | RUBRIC-ID>`
-- Outcome: <what is true when this task is done>
-- Steps:
-  - Define the expected outcome and cheapest faithful check
-  - Reproduce the reported failure when practical; use TDD if it helps
-  - Implement the minimal change
-  - Exercise the selected verification path
-  - Apply the code-health law, refactor while green, and re-run the targeted check
-  - Run broader regression checks if needed
-- Verification:
-  - `exact command`
-  - expected result
-- Dependencies:
-  - `Task N-1` or `none`
-
-## Planning Rules
-
-- Use exact file paths.
-- Prefer tasks that can be verified independently.
-- Select verification for changed behavior; do not prescribe test-first order
-  or an additional test layer without a task-specific benefit.
-- Start from a written QA design: map each material risk to the cheapest faithful
-  evidence instead of filling every test layer by habit.
-- When the existing structure fights the feature, put a behavior-preserving
-  prefactor unit first when it can be independently green. Keep the behavior
-  change in the following unit so either step is understandable and reversible.
-- Include commands that can actually be run from the repo.
-- Keep steps concrete: "add parser for X in `foo.ts`", not "improve parsing".
-- Keep unrelated refactors out unless they are required to make the change safe.
-- Give each task a risk class; shared AGENTS.md defines the high-risk set and
-  its approval requirement. Existing approval is not requested again.
-- Include a back-of-envelope resource sketch for data-plane work (per-request/per-item hot paths).
-- For an operable surface, keep the bug-bash artifact, environment, task or time
-  budget, and severity floor explicit. The shared high-risk classes default to a
-  matching bounded specialist review unless the human records a PLAN waiver;
-  other classes add one only for a named risk that execution cannot decide. Put
-  selected review before the terminal bug bash and never invent an open-ended
-  review loop.
-
-## Execution Handoff
-
-If the plan will be executed in the same session:
-- Mirror the task list in your harness's plan/progress mechanism, when one exists
-- Keep one task in progress at a time
-- Revise the plan if implementation reveals real gaps
-
-Implement directly or delegate bounded independent work where useful, with
-non-overlapping file ownership. Reserve fresh independent executors for the
-gates that require them; implementation delegation is not itself a gate.
-
-## Red Flags
-
-- Plans that rely on tool names from another harness
-- Tasks that touch the same files from multiple parallel workers
-- Missing verification steps
-- Hidden migrations, schema changes, or contract changes buried in generic wording
-- Placeholder language like "update as needed" or "handle edge cases"
+Name any real prerequisite or high-risk approval before it blocks dependent
+work. Do not prescribe every read, test layer, worker round, or post-green
+refactor. Update the plan when findings change the work. Once execution is
+authorized, implement rather than repeatedly refining the plan.
