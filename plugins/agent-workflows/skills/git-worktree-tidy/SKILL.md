@@ -1,18 +1,19 @@
 ---
 name: git-worktree-tidy
-description: Use when fetching and pruning a worktree-based repository, removing stale local branches or worktrees, or bringing its important branches up to date.
+description: Use when fetching and pruning a worktree-based repository, removing stale local branches, worktrees, or stashes, or bringing its important branches up to date.
 ---
 
 # git-worktree-tidy
 
 Routine hygiene for bare-repo + worktree layouts. Fetches origin, prunes
-gone branches and orphaned worktrees, restores a missing default-branch
-checkout, and fast-forwards important branches.
+gone branches and orphaned worktrees, reviews stashes, restores a missing
+default-branch checkout, and fast-forwards important branches.
 
 ## When to use
 
 User asks to "fetch prune", "clean up stale branches/worktrees", or
-"update main/dev to latest" in a worktree-based repo.
+"update main/dev to latest" in a worktree-based repo. Stash review applies to
+any repository.
 
 ## Hard Rules
 
@@ -22,6 +23,9 @@ User asks to "fetch prune", "clean up stale branches/worktrees", or
 - At-risk branches and dirty worktrees hold potentially unshipped work: batch
   them into the single confirmation in step 5. Never force-delete a dirty
   worktree without explicit approval.
+- Every stash is at risk: nothing proves its content landed, so each one goes
+  into the step 5 confirmation. Keep a stash the user wants by committing it
+  to a `wip/<topic>` branch, not by leaving it stashed.
 - Use `--ff-only` when updating branches. If ff-only fails, stop and ask.
 - Operate from the `.bare` directory (or repo root) for branch/worktree
   management commands.
@@ -112,6 +116,21 @@ Categorize:
 - **Dirty + gone**: flag for user review
 - **Prunable metadata**: orphaned worktree entries (directory already gone)
 
+### 4a) Review stashes
+
+```bash
+git stash list --format='%gd %ci %gs'
+git stash show --stat --include-untracked stash@{N}
+git log -1 --format='%h %s' stash@{N}^1        # the commit it was taken on
+```
+
+For each stash, record its age, base commit, and files, then read enough of
+the diff to say whether that content now exists on the default branch
+(`git stash show -p stash@{N} | git apply --reverse --check -` passing is
+strong evidence; failing proves nothing, because later edits to the same lines
+defeat it). Label each **likely landed**, **superseded** (the files or feature
+were rewritten or removed since), or **unshipped**, with the evidence.
+
 ### 5) Report, then confirm only the at-risk class
 
 Present a summary table:
@@ -127,12 +146,15 @@ Stale branches:
 
 Prunable worktree metadata:
   <entry>
+
+Stashes:
+  stash@{N}  <age> on <base>  <files>  [likely landed | superseded | unshipped — evidence]
 ```
 
 Proceed with the verified-merged branches and clean worktrees immediately —
 they are recoverable interior deletions. Batch the **at risk** branches and
-**dirty** worktrees into one confirmation, with the ship-status evidence in
-front of the user; only that class waits.
+**dirty** worktrees with the stashes into one confirmation, with the
+ship-status evidence in front of the user; only that class waits.
 
 ### 6) Remove stale worktrees
 
@@ -149,6 +171,12 @@ If removal fails (dirty), report and skip unless user approved force.
 ```bash
 git branch -D <branch1> <branch2> ...
 ```
+
+### 7a) Resolve stashes
+
+Drop the stashes the user approved, highest index first so the remaining
+indexes stay valid (`git stash drop stash@{N}`). For each stash the user keeps,
+commit it to a `wip/<topic>` branch in a clean worktree, then drop the stash.
 
 ### 8) Prune worktree metadata
 
@@ -192,5 +220,5 @@ If ff-only fails, report the divergence and ask for guidance.
 
 ### 10) Final status
 
-Show a summary: what was removed, what checkouts were restored, what was
-updated, any items skipped.
+Show a summary: what was removed, which stashes were dropped or kept as
+branches, what checkouts were restored, what was updated, any items skipped.
