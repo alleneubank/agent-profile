@@ -87,9 +87,8 @@ are not added.
   compatibility surface: its experimental behavior is not a contract, so it
   earns no shim, no dual path, and no deprecation window. Tests that redden
   under a supposedly behavior-preserving refactor are first suspected of having
-  caught a regression it introduced; only the ones asserting the old call
-  sequence rather than an outcome are change detectors, and those are part of
-  the migration — rewrite them against behavior or delete them.
+  caught a regression it introduced; only change detectors, as
+  `testing-best-practices` defines them, are part of the migration.
 - Name clearly and precisely at the code's abstraction level. Omit type words,
   surrounding context, and filler the reader already has; prefer a longer name
   to an ambiguous one. Established abbreviations such as `RPC` are useful when a

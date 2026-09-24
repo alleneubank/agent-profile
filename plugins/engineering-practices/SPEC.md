@@ -29,9 +29,11 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 - **REQ-DOCTRINE-001 — Testing strategy:** `testing-best-practices` chooses test
   scope by risk and favors the highest-fidelity practical dependency.
 - **REQ-DOCTRINE-002 — Test integrity:** testing guidance requires scenario and
-  outcome tests with discriminating expectations. A bug fix gets one regression
-  test that fails without the fix, and a new checker shows it can fail. TDD and
-  unit tests are optional techniques selected by risk.
+  outcome tests with discriminating expectations from an oracle independent of
+  the implementation. A shipped bug gets one regression check at the smallest
+  level that reproduces what its user observed, seen failing before the fix; a mistake made and fixed
+  within the task gets none. A new checker shows it can fail. TDD and unit
+  tests are optional techniques selected by risk.
 - **REQ-DOCTRINE-003 — End-to-end scope:** E2E guidance covers important user
   workflows and important error classes while keeping the suite small; hermetic
   runs prefer ephemeral state and shared environments require idempotent,
@@ -91,7 +93,10 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 - **REQ-DOCTRINE-017 — Behavioral evidence:** verification exercises requested
   behavior through the real execution path when practical, uses narrower checks
   where they provide better evidence at lower cost, and adds permanent coverage
-  for meaningful regression risks rather than test-layer completeness. UI
+  for meaningful regression risks rather than test-layer completeness. One-off
+  verification is recorded with the change; a permanent test guards a
+  contract, isolated logic, or a shipped defect, and change detectors are
+  rewritten against the outcome or deleted when a change touches them. UI
   screenshots establish visible state, not unobserved persistence or delivery;
   completion evidence identifies the tested artifact and untested boundaries.
 
@@ -135,6 +140,12 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   from hand-written scripts; a rule the toolchain cannot check is applied at
   review. Bespoke scripts became change detectors and token sinks in
   practice. (2026-09-10, provisional)
+- Permanent tests are a recurring cost to every later change, so verification
+  evidence stays with the change and only contract, isolated-logic, and
+  shipped-defect tests persist. Source: the sendapp unit-test audit (0xsend
+  issue #8169), in which a file-by-file read of every unit test found 234 of
+  1,212 files grading rendered props, mocks, or constants; #8176 deleted them.
+  (2026-09-24, provisional)
 
 ## Acceptance criteria
 
