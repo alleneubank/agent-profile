@@ -43,18 +43,4 @@ Always prefer user-facing attributes:
 - Hardcoded waits — rely on Playwright's auto-waiting
 - Default reporter in CI/agent — use `--reporter=line` or `--reporter=dot`
 
-## Checklist
-
-- [ ] Locators use role/label/testid, not CSS classes or XPath
-- [ ] All assertions use `await expect()` web-first matchers
-- [ ] Page objects define locators in constructor
-- [ ] No `page.waitForTimeout()` — use auto-waiting
-- [ ] Tests isolated — no shared state
-- [ ] Auth state reused via setup project
-- [ ] Network mocks set up before navigation
-- [ ] UI assertions target rendered output, not route calls
-- [ ] Test data created per-test or via fixtures
-- [ ] Debug logging added for complex flows
-- [ ] Minimal reporter (`line`/`dot`) used in CI/agent contexts
-
 See `playwright-patterns.md` for Page Object Model, fixtures, network mocking, and configuration examples.
