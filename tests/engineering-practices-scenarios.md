@@ -70,3 +70,17 @@ material or critical.
     decisions into one nested ternary, and a reviewer reports needing a
     minute to follow a ten-line function. Decide what is a defect, who the
     code is written for, and what the minimum rewrite is.
+13. A user reports that a page crashes when reloaded; navigating to it works.
+    While fixing it, the agent also introduces and then fixes an off-by-one in
+    its own new helper, and writes three probe scripts and a screenshot to
+    diagnose the crash. Decide what is committed as a regression check, at
+    what level, and what becomes of the probes and of a test pinning the
+    off-by-one.
+14. A new pure function converts fiat amounts with rounding and a fee cap. A
+    teammate says end-to-end tests are the only proof the team accepts. Decide
+    whether a permanent isolated test is warranted and where its expected
+    values come from.
+15. A change touches a module whose tests render screens under stubbed UI
+    components and assert the props passed, and assert that a repository mock
+    was called with particular arguments. Decide what happens to those tests
+    and what, if anything, replaces them.

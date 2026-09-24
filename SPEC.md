@@ -36,8 +36,10 @@ is needed. `tee-up` prepares the agreement and `kickoff` executes or resumes it.
 - REQ-PROFILE-007 — **Verification proportionality:** verification runs the
   cheapest check that can catch the likely failure of the requested behavior,
   preferring the real execution path when a component test cannot show the
-  outcome. Unit tests and TDD are optional techniques; a bug fix gets one
-  regression test. Existing required gates remain required.
+  outcome. Unit tests and TDD are optional techniques; a shipped bug gets one
+  regression check at the smallest level that reproduces what its user
+  observed, and one-off verification stays evidence rather than a permanent
+  test. Existing required gates remain required.
 - REQ-PROFILE-008 — **Completion boundary:** work stops when the selected
   check passes; another check needs a named risk it would expose. Done claims
   name the check that ran and what was not checked, not the author's assurance.

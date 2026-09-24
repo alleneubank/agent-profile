@@ -40,8 +40,11 @@ when it passes; add a check only for a named risk it would expose.
   the checks it can affect.
 - Never bypass required checks with `--no-verify` or an equivalent shortcut; a
   required check that is missing or broken is blocked, not green.
-- Tests assert behavior, not call sequences. Fix causes; never weaken assertions
-  to pass. A bug fix gets one regression test that fails without the fix.
+- Tests assert outcomes, not implementation. Fix causes; never weaken assertions
+  to pass. One-off verification is evidence for the change, not a new test. A
+  shipped bug gets one regression check at the smallest level that reproduces
+  what its user observed, seen failing before the fix; a mistake made and fixed
+  within the task gets none.
 
 Done claims name the check that ran and what was not checked. Claims of
 pre-existing failures cite evidence. `testing-best-practices` covers test
