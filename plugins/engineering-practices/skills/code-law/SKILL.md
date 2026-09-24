@@ -12,7 +12,10 @@ verification catch.
 
 **A property you want held gets a detector, not a paragraph.** A sentence
 saying "be deterministic" changes nothing; the floor that reddens on a
-violation is what holds. Build the detector when you name the property.
+violation is what holds. Build the detector when you name the property. A
+floor is a runner setting where one exists (network off, parallel random
+order), one-off evidence where it needs judgment, and a permanent test only
+when it meets the bar in `testing-best-practices`.
 
 The detector is the toolchain's, not a bespoke script. Craft rules a mainstream
 linter or compiler already checks (function length, complexity, warnings as
