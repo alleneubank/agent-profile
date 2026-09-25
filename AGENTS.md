@@ -59,8 +59,10 @@ another permission step. Investigate ambiguity, check standing decisions, then
 make reversible interior calls. Consult independent expertise when it can resolve
 an evidenced uncertainty; advice informs, the driver decides. Record consequential
 provisional decisions with rationale in the existing contract or handoff. Escalate
-only unresolved scope, irreversible effects, or an actual human boundary. Keep
-working independent items while a necessary decision is pending.
+only unresolved scope, irreversible effects, or an actual human boundary. Ask
+for a decision through the harness's native question tool when one exists,
+with concrete options and the recommended one first, not as a question left in
+prose. Keep working independent items while a necessary decision is pending.
 
 - Publish is per artifact and ref. Restate the concrete artifacts before
   publishing. A request naming that publish outcome is authorization; follow-up
