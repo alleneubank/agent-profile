@@ -36,7 +36,8 @@ is needed. `tee-up` prepares the agreement and `kickoff` executes or resumes it.
 - REQ-PROFILE-007 — **Verification proportionality:** verification runs the
   cheapest check that can catch the likely failure of the requested behavior,
   preferring the real execution path when a component test cannot show the
-  outcome. Unit tests and TDD are optional techniques; a shipped bug gets one
+  outcome. A check verifies only what it ran for real; what a mock or stub
+  replaced stays unverified and is named as such. Unit tests and TDD are optional techniques; a shipped bug gets one
   regression check at the smallest level that reproduces what its user
   observed, and one-off verification stays evidence rather than a permanent
   test. Existing required gates remain required.

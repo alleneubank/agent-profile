@@ -19,9 +19,10 @@ limits rather than claiming an unobserved failure.
   test: the user story, a spec, a published contract, the real system, or a
   property. An expectation derived from the finished implementation copies it
   and passes its defects.
-- Prefer real dependencies, then behaviorally conformant fakes. Mock a boundary
-  you own when useful; do not build a simulated third-party contract to prove
-  the same simulation.
+- Prefer real dependencies, then behaviorally conformant fakes. A mock of a
+  boundary you own may isolate the unit under test for speed; it checks that
+  unit, not what it replaced, which needs its own run against the real thing.
+  Do not build a simulated third-party contract to prove the same simulation.
 - Keep tests understandable: name the scenario, make important inputs explicit,
   and use discriminating expected results. Assert call order only when that
   interaction is itself the promised behavior.
