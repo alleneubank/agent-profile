@@ -1,0 +1,60 @@
+# Publishes a GitHub release for each plugin tag (`<plugin>-vX.Y.Z`).
+# The notes are the release commit's body plus a compare link to the plugin's
+# previous tag. Rerunning for a tag that already has a release is a no-op, so
+# workflow_dispatch also backfills tags pushed before this workflow existed.
+name: release
+
+on:
+  push:
+    tags:
+      - "*-v[0-9]*.[0-9]*.[0-9]*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing plugin tag, e.g. engineering-practices-v6.2.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Check the tag matches its plugin manifest
+        run: |
+          [[ "$TAG" =~ ^([a-z0-9][a-z0-9-]*)-v([0-9]+\.[0-9]+\.[0-9]+)$ ]] \
+            || { echo "::error::$TAG is not a <plugin>-vX.Y.Z tag"; exit 1; }
+          plugin="${BASH_REMATCH[1]}"
+          version="${BASH_REMATCH[2]}"
+          manifest="plugins/$plugin/.claude-plugin/plugin.json"
+          declared="$(jq -r .version "$manifest")"
+          [[ "$declared" == "$version" ]] \
+            || { echo "::error::$manifest declares $declared, tag says $version"; exit 1; }
+          echo "PLUGIN=$plugin" >> "$GITHUB_ENV"
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Publish the release
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG already exists"
+            exit 0
+          fi
+          previous="$(git tag -l "$PLUGIN-v*" --sort=-v:refname | grep -x -A1 -F "$TAG" | sed -n 2p)"
+          {
+            printf '%s\n' "$(git log -1 --format=%b "$TAG^{commit}")"
+            if [[ -n "$previous" ]]; then
+              echo
+              echo "[Changes since $PLUGIN ${previous##*-v}](https://github.com/$GITHUB_REPOSITORY/compare/$previous...$TAG)"
+            fi
+          } > notes.md
+          gh release create "$TAG" --verify-tag --title "$PLUGIN v$VERSION" --notes-file notes.md
