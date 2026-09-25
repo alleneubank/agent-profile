@@ -47,11 +47,19 @@ after the first section must already know what is theirs to do.
 
 ## Fleet shape
 
-- Survey with whatever session visibility exists (a session index such as
-  `recall`, host process listings) and treat the result as a sample, not a
-  census: liveness inferred from transcript recency or a process table is an
-  approximation that misses quiet-but-live sessions and counts just-finished
-  ones.
+- When agents run in shells a multiplexer can address across hosts (for
+  example `sox ls`), survey with it first: its per-shell status is the
+  daemon's own answer, not an inference, though a live shell does not show
+  whether the agent in it is working. Otherwise use whatever session
+  visibility exists (a session index such as `recall`, host process listings)
+  and treat the result as a sample, not a census: liveness inferred from
+  transcript recency or a process table is an approximation that misses
+  quiet-but-live sessions and counts just-finished ones.
+- A session silent on a file or queue channel is "quiet on <channel>", not
+  "unreachable", while its shell is live. When the task includes contacting
+  agents, one short message typed into a live interactive shell is the
+  reachability test; report "unreachable" only after that fails or the shell
+  is gone.
 - State the coverage basis and its gaps in the sitrep itself: which hosts
   were reachable, which were not, what the liveness heuristic was, and as of
   when. An unreachable host is a reported line, never a silent omission.
