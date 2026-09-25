@@ -214,6 +214,11 @@ Release steps:
    `git tag -a <plugin>-vX.Y.Z -m "<plugin> vX.Y.Z — <summary>"`.
 4. Push commits and the tag, then bump the submodule pin in the consuming superproject.
 
+Pushing a tag runs `.github/workflows/release.yml`, which checks the tag against the
+plugin manifest and publishes a GitHub release titled `<plugin> vX.Y.Z`, with the release
+commit's body and a compare link to the plugin's previous tag as notes. For a tag pushed
+without a release, run the workflow by hand with that tag; an existing release is left as is.
+
 Tags mirror the manifest version and are human-facing markers only — plugins install by
 name from the marketplace (`claude plugin install <plugin>@agent-profile`), which reads the
 manifest, not git tags. The legacy unscoped `v1.1.0` tag predates this scheme.
