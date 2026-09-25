@@ -28,8 +28,10 @@ and decisions survive sessions; apply them instead of re-asking.
 
 Run the cheapest check that can catch the likely failure of the requested
 behavior, starting with the repository's existing harness. Prefer the real
-command, app, or service when a component test cannot show the outcome. Stop
-when it passes; add a check only for a named risk it would expose.
+command, app, or service when a component test cannot show the outcome. A
+check verifies only what it ran for real: whatever a mock or stub replaced
+stays unverified, and the change record says so. Stop when it passes; add a
+check only for a named risk it would expose.
 
 - High-risk changes — schema/data migrations, auth/security boundaries, public
   API compatibility or contract changes, infra/deploy configuration — require

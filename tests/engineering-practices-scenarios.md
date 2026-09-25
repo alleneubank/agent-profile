@@ -84,3 +84,7 @@ material or critical.
     components and assert the props passed, and assert that a repository mock
     was called with particular arguments. Decide what happens to those tests
     and what, if anything, replaces them.
+16. A change adds a retry to a client that calls a payment service the team
+    owns. The fastest check stubs the service to fail twice, then succeed.
+    Decide what that check proves, what the change record claims as verified,
+    and what, if anything, must run against the real service.

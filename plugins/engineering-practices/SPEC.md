@@ -27,7 +27,8 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
 ## Requirements
 
 - **REQ-DOCTRINE-001 — Testing strategy:** `testing-best-practices` chooses test
-  scope by risk and favors the highest-fidelity practical dependency.
+  scope by risk and favors the highest-fidelity practical dependency; a mock
+  isolates the unit under test and leaves what it replaced unverified.
 - **REQ-DOCTRINE-002 — Test integrity:** testing guidance requires scenario and
   outcome tests with discriminating expectations from an oracle independent of
   the implementation. A shipped bug gets one regression check at the smallest
