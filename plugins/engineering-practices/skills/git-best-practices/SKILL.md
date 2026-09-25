@@ -55,7 +55,7 @@ Apply per-ref publish semantics: a force-with-lease push to your own non-deployi
 
 ### Rebasing a Stack
 
-When rebasing a branch that other branches are stacked on (e.g. phased `NN-description` chains), use `git rebase --update-refs` so the stacked branches follow the rewrite instead of being orphaned on the old commits. `--update-refs` moves **local** refs only — each moved branch that also exists on the remote still needs its own `--force-with-lease` push (per-ref publish semantics), and any branch checked out in another worktree is skipped. For the full conflict-resolution and safety workflow, use the `git-rebase-sync` skill.
+When rebasing a branch that other branches are stacked on (e.g. phased `NN-description` chains), use `git rebase --update-refs` so the stacked branches follow the rewrite instead of being orphaned on the old commits. `--update-refs` moves **local** refs only — each moved branch that also exists on the remote still needs its own `--force-with-lease` push (per-ref publish semantics), and any branch checked out in another worktree is skipped. For the full conflict-resolution and safety workflow, use the `git-rebase-sync` skill. When the branches form a GitHub stack (`gh stack view --json` succeeds), use `gh stack rebase` / `gh stack sync` instead so the stack's PR bases stay in step; see the `gh` skill.
 
 ## Conventional Commits
 

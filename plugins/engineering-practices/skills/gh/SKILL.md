@@ -1,16 +1,16 @@
 ---
-description: Use when invoking the GitHub CLI for repository inspection, issues, pull requests, attachments, release assets, projects, or API access.
+description: Use when invoking the GitHub CLI for repository inspection, issues, pull requests, stacked pull requests, attachments, release assets, projects, or API access.
 metadata:
     github-path: skills/gh
-    github-ref: refs/tags/v2.100.0
+    github-ref: refs/tags/v2.101.0
     github-repo: https://github.com/cli/cli
     github-tree-sha: 5cf8c343d459cc0fdd839100c02b6fbb1ddda8e1
 name: gh
 ---
 # Reference
 
-Checked against GitHub CLI **2.100.0** on 2026-09-10, incorporating the
-[upstream skill](https://github.com/cli/cli/blob/v2.100.0/skills/gh/SKILL.md)
+Checked against GitHub CLI **2.101.0** on 2026-09-25, incorporating the
+[upstream skill](https://github.com/cli/cli/blob/v2.101.0/skills/gh/SKILL.md)
 with local delivery guidance. The metadata identifies that upstream source,
 not a byte-identical copy. Check `gh version` and the relevant command's
 `--help` before assuming a capability is unavailable. For a refresh, resolve
@@ -125,6 +125,7 @@ gh issue comment 12 --repo OWNER/REPO --body-file comment.md \
 - Uploads require GitHub.com/GHEC, an OAuth token or classic/fine-grained PAT,
   and repository write/maintain/admin permission. GHES and GitHub App tokens
   are unsupported. Do not change credential configuration to work around this.
+- `gh pr review` has no `--attach`; put review media in a `gh pr comment`.
 - `--attach` cannot combine with `--web`; PR creation also disallows
   `--dry-run`. Issue edit accepts one issue when attaching. Comment attachment
   works with `--edit-last`, but not `--delete-last`.
@@ -177,6 +178,44 @@ References: [media attachment rules](https://github.com/cli/cli/blob/v2.100.0/sk
 [release creation](https://cli.github.com/manual/gh_release_create),
 [release upload](https://cli.github.com/manual/gh_release_upload), and
 [draft visibility](https://docs.github.com/en/rest/releases/releases#list-releases).
+
+## Stacked PRs (`gh stack`)
+
+GitHub supports native stacked PRs: an ordered chain of branches rooted on a
+trunk, one PR per layer, each based on the layer below, merged bottom-up. The
+`github/gh-stack` extension drives them (checked against v0.1.1). Prefer it
+over hand-chained `--base` PRs when the repository has stacks enabled.
+
+- Detect: `gh extension list` shows `github/gh-stack`; exit code 9 means
+  stacked PRs are not enabled on the repository. Report that rather than
+  installing the extension or changing repository settings unasked.
+- It branches on stdout being a TTY, and agent harnesses vary, so always use
+  the non-interactive form: `view --json`, `submit --auto` (drafts; `--open`
+  marks them ready), `init <branch>...`, `add <branch>`, `checkout <target>`,
+  `up`/`down`/`top`/`bottom`, `merge <pr-or-stack> --yes`. Never run bare
+  `view`, `submit`, `init`, `add`, `checkout`, or `switch`/`modify` (TUI only).
+- With more than one remote, pass `--remote <name>` to `push`, `submit`,
+  `sync`, `rebase`, and `link`, or rely on `remote.pushDefault`.
+- Put each change in the layer that owns it: check out that layer, commit,
+  then `gh stack rebase --upstack` and `gh stack push`. Do not commit a lower
+  layer's concern on the top branch.
+- `gh stack sync` fetches, rebases, pushes, and refreshes PR state; it prunes
+  merged branches only with `--prune`. On divergence it prints both chains,
+  changes nothing, and still exits 0 with `Sync aborted`; check its output.
+- `gh stack merge 42 --yes` merges #42 and every unmerged PR below it,
+  all-or-nothing. `gh pr merge` cannot merge a stack. Merge and `submit`
+  publish per the usual publish rules.
+- `gh stack link <branch|pr>...` (bottom to top) stacks PRs whose branches
+  another tool (jj, git-town, `git rebase --update-refs`) manages.
+- Exit codes: 2 not in a stack, 3 rebase conflict (resolve, `git add`,
+  `gh stack rebase --continue`; after `sync`, rerun `gh stack rebase` first),
+  7 rebase in progress, 8 stack file locked (retry). Stacks are strictly
+  linear; restructure with `unstack` then `init`.
+
+`gh stack <command> --help` is authoritative (`gh stack help <command>` prints
+top-level help). For layer design and troubleshooting, see the
+[upstream gh-stack skill](https://github.com/github/gh-stack/tree/v0.1.1/skills/gh-stack)
+and [GitHub stacks docs](https://gh.io/stacks).
 
 ## Discussions (`gh discussion`)
 
