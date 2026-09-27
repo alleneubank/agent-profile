@@ -1,5 +1,5 @@
 ---
-description: Use when invoking the GitHub CLI for repository inspection, issues, pull requests, stacked pull requests, attachments, release assets, projects, or API access.
+description: Use when invoking the GitHub CLI for repository inspection, issues, opening or stacking pull requests (dependent PRs), attachments, release assets, projects, or API access.
 metadata:
     github-path: skills/gh
     github-ref: refs/tags/v2.101.0
@@ -183,12 +183,16 @@ References: [media attachment rules](https://github.com/cli/cli/blob/v2.100.0/sk
 
 GitHub supports native stacked PRs: an ordered chain of branches rooted on a
 trunk, one PR per layer, each based on the layer below, merged bottom-up. The
-`github/gh-stack` extension drives them (checked against v0.1.1). Prefer it
-over hand-chained `--base` PRs when the repository has stacks enabled.
+`github/gh-stack` extension drives them (checked against v0.1.1).
+
+A set of dependent PRs is a native stack, created and maintained with
+`gh stack` (`init`/`link`, `push`, `submit`, `sync`, `merge`). Never
+approximate one by chaining `gh pr create --base <parent-branch>`.
 
 - Detect: `gh extension list` shows `github/gh-stack`; exit code 9 means
-  stacked PRs are not enabled on the repository. Report that rather than
-  installing the extension or changing repository settings unasked.
+  stacked PRs are not enabled on the repository. Report either gap and ask;
+  do not install the extension, change repository settings, or fall back to
+  hand-chained bases unasked.
 - It branches on stdout being a TTY, and agent harnesses vary, so always use
   the non-interactive form: `view --json`, `submit --auto` (drafts; `--open`
   marks them ready), `init <branch>...`, `add <branch>`, `checkout <target>`,
