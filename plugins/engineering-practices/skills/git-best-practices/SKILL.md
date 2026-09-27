@@ -172,6 +172,8 @@ split an inherently atomic change into invalid intermediate states.
 
 Use repo-native PR tooling (`gh pr create`, GitLab CLI, or web UI) with a short
 title, a summary that says what changed and why, and a test plan as a checklist.
+Dependent PRs form a native GitHub stack, never hand-chained `--base` PRs; see
+the `gh` skill.
 
 ### Merge Readiness
 
