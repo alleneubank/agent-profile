@@ -110,7 +110,9 @@ Use subagents for testing only when they add signal. They are optional, not the 
 - Instructions referencing tools unavailable in the target harness
 - Long examples that restate the same rule
 - Rules encoding one incident's surface details (tool names, paths, exact
-  phrasings) where the failure was structural
+  phrasings) where the failure was structural; use the weakest rule that
+  excludes the observed failure and keeps a named legitimate neighbor
+- An exception list that keeps growing: weaken the rule instead
 - Skills that restate AGENTS.md law — skills carry
   mechanics and point at law
 - Vendor tool names or harness-only paths in a shared skill

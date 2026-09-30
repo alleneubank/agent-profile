@@ -13,9 +13,8 @@ context for the next agent — do not conflate them.
 ## Recognize the shape
 
 - **Campaign** — "sitrep" inside a session with active work: report this
-  campaign's state. When a `LOOP.md` exists, read state from it (and
-  `missionctl context` where available) rather than reconstructing from
-  conversation memory.
+  campaign's state. Under a coordinator, read state from its charter and log
+  rather than reconstructing from conversation memory.
 - **Fleet** — "my sessions", "what's running", "all agents": survey live
   sessions across hosts and roll up.
 - **Stakeholder artifact** — a named audience or destination (channel, thread,

@@ -158,18 +158,10 @@ versions managed under Releasing below.
 
 ## Campaign workflow
 
-`tee-up` prepares an objective, acceptance, seed, budget, and boundary without
-executing the draft. `kickoff` executes or resumes that agreement; a fresh
-session and structured loop are options when coordination or recovery needs
-them, not prerequisites for ordinary work. `afk` changes human availability without adding scope or forcing
-a bounded attended task into a campaign.
-
-Structured campaigns use `mission-command` with the separately versioned
-`missionctl` executable from `PATH` (one compact `LOOP.md` per attempt,
-optional `.mission/mission.yaml`); agent-profile does not vendor or
-release that tool or register its `SessionStart` loop-context hook. Fleet
-installations manage the executable through mise and install the hooks-only
-plugin from `github:alleneubank/missionctl`.
+`tee-up` prepares an objective, acceptance, budget, and boundary without
+executing the draft. Multi-lane or unattended work runs under a coordinator's
+charter, with the coordinator skill kept outside this profile; bounded
+attended work needs no campaign machinery.
 
 Use `bugbash`, a fresh participant, or another independent review when the
 user or the agreement asks for one. The shared profile's high-risk classes

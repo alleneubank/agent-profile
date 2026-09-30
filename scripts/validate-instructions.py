@@ -24,14 +24,15 @@ def main() -> int:
             errors.append(f"empty skill catalog: {skill_root.relative_to(ROOT)}")
         runtime_docs.extend(sorted(skill_root.rglob("*.md")))
 
-    if (skill_roots[0] / "loop-brief").exists():
-        errors.append("retired loop-brief directory is still in the skill catalog")
+    for retired in ("loop-brief", "kickoff", "mission-command", "afk"):
+        if (skill_roots[0] / retired).exists():
+            errors.append(f"retired {retired} directory is still in the skill catalog")
 
     for path in runtime_docs:
         text = path.read_text(encoding="utf-8")
         rel = path.relative_to(ROOT)
         for line_number, line in enumerate(text.splitlines(), 1):
-            if re.search(r"\brl\b|loop-brief", line, re.IGNORECASE):
+            if re.search(r"\brl\b|loop-brief|missionctl|mission-command|\bkickoff\b|\bafk\b", line, re.IGNORECASE):
                 errors.append(f"{rel}:{line_number}: retired default instruction")
         # External URLs, anchors, and illustrative template placeholders are not
         # shipped local dependencies. Check actual Markdown link destinations.

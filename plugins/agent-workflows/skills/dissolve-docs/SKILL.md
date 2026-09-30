@@ -5,8 +5,7 @@ description: Use when the user calls a docs cleanup, a campaign has shipped, or 
 
 # Dissolve Docs
 
-Mechanics for the [campaign doctrine](../kickoff/references/doctrine.md):
-narrative, planning, and loop docs dissolve — anything important,
+Narrative, planning, and loop docs dissolve — anything important,
 necessary, or authoritative migrates into the standing docs, the rest is
 deleted. The standing-doc surface is the only durable documentation, and
 git is the changelog: deleted text is demoted to history, never lost.
@@ -22,16 +21,15 @@ one of three classes:
   operate or extend it: runbooks, API references, maintained architecture
   docs. Keep, subject to the focus pass.
 - **Candidates** — records how the work got here, what was planned, or
-  what was true mid-flight: terminal LOOP.md campaigns (closed through
-  `missionctl close`; a legacy `.claude/loop.md` or `MISSION.md` journal is
-  routed by hand), `DELTA.md` / `DEVIATIONS.md` brief sidecars (a
+  what was true mid-flight: terminal campaign journals (`LOOP.md`,
+  `.claude/loop.md`, `MISSION.md`, coordinator logs once the charter closes), `DELTA.md` / `DEVIATIONS.md` brief sidecars (a
   retired pattern — still-active floor waivers migrate to the BRIEF's
   Decisions, dated), PLAN / TODO / NOTES / STATUS / HANDOFF docs, phase
   and iteration journals, proposals whose decision already landed, design
   explorations, migration narratives.
 
 The test is tense: "the system does X" survives; "we did / will do X"
-dissolves. Classify by content, not path or filename. A LOOP.md whose
+dissolves. Classify by content, not path or filename. A journal whose
 campaign has not reached a terminal state is exempt — dissolution rides
 the ship — unless the user explicitly ends the campaign.
 
@@ -43,7 +41,6 @@ necessary, or authoritative:
 | Content | Destination |
 | --- | --- |
 | Direction, goals, what "done" means | VISION |
-| Rubric status of a declared multi-campaign outcome | `.mission/mission.yaml` (via `missionctl close`) |
 | Requirements, invariants, acceptance, non-goals | SPEC |
 | Quality bar, taste calls, decided questions | BRIEF (Decisions) |
 | Build / run / operate commands, onboarding | README |

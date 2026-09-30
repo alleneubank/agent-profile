@@ -16,4 +16,5 @@ receives. Historical prompts and unrelated loops are evidence, not grants.
 Return the shortest usable prompt and briefly explain substantive changes.
 Do not run the draft during preparation. A fresh session is an option for
 execution, not a compulsory reset. For a bounded ordinary task, no campaign
-machinery is needed; for requested campaign execution, use `kickoff`.
+machinery is needed; multi-lane or unattended work goes to a coordinator,
+whose charter records the agreement.

@@ -116,6 +116,8 @@ longer be written or another check covers it.
 
 ## Interfaces and abstraction
 
+- Prefer platform-supported design over a custom wrapper, and derivation from a
+  source of truth over cached local state and the cleanup machinery it needs.
 - Make the correct call easy and misuse hard. Prefer compiler-enforced contracts,
   then runtime checks, then documentation. Return fully initialized values, use
   domain types for constrained values and units, and group parameters that form

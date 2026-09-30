@@ -4,18 +4,16 @@
 
 The universal `AGENTS.md` carries cross-task law. Discoverable skills carry
 action-specific mechanics; campaign references load only when their operation
-is needed. `tee-up` prepares the agreement and `kickoff` executes or resumes it.
+is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
 
 ### Requirements
 
 - REQ-PROFILE-001 — **Default discovery:** runtime instructions and skill
   guidance do not advertise retired reviewer or loop-authoring workflows.
   This repository does not uninstall binaries or erase session history.
-- REQ-PROFILE-002 — **Campaign ownership:** `kickoff` owns seed selection,
-  bounded execution, recovery, evidence, and terminals. Its references hold the
-  optional structured-loop template and doctrine; `mission-command` owns
-  missionctl operations only for agreements using that lifecycle.
-  `afk` changes human availability without inventing a campaign or scope.
+- REQ-PROFILE-002 — **Campaign ownership:** multi-lane and unattended work
+  runs under a coordinator's charter, outside this profile. The profile ships
+  no loop lifecycle, campaign template, or presence skill.
 - REQ-PROFILE-003 — **Proportional work:** bounded attended changes may use
   existing requirements and a session plan; persistent campaign documents are
   required only when unattended multi-session work or recovery needs them.
@@ -48,7 +46,7 @@ is needed. `tee-up` prepares the agreement and `kickoff` executes or resumes it.
 ### Invariants and non-goals
 
 No duplicate public execution skill, implicit publication, plugin version bump,
-or missionctl schema change belongs to this consolidation. Repository-local
+belongs to this consolidation. Repository-local
 guidance is not counted as universally loaded context.
 
 ### Decisions
@@ -66,13 +64,19 @@ guidance is not counted as universally loaded context.
   The human waived fresh-run evidence for this change; a week of post-rollout
   sessions (token spend, user corrections) judges it, and a revert rolls it
   back. **ratified (human)**
+- 2026-09-29 — Fold the loop machinery into the coordinator model: retire
+  `kickoff`, `mission-command`, and `afk` and drop the missionctl lifecycle;
+  keep `tee-up`. Kickoff's gates, budget, and end states move into the
+  coordinator's lane brief. Supersedes the 2026-09-09 `tee-up` → `kickoff`
+  adoption, D7/D8, and the 2026-08-30 ruling to keep `afk` public.
+  **ratified (human)**
 
 ### Acceptance
 
 - [ ] `scripts/validate-instructions.py` checks the default catalog, retired
   references, local Markdown links, and universal word budget.
 - [ ] `tests/bugbash-routing-scenarios.md` compares baseline and candidate
-  decisions for bounded attended work, fresh kickoff, AFK continuation,
+  decisions for bounded attended work, a tee-up agreement, absent-human continuation,
   unchanged evidence, high-risk work, and honest blocked terminals; no material
   or critical regression remains.
 - [ ] `npm run check` and `./scripts/validate.sh` pass on the final state.
@@ -80,9 +84,6 @@ guidance is not counted as universally loaded context.
   integration, and concentrated logic, preserving useful unit tests/TDD and
   rejecting false completion. Candidate artifacts identify the tested state;
   screenshots do not substitute for checks of invisible effects.
-
-`missionctl` is a separately versioned PATH dependency. This repository owns
-the shared doctrine, not the reducer, executable, or lifecycle adapter.
 
 ## Goal
 
@@ -163,8 +164,7 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
   `null` and `session_bounds` carries inclusive `minimum` and `maximum` values.
 - REQ-CENSUS-007 — **Decision boundary**: this census declares no skill dead
   and performs no archival, rename, catalog, or plugin-version mutation.
-  `agent-workflows:afk` remains public and `agent-workflows:writing-plans`
-  remains only a candidate pending complete-fleet evidence.
+  `agent-workflows:writing-plans` remains only a candidate pending complete-fleet evidence.
 - REQ-CENSUS-008 — **Verification**: tests use a fake Recall executable and
   cover exact/bare canonicalization, ambiguity, unmatched names, filters and
   option forwarding, missing/failed Recall, malformed or incomplete coverage,

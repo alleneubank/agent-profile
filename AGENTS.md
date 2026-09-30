@@ -15,11 +15,10 @@ before iterating: observe evidence, make the smallest useful change, verify.
 Implement directly unless requested delegation or independent parallel work
 benefits from another agent.
 
-For campaigns, use `tee-up` to prepare the agreement and `kickoff` to execute
-or resume it. `afk` changes human availability, not scope or authorization.
-Kickoff owns campaign phases, budgets, working memory, and terminals;
-`mission-command` owns missionctl lifecycle operations. Standing requirements
-and decisions survive sessions; apply them instead of re-asking.
+Multi-lane or unattended work runs under a coordinator's charter; `tee-up`
+prepares the agreement it starts from. The human's absence changes cadence,
+not scope or authorization. Standing requirements and decisions survive
+sessions; apply them instead of re-asking.
 
 ## Verification
 

@@ -8,7 +8,7 @@
 
 > Law doc for the landing hero, present-tense, no narrated history — git is the changelog. The
 > Boundary and ratified Decisions amend only with human confirmation; the driver appends
-> provisional Decisions, marked and dated. Working memory lives in the campaign's LOOP.md State,
+> provisional Decisions, marked and dated. Working memory lives in the coordinator's log or a handoff,
 > not here; floor waivers are dated Decisions below.
 
 ## Bar
@@ -45,8 +45,7 @@ permanently biased (the exact failure the oracle exists to defeat).
   panel defeats a single idiosyncratic taste and cannot be talked around.
 - **Objective floors** run in CI (Lighthouse, axe, token-lint) — fail-closed, no human in the path.
 - **Reference-anchored.** Place the captured hero beside the brand's reference frames and the top
-  three admired peers; rank the ten most significant gaps by impact in the campaign's LOOP.md
-  State; fix the top three; re-capture. The round closes only after the re-capture.
+  three admired peers; rank the ten most significant gaps by impact in the coordinator's log; fix the top three; re-capture. The round closes only after the re-capture.
 - **Post-ship (live).** The oracle extends into telemetry: hero bounce rate, scroll-past rate, and
   CTA click-through are the continuing signal that the first impression holds. The judge panel was
   the proxy; the live audience is the final gate.

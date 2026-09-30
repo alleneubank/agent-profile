@@ -2,11 +2,8 @@
 
 > Law doc for <surface>, present-tense, no narrated history — git is the changelog. The Boundary
 > and ratified Decisions amend only with human confirmation; the driver appends provisional
-> Decisions, marked and dated. Working memory lives in the campaign's LOOP.md State, not here;
+> Decisions, marked and dated. Working memory lives in the coordinator's log or a handoff, not here;
 > floor waivers are dated Decisions below.
-
-Mission (only if declared): <`.mission/mission.yaml` id and relevant rubric ids>. This BRIEF
-governs surface quality and does not duplicate a mission's strategic success rubric.
 
 ## Bar
 

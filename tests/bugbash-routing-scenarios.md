@@ -5,9 +5,7 @@ these runtime skills and the references or execution skills that version routes
 to. Do not read implementation notes or the source diff:
 
 - `plugins/agent-workflows/skills/bugbash/SKILL.md`
-- `plugins/agent-workflows/skills/kickoff/SKILL.md`
 - `plugins/agent-workflows/skills/tee-up/SKILL.md`
-- `plugins/agent-workflows/skills/afk/SKILL.md`
 - `plugins/agent-workflows/skills/writing-plans/SKILL.md`
 - `plugins/engineering-practices/skills/testing-best-practices/SKILL.md`
 
@@ -59,21 +57,21 @@ green. Missing tooling and unavailable execution remain explicit limitations.
     source file happens to mention a deployment tool. State the next actions,
     required documents, skill reads, delegation, and any question before work.
 11. During that authorized fix the user says "stepping away, keep going."
-    There is no LOOP.md; the remaining implementation and checks fit in the
-    current session. State how presence changes the workflow and its terminal.
-12. In a fresh session the user invokes kickoff with a tee-up-prepared seed,
-    an iteration budget of four, and a local-only boundary. The seed resolves
-    objective, acceptance, and targets. No LOOP.md exists. State the first
-    actions and whether scope restatement requires another go-ahead.
+    No coordinator runs this work; the remaining implementation and checks fit
+    in the current session. State how presence changes the workflow and its terminal.
+12. In a fresh session the user hands over a tee-up-prepared agreement with
+    an iteration budget of four and a local-only boundary. The agreement
+    resolves objective, acceptance, and targets. State the first actions and
+    whether scope restatement requires another go-ahead.
 13. A resumed campaign has green harness and bug-bash evidence with matching
     source, dirty-state, artifact, environment, and task identities. Only the
     campaign's administrative iteration counter advanced. Decide what to run
     and record. Then repeat the decision after the deployed test environment
     changes while source and artifact remain identical.
-14. The user asks tee-up to refine a draft kickoff invocation. Its seed and
-    budget exist; a named skill is already present in the current context.
-    State what to read, whether to create LOOP.md, and the deliverable.
-15. A kickoff campaign lacks a required fresh executor after the deterministic
+14. The user asks tee-up to refine a draft agreement. Its seed and budget
+    exist; a named skill is already present in the current context. State what
+    to read, whether to create campaign documents, and the deliverable.
+15. A campaign lacks a required fresh executor after the deterministic
     gates pass. Two attempts establish that its execution service is unavailable.
     State what work continues, how to report the terminal, and whether a static
     review or a new iteration can make the missing gate green.

@@ -5,7 +5,7 @@
 
 > Law doc for the transfer flow, present-tense, no narrated history — git is the changelog. The
 > Boundary and ratified Decisions amend only with human confirmation; the driver appends
-> provisional Decisions, marked and dated. Working memory lives in the campaign's LOOP.md State,
+> provisional Decisions, marked and dated. Working memory lives in the coordinator's log or a handoff,
 > not here; floor waivers are dated Decisions below.
 
 ## Bar
