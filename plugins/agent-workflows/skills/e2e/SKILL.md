@@ -55,9 +55,9 @@ exonerate the product.
 - Quote the spec section that defines expected behavior
 - Fix the source code to match the spec
 - Reproduce the failure before fixing when practical. The E2E reproducer can supply regression coverage; add a narrower test only for a risk or diagnostic benefit it covers better.
-- Verifier integrity applies: never bend an e2e assertion toward buggy code (verifier law)
+- Never bend an e2e assertion toward buggy code.
 - **Never change API contracts or interfaces** without spec backing
-- If no spec exists, climb the interior-decision ladder before asking: investigate (git log, linked tests, code intent), check the surface's Decisions and the doctrine, consult an independent model at a genuine fork. Still undecided: classify as unverified failure and batch the bug-vs-outdated question for the human — never block on it
+- If no spec exists, before asking: investigate (git log, linked tests, code intent), check the surface's Decisions and other standing decisions, consult an independent model at a genuine fork. Still undecided: classify as unverified failure and batch the bug-vs-outdated question for the human — never block on it
 
 ## Source Code Boundary
 

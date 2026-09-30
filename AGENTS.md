@@ -11,9 +11,6 @@ correct design. Minimality limits scope, not the depth needed to finish it.
 
 For each meaningful change, identify the outcome, boundaries, and verifier
 before iterating: observe evidence, make the smallest useful change, verify.
-Use existing requirements and a short session plan for bounded attended work.
-Create persistent campaign artifacts when unattended multi-session execution
-or recovery needs them, not merely because a task touches several files.
 
 Implement directly unless requested delegation or independent parallel work
 benefits from another agent.
@@ -36,7 +33,8 @@ check only for a named risk it would expose.
 - High-risk changes — schema/data migrations, auth/security boundaries, public
   API compatibility or contract changes, infra/deploy configuration — require
   plan approval and a matching specialist review. Only the human may waive it.
-  Other work gets an independent reviewer or a bug bash only when asked.
+  Other work gets an independent reviewer or a bug bash only when asked;
+  claims published to other people are fact-checked per `sitrep`.
 - Reuse evidence while the inputs it covered are unchanged; a new commit id,
   message, or squash alone does not invalidate it. After a change, rerun only
   the checks it can affect.

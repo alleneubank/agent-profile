@@ -69,8 +69,7 @@ sessions; its Decisions reference the loop's rather than forking them.
 
 ## Rules
 
-- **"Acceptance / Verification" and "Decisions" are mandatory.** A handoff
-  missing either fails this skill's own gate — do not write it without them.
+- Every handoff has "Acceptance / Verification" and "Decisions" sections.
   Acceptance lists every check that counts as done (flows to drive, deploy
   bumps, e2e floors), stated as evidence to show, not activities to perform.
   Decisions carries the calls already made — each marked ratified or

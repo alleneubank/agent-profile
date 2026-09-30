@@ -7,14 +7,10 @@ description: Use when preparing clean, logical git commits from an existing work
 
 Prepare focused commits that are easy to verify and revert.
 
-## Workflow
-
-1. Load `git-best-practices`.
-2. Inspect `git status`, staged changes, unstaged changes, current branch, and recent commits.
-3. Group changes by intent, not by file extension.
-4. Stage only the files for one logical commit at a time.
-5. Use a conventional commit subject when it fits the repo style.
-6. Run the relevant verifier before committing when the change is non-trivial.
+Load `git-best-practices`. Group changes by intent, not by file extension, and
+stage one logical commit at a time. Use a conventional commit subject when it
+fits the repo style. Run the relevant verifier before committing a non-trivial
+change.
 
 ## Rules
 

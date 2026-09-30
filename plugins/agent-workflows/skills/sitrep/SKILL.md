@@ -5,7 +5,7 @@ description: Use when the user asks for a sitrep, a status report, or "where are
 
 # Sitrep
 
-A sitrep is a point-in-time report of claims to the commander. Two laws govern
+A sitrep is a point-in-time report of claims to the human. Two laws govern
 every shape: **every claim carries its evidence**, and **the reader's decisions
 lead**. A sitrep briefs the human now; a handoff (see `handoff`) packages
 context for the next agent — do not conflate them.

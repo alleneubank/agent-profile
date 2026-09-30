@@ -17,8 +17,8 @@ Use this skill when you need to sync a feature branch onto the latest `origin/{b
 - Print each history-rewriting command (`git rebase ...`, `git push --force*`) as a one-line status before running it.
 - Create a local backup ref (prefer an annotated tag) before starting the rebase. Do not push backup refs unless the user explicitly asks.
 - Prefer `git push --force-with-lease`, never plain `--force`.
-- Pushing a deploy-tracked ref is a publish and stays with the user (rules of engagement); discover which refs pipelines track before pushing. A ref that is shared (other authors, a collaborative PR) stays with the user as well.
-- Resolve conflicts via the interior-decision ladder (step 7). Do not invent product behavior.
+- Pushing a deploy-tracked ref is a publish and stays with the user; discover which refs pipelines track before pushing. A ref that is shared (other authors, a collaborative PR) stays with the user as well.
+- Resolve conflicts as step 7 describes. Do not invent product behavior.
 
 ## Workflow
 
@@ -79,7 +79,7 @@ When conflicts happen:
 1. Collect context:
    - `git status`
    - Identify conflicted files (from status output).
-2. Resolve each conflicted file via the interior-decision ladder (rules of engagement):
+2. Resolve each conflicted file:
    - Investigate first: open the file, read the surrounding code and both sides' intent — most conflicts are located facts, not judgment calls.
    - Prefer minimal, mechanical resolutions: keep upstream changes unless the feature branch deliberately supersedes them; re-run generators (lockfiles, codegen) instead of hand-editing when appropriate.
    - Check the brief's Decisions and the doctrine for a standing answer before treating intent as ambiguous.

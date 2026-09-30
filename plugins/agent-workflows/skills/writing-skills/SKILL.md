@@ -111,7 +111,7 @@ Use subagents for testing only when they add signal. They are optional, not the 
 - Long examples that restate the same rule
 - Rules encoding one incident's surface details (tool names, paths, exact
   phrasings) where the failure was structural
-- Skills that restate AGENTS.md law or doctrine entries — skills carry
+- Skills that restate AGENTS.md law — skills carry
   mechanics and point at law
 - Vendor tool names or harness-only paths in a shared skill
 - Rules justified only by model agreement, intuition, or imagined failure
