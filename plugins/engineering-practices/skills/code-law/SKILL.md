@@ -6,7 +6,7 @@ description: Use when writing or changing code in any language — the craft law
 # Code Law
 
 The craft law for code. `AGENTS.md` keeps the law whose violation is
-unrecoverable — boundary, secrets, publish, self-approval, done-claims.
+unrecoverable — boundary, secrets, publish, done-claims.
 This skill carries the law whose violation the harness and behavior-first
 verification catch.
 
@@ -17,14 +17,18 @@ floor is a runner setting where one exists (network off, parallel random
 order), one-off evidence where it needs judgment, and a permanent test only
 when it meets the bar in `testing-best-practices`.
 
-The detector is the toolchain's, not a bespoke script. Craft rules a mainstream
-linter or compiler already checks (function length, complexity, warnings as
-errors, unchecked results, unused values) are enforced through that tool's
-configuration and, where it has one, its custom-rule engine. A rule with no such
-checker is a review-list item applied by a reviewer who did not write the code;
-a review comment that recurs is uplifted into the project's style document, not
-repeated. Hand-written checker scripts are code with no tests of their own and
-are not added.
+Prefer the strongest check that can catch a defect: the type system or
+compiler, then the toolchain's linter, then a project checker, then a review
+item, then a worked example. Craft rules a mainstream linter or compiler
+already checks (function length, complexity, warnings as errors, unchecked
+results, unused values) are enforced through that tool's configuration and,
+where it has one, its custom-rule engine. A project checker names the defect
+class it prevents and ships a self-test that plants that defect and fails. A
+check that only confirms a file or string changed prevents no defect and is not
+added. A rule with no checker is a review-list item applied by a reviewer who
+did not write the code; a review comment that recurs is uplifted into the
+project's style document, not repeated. Retire a check when its defect can no
+longer be written or another check covers it.
 
 ## Craft
 
@@ -75,6 +79,9 @@ are not added.
 - Errors are handled or propagated, never swallowed. Keep the failure region
   narrow: wrap only the operation whose failure is handled, catch only the error
   meant to be handled, and preserve the original cause when adding context.
+  Prefer a specific check to a catch-all: catching every error and continuing
+  is rarely safe, and a broad handler behind your own specific check is dead
+  code that hides the next failure.
   Validate at system boundaries and only there — a check protecting a state an
   upstream boundary already guarantees is deleted, not kept for safety. Publish
   externally visible state only after every fallible operation succeeds, so a
