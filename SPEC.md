@@ -318,8 +318,8 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   smallest operational form.
 - No new always-loaded law duplicates mechanics already owned by a skill.
 - Direct secret values never enter scenario fixtures, transcripts, or docs.
-- Optional TDD does not waive a new checker's known-broken case, existing
-  repository gates, or high-risk approval and review.
+- Optional TDD does not waive existing repository gates or high-risk approval
+  and review.
 
 ### Decisions
 

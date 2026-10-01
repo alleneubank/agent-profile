@@ -33,7 +33,23 @@ check only for a named risk it would expose.
   API compatibility or contract changes, infra/deploy configuration — require
   plan approval and a matching specialist review. Only the human may waive it.
   Other work gets an independent reviewer or a bug bash only when asked;
-  claims published to other people are fact-checked per `sitrep`.
+  claims published to other people are fact-checked per `sitrep`. An
+  adversarial reviewer gets the goal, the diff, production behavior, and the
+  code, not this profile, and judges each waiver on its merits.
+- Hold an invariant in the source before checking it: make the defect
+  unwritable through types, visibility, module boundaries, or by keeping the
+  invariant with the state it protects. Correct types need no further proof.
+  Then use the compiler, rules existing linters ship, and behavior tests. Do
+  not write project-specific source checks; an invariant none of these can
+  hold gets a waiver comment at the site saying it is unchecked.
+- When review finds a second instance of one defect class, redesign so the
+  class cannot be written; do not patch it again or harden a detector.
+  Deliberation over one major finding ends by the third review round: if no
+  redesign or existing check can hold it, add a code-law waiver and proceed,
+  attended or not. A redesign larger than the task's scope becomes the
+  waiver's debt and a follow-up. Done claims list the waivers added. A waiver never covers a
+  high-risk change's approval or review, a required check, or a weakened
+  assertion; those stay with the human.
 - Reuse evidence while the inputs it covered are unchanged; a new commit id,
   message, or squash alone does not invalidate it. After a change, rerun only
   the checks it can affect.
