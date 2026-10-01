@@ -47,9 +47,9 @@ check only for a named risk it would expose.
   Deliberation over one major finding ends by the third review round: if no
   redesign or existing check can hold it, add a code-law waiver and proceed,
   attended or not. A redesign larger than the task's scope becomes the
-  waiver's debt and a follow-up. Done claims list the waivers added. A waiver never covers a
-  high-risk change's approval or review, a required check, or a weakened
-  assertion; those stay with the human.
+  waiver's debt and a follow-up. Done claims list the waivers added. A waiver
+  never covers a high-risk change's approval or review, a required check, or a
+  weakened assertion; those stay with the human.
 - Reuse evidence while the inputs it covered are unchanged; a new commit id,
   message, or squash alone does not invalidate it. After a change, rerun only
   the checks it can affect.
