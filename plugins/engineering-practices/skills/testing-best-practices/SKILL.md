@@ -27,8 +27,8 @@ limits rather than claiming an unobserved failure.
   and use discriminating expected results. Assert call order only when that
   interaction is itself the promised behavior.
 - Unit tests, TDD, integration tests, and exploratory use are alternatives or
-  complements selected by risk, not a checklist of layers. A new checker ships
-  a known-broken case that shows it can fail.
+  complements selected by risk, not a checklist of layers. A property held by
+  types needs no test of its own.
 
 ## Evidence or permanent test
 

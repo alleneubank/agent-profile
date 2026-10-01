@@ -137,10 +137,18 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   is the crash boundary, and the precondition for any boundary smaller than
   the process is state isolation. (2026-09-10, provisional — from the
   eng-wiki TigerStyle/matklad ingest)
-- Checkers come from the toolchain's rule engine and configuration, never
-  from hand-written scripts; a rule the toolchain cannot check is applied at
-  review. Bespoke scripts became change detectors and token sinks in
-  practice. (2026-09-10, provisional)
+- Invariants are held by construction first; correct types are the proof and
+  need no checker or fixture. What construction cannot hold goes to the
+  compiler, rules existing linters ship, or a behavior test. Projects write no
+  source checks of their own (no analyzer scripts, linter plugins, or custom
+  rule files). An invariant no rung can hold gets a code-law waiver comment
+  saying it is unchecked, not a review item or a worked example; a waiver a
+  redesign would remove is a defect. A
+  defect class found twice in review is answered by a redesign, not a stronger
+  detector. Supersedes the 2026-09-10 checker ban and the 2026-09-29 checker
+  ladder: Sox carried about 24k lines of bespoke checkers, about 3,800 of them
+  for one Android locking rule that construction may hold (sox#716).
+  (2026-10-01, provisional — EXP-011)
 - Permanent tests are a recurring cost to every later change, so verification
   evidence stays with the change and only contract, isolated-logic, and
   shipped-defect tests persist. Source: the sendapp unit-test audit (0xsend

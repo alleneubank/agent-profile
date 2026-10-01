@@ -10,25 +10,34 @@ unrecoverable — boundary, secrets, publish, done-claims.
 This skill carries the law whose violation the harness and behavior-first
 verification catch.
 
-**A property you want held gets a detector, not a paragraph.** A sentence
-saying "be deterministic" changes nothing; the floor that reddens on a
-violation is what holds. Build the detector when you name the property. A
-floor is a runner setting where one exists (network off, parallel random
-order), one-off evidence where it needs judgment, and a permanent test only
-when it meets the bar in `testing-best-practices`.
+**A property you want held is made unwritable first, detected second.**
+Before reaching for any check, shape the code so the defect cannot be written:
+a type the wrong value cannot inhabit, visibility that hides the wrong call, a
+module boundary, the invariant kept with the state it protects, a capability
+that only the authorized scope can obtain. Correct types are the proof. They
+need no checker, fixture, or mutation run to show that they hold. Choose this
+even when a check would be quicker to add today.
 
-Prefer the strongest check that can catch a defect: the type system or
-compiler, then the toolchain's linter, then a project checker, then a review
-item, then a worked example. Craft rules a mainstream linter or compiler
-already checks (function length, complexity, warnings as errors, unchecked
-results, unused values) are enforced through that tool's configuration and,
-where it has one, its custom-rule engine. A project checker names the defect
-class it prevents and ships a self-test that plants that defect and fails. A
-check that only confirms a file or string changed prevents no defect and is not
-added. A rule with no checker is a review-list item applied by a reviewer who
-did not write the code; a review comment that recurs is uplifted into the
-project's style document, not repeated. Retire a check when its defect can no
-longer be written or another check covers it.
+Where construction cannot hold a property, a sentence saying "be
+deterministic" still changes nothing; a floor that reddens on a violation is
+what holds. A floor is a runner setting where one exists (network off,
+parallel random order), one-off evidence where it needs judgment, and a
+permanent test only when it meets the bar in `testing-best-practices`.
+
+What construction cannot hold goes to the cheapest existing check that can
+express it: the compiler, then rules an existing linter already ships, turned
+on and configured, then a behavior test. Craft rules a mainstream linter or
+compiler already checks (function length, complexity, warnings as errors,
+unchecked results, unused values) are enforced through that tool's
+configuration. A project never writes its own source checks: no analyzer
+scripts, linter plugins, or custom rule files. A check that only confirms a
+file or string changed prevents no defect and is not added. When no rung can
+hold an invariant, because the defect is rare, hard to enforce, or impossible
+to catch, a waiver comment at the site says it is unchecked; it does not
+become a review deliberation or a contrived example. The waiver is the last
+rung, never a shortcut past a redesign. A recurring finding is answered by a
+redesign that makes its class unwritable. Retire a check when its defect can
+no longer be written or another check covers it.
 
 ## Craft
 
@@ -240,14 +249,21 @@ other check. *Scope* — assert cancellation propagates to the leaf.
 
 ## Waivers
 
-An instance that cannot hold a property carries a waiver comment naming the
-property, why this instance can't hold it, and whether it is debt or a
-permanent exemption. Debt names what would remove it.
+An instance that cannot hold a property, or an invariant no rung can hold,
+carries a waiver comment naming the property or invariant, why this instance
+can't hold it or why holding it costs more than the defect could, and whether
+it is debt or a permanent exemption. For an
+invariant, the reason names the design that would make the defect unwritable
+and why it does not fit here. Debt names what would remove it.
 
 ```
-// <property>: <why this instance cannot hold it>. <Debt — removed by X | Permanent — X makes it impossible.>
+// WAIVER(<property or invariant>): <why this instance cannot hold it, or why it is not worth holding>. <Debt — removed by X | Permanent — X makes it impossible.>
 ```
 
-A waiver is written prose a maintainer can evaluate, never a suppression flag. A
-waiver list that grows without its debt entries shrinking means the property
-was stated too strongly — weaken the property, don't grow the list.
+The `WAIVER(` tag is literal in every language's comment syntax, so one search
+lists every waiver in a project. A waiver is written prose a maintainer can evaluate, never a suppression flag.
+A waiver whose reason a redesign within scope would remove is a defect: ship
+the redesign instead. The same invariant waived at a second site means its
+class needs the redesign. A waiver list that grows without its debt entries
+shrinking means the property was stated too strongly — weaken the property,
+don't grow the list.

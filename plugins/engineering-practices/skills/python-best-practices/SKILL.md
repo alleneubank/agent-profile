@@ -75,6 +75,8 @@ def process_input(source: Readable) -> bytes:
     return source.read()
 ```
 
+**Restrict who can do it** — Python cannot hide a call, so keep an effect that needs a scope (a lock, a transaction) inside that scope: a context manager or a method of the object that owns the state, not a free function callers must remember to guard. Correct types are the proof where the type checker can see them.
+
 ## Python-Specific Error Handling
 
 Chain exceptions with `from err` to preserve the original traceback:

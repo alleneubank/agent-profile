@@ -70,6 +70,8 @@ function processStatus(status: Status): string {
 }
 ```
 
+**Restrict who can do it** — when only one scope may perform an effect, keep its functions unexported and export only the scope that performs it; a branded capability that the scope alone creates makes an out-of-scope call a type error. Hold module boundaries with ESLint's shipped `no-restricted-imports` rule. Correct types are the proof.
+
 ## Runtime Validation with Zod
 
 - Define schemas as single source of truth; infer TypeScript types with `z.infer<>`. Avoid duplicating types and schemas.

@@ -39,6 +39,8 @@ fn Buffer(comptime size: usize) type {
 }
 ```
 
+**Restrict who can do it** — when only one scope may perform an effect, keep its functions non-`pub` and expose only the scope that performs it; an opaque capability that the scope alone constructs makes an out-of-scope call a compile error. Correct types are the proof.
+
 ## Memory Management
 
 - Pass allocators explicitly to every function that allocates; no global allocator state.

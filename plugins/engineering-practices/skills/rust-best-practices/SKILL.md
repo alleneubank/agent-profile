@@ -36,6 +36,13 @@ enum Connection { Disconnected, Connecting { since: Instant }, Connected { socke
 
 **`#[must_use]`** on types/functions where dropping the result is a bug (builders mid-chain, guards, pure queries, error-like returns) — the compiler flags the dropped value.
 
+**Restrict who can do it** — when only one scope may perform an effect (holding a lock, inside a transaction), make the permission a value only that scope can create: a token with a private field, or a guard borrowed for the closure's lifetime. Keep the effect's functions private to the module that issues it. Correct types are the proof.
+```rust
+pub struct Locked<'a>(PhantomData<&'a ()>);       // no public constructor
+pub fn with_lock<R>(f: impl FnOnce(Locked<'_>) -> R) -> R { /* acquire, call f, release */ }
+fn write_profile(_: Locked<'_>, p: &Profile) { /* callable only inside with_lock */ }
+```
+
 ## Ownership Is API Design
 
 Signatures encode an ownership contract. Get it right and callers never clone to satisfy you.

@@ -97,6 +97,8 @@ type User struct {
 }
 ```
 
+**Restrict who can do it** — when only one scope may perform an effect, unexport its functions and export only the scope that performs it; put packages that other modules must not import under `internal/`. A capability with an unexported field can be created only by its own package. Correct types are the proof.
+
 ## Go-Specific Error Handling
 
 Wrap errors with `%w` to preserve the chain for `errors.Is` / `errors.As`:
