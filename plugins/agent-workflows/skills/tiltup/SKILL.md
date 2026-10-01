@@ -1,6 +1,6 @@
 ---
 name: tiltup
-description: Use when starting tilt, debugging Tiltfile errors, or bootstrapping a dev environment. Starts Tilt in zmx, monitors bootstrap to healthy state, fixes Tiltfile bugs without hard-coding or fallbacks.
+description: Use when starting tilt, debugging Tiltfile errors, or bootstrapping a dev environment. Starts Tilt in a detached sox shell, monitors bootstrap to healthy state, fixes Tiltfile bugs without hard-coding or fallbacks.
 ---
 
 # Tilt Up
@@ -41,8 +41,8 @@ Restart only for: Tilt version upgrades, port/host config changes, crashes, clus
 1. Check if tilt is already running:
    ```bash
    ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-   PROJECT="$(basename "$ROOT")"
-   zmx list --short 2>/dev/null | grep -q "^${PROJECT}-tilt$"
+   sox ls --json | jq -r --arg root "$ROOT" \
+     'select(.kind == "shell" and .status == "live" and .labels.role == "tilt" and .labels.root == $root) | .backing_id'
    ```
    If running, check health via `tilt get uiresources -o json` and skip to Step 3.
 
@@ -58,45 +58,51 @@ Restart only for: Tilt version upgrades, port/host config changes, crashes, clus
 
 4. Check for k3d cluster or Docker prerequisites.
 
-### Step 2: Start Tilt in zmx
+### Step 2: Start Tilt in a sox shell
 
-Follow the `zmx` skill patterns:
+Start Tilt in a detached sox shell, which outlives the agent's turn and the
+human can attach to. That shell owns the Tilt UI/API; diagnose from the agent
+turn with `tilt get ...` and bounded `tilt logs "$RESOURCE" ...` commands.
+Never `sox attach` from an agent turn: it blocks.
 
-Start Tilt quietly and keep the durable session as the UI/API owner. Diagnose
-from the agent turn with `tilt get ...` and bounded `tilt logs "$RESOURCE" ...`
-commands.
-
-`tilt up` never exits, so it **must** be detached with `-d` (placed after the
-session name) and passed as separate arguments — bare `zmx run` blocks the
-agent forever, and a quoted `'tilt up'` is looked up as a single binary name
-and dies with exit 127. Hold the boot command in an **array**, not a string:
+`--exec` takes argv with no shell, so hold the boot command in an **array**:
 zsh does not word-split unquoted expansions, so a `START_CMD='tilt up'` string
-arrives as one argument there even though it works in bash.
+arrives as one argument there even though it works in bash. sox keeps no
+readable scrollback, so the boot command writes to a log file. Run `sox daemon
+--ensure` first if `sox ls` cannot reach this machine's daemon.
 
 ```bash
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-PROJECT="$(basename "$ROOT")"
-SESSION="${PROJECT}-tilt"
 START_CMD=(tilt up)
 # Replace START_CMD with the repo's documented boot command when present, e.g.:
 # START_CMD=(yarn localnet:up)
 # START_CMD=(silo up)
+LOG="${TMPDIR:-/tmp}/tilt-$(basename "$ROOT").log"
 
-if zmx list --short 2>/dev/null | grep -q "^${SESSION}$"; then
-  echo "Tilt session already exists: $SESSION"
+SHELL_ID="$(sox ls --json | jq -r --arg root "$ROOT" \
+  'select(.kind == "shell" and .status == "live" and .labels.role == "tilt" and .labels.root == $root) | .backing_id')"
+if [ -n "$SHELL_ID" ]; then
+  echo "Tilt shell already exists: $SHELL_ID"
 else
-  zmx run "$SESSION" -d "${START_CMD[@]}"
-  sleep 2
-  if zmx history "$SESSION" 2>/dev/null | tail -5 | grep -q 'ZMX_TASK_COMPLETED:'; then
+  # sh receives the log path as $0 and the boot command as "$@".
+  SHELL_ID="$(sox up "localhost:$ROOT" --detach --no-chrome --no-ext \
+    --exec -- sh -c 'exec "$@" >"$0" 2>&1' "$LOG" "${START_CMD[@]}" | tail -1)"
+  sox label "$SHELL_ID" role=tilt root="$ROOT" >/dev/null
+  # A boot command that dies at once has exited within 5s; exit 3 means it is
+  # still running, which is the healthy case.
+  sox wait "$SHELL_ID" --timeout 5
+  if [ $? -ne 3 ]; then
     echo "Boot command exited immediately:"
-    zmx history "$SESSION" | tail -20
+    tail -20 "$LOG"
   else
-    echo "Started tilt in zmx session: $SESSION"
+    echo "Started tilt in sox shell: $SHELL_ID (log: $LOG)"
   fi
 fi
 
 tilt get uiresources -o json | jq -r '.items[] | "\(.metadata.name): runtime=\(.status.runtimeStatus) update=\(.status.updateStatus)"'
 ```
+
+To stop it: `sox kill "$SHELL_ID"`.
 
 For silo projects: `silo up` instead of `tilt up`.
 
@@ -145,7 +151,7 @@ After 3 fix iterations on the same resource without progress:
 ## Tilt Status: <healthy|degraded|errored>
 
 **Resources**: X/Y ok
-**Session**: zmx $SESSION
+**Shell**: sox $SHELL_ID
 
 ### Errors (if any)
 - <resource>: <root cause> — <what was fixed or what remains>

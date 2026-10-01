@@ -94,7 +94,8 @@ timeout 20 k3d cluster list          # or: kubectl config get-contexts
 
 A supervisor-driven localnet typically owns a compose project **and** a
 cluster + registry. Also check the session multiplexer's own view (e.g.
-`zmx ls`) — it records sessions the process table cannot explain.
+`sox ls`) — it records shells and their labels the process table cannot
+explain.
 
 ### 3) Attribute ownership
 
