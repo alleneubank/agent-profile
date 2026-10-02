@@ -36,6 +36,13 @@ check only for a named risk it would expose.
   claims published to other people are fact-checked per `sitrep`. An
   adversarial reviewer gets the goal, the diff, production behavior, and the
   code, not this profile, and judges each waiver on its merits.
+- Security work states its threat model and hands it to the reviewer. The
+  default trusts the host (root, the user's own account, other local accounts,
+  physical access, installed tools) and defends against the network, remote
+  peers, and untrusted input; `code-law` has the detail. A project crossing a
+  local privilege boundary states a stricter model in its SPEC. A finding
+  outside the model is answered by citing it: it never blocks, forces a
+  redesign, or counts as a waiver.
 - Hold an invariant in the source before checking it: make the defect
   unwritable through types, visibility, module boundaries, or by keeping the
   invariant with the state it protects. Correct types need no further proof.

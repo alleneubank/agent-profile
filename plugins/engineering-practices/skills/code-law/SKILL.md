@@ -1,6 +1,6 @@
 ---
 name: code-law
-description: Use when writing or changing code in any language — the craft law (types, assertions, bounds, errors, naming, comments, scope) and the system properties (deterministic, hermetic, idempotent, isolated, observable, evented, contextual) with the floor that proves each one. Not for prose, docs-only, or config-only changes.
+description: Use when writing or changing code in any language — the craft law (types, assertions, bounds, errors, naming, comments, scope), the default threat model, and the system properties (deterministic, hermetic, idempotent, isolated, observable, evented, contextual) with the floor that proves each one. Not for prose, docs-only, or config-only changes.
 ---
 
 # Code Law
@@ -148,6 +148,37 @@ no longer be written or another check covers it.
   load `agent-operability`. Its inspect/plan/apply/verify contract is the public
   expression of this skill's deterministic, idempotent, atomic, observable,
   evented, and contextual properties—not a second implementation path.
+
+## Threat model
+
+Security-relevant code is written and reviewed against a stated threat model.
+A bug is a vulnerability only when it lets an actor do something they could
+not already do. Unless the project's SPEC says otherwise, the default model is:
+
+- **Defended against:** network attackers (DNS, routing, Wi-Fi, on-path
+  interception), malicious remote peers, and untrusted input: protocol data,
+  files, and content the software did not author.
+- **Trusted:** root, the user's own account, every other local account on the
+  host, physical access, the OS and its configuration, and installed
+  executables and dependencies. An actor with shell or disk access already
+  owns the machine, and no check in the software changes that.
+
+Hosts are single-tenant. Shared hosts, group-writable package prefixes
+(Linuxbrew), permissive ACLs, and other weaker setups a user chooses are that
+user's risk and a documented limitation, not a design input. Do not add
+ownership, mode, or parent-chain checks whose only purpose is to stop local
+accounts.
+
+A project tightens the default in its SPEC when the software crosses a local
+privilege boundary: setuid programs or root daemons, multi-tenant services, or
+anything acting for a less-privileged local principal. The SPEC names the added
+actors, and the rest of the default stands.
+
+A review finding that needs a trusted actor is answered by citing the model.
+It does not block, does not count as a second instance of a defect class, and
+needs no waiver. The driver may still take a trivial in-scope fix as ordinary
+hardening. The model itself can be challenged: a reviewer who argues it is
+wrong for the project takes that to the human.
 
 ## Properties
 

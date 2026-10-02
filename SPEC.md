@@ -42,6 +42,12 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
 - REQ-PROFILE-008 — **Completion boundary:** work stops when the selected
   check passes; another check needs a named risk it would expose. Done claims
   name the check that ran and what was not checked, not the author's assurance.
+- REQ-PROFILE-009 — **Default threat model:** security work states its threat
+  model and hands it to the reviewer. Universal `AGENTS.md` carries the rule;
+  `code-law` carries the default actors, the single-tenant host assumption, the
+  SPEC override for software crossing a local privilege boundary, and the
+  disposition of out-of-model findings (cited, non-blocking, not a waiver). The
+  high-risk approval and specialist review in REQ-PROFILE-005 are unchanged.
 
 ### Invariants and non-goals
 
@@ -69,6 +75,15 @@ guidance is not counted as universally loaded context.
   keep `tee-up`. Kickoff's gates, budget, and end states move into the
   coordinator's lane brief. Supersedes the 2026-09-09 `tee-up` → `kickoff`
   adoption, D7/D8, and the 2026-08-30 ruling to keep `afk` public.
+  **ratified (human)**
+- 2026-10-02 — Adopt a default threat model: the network, remote peers, and
+  untrusted input are in scope; root, the user's own account, other local
+  accounts, physical access, and installed tools are trusted; hosts are
+  single-tenant. Out-of-model review findings are answered by citing the model.
+  Prompted by sox #725, whose plan rounds 2 and 3 were each blocked by a new
+  route for another local account. Research and record: eng-wiki
+  `wiki/threat-model-scoping.md` and
+  `raw/agentic-engineering/2026-10-02-default-threat-model-decision.md`.
   **ratified (human)**
 
 ### Acceptance
