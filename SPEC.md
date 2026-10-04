@@ -12,8 +12,9 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   guidance do not advertise retired reviewer or loop-authoring workflows.
   This repository does not uninstall binaries or erase session history.
 - REQ-PROFILE-002 — **Campaign ownership:** multi-lane and unattended work
-  runs under a coordinator's charter, outside this profile. The profile ships
-  no loop lifecycle, campaign template, or presence skill.
+  runs under a coordinator's charter. `agent-workflows:coordinator` owns the
+  workflow and its reference file shapes; fleet state and grants stay outside
+  repositories. The profile ships no separate loop lifecycle or presence skill.
 - REQ-PROFILE-003 — **Proportional work:** bounded attended changes may use
   existing requirements and a session plan; persistent campaign documents are
   required only when unattended multi-session work or recovery needs them.
@@ -57,6 +58,11 @@ guidance is not counted as universally loaded context.
 
 ### Decisions
 
+- 2026-10-03 — Promote the dotfiles coordinator skill into `agent-workflows`.
+  Preserve its lane, lease, theme, relay, and rotation workflow; isolate Claude
+  tool names in the stack adapter and require wakeup capabilities before a
+  harness holds the watch. Fleet state remains private. Supersedes the
+  2026-09-29 placement outside this profile. **ratified (human)**
 - 2026-09-09 — Adopt `tee-up` → `kickoff`, retire ambient reviewer loops and the separate
   loop-authoring skill, and reduce global process while preserving verification
   and authority boundaries. **ratified (human)**

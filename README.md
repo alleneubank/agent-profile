@@ -160,8 +160,10 @@ versions managed under Releasing below.
 
 `tee-up` prepares an objective, acceptance, budget, and boundary without
 executing the draft. Multi-lane or unattended work runs under a coordinator's
-charter, with the coordinator skill kept outside this profile; bounded
-attended work needs no campaign machinery.
+charter, using `agent-workflows:coordinator`. Its sox/recall stack reference
+includes a Claude Code adapter; another coordinator harness needs its own
+decision interface and persistent wakeups. Fleet state and grants stay
+outside repositories. Bounded attended work needs no campaign machinery.
 
 Use `bugbash`, a fresh participant, or another independent review when the
 user or the agreement asks for one. The shared profile's high-risk classes
