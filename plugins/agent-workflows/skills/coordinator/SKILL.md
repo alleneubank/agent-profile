@@ -116,8 +116,9 @@ that leads with their items. Their next turn restarts the heartbeat.
    verbatim, relaunch, or retire. Retire the shell in the pass that processes
    it, and clean up only what you can attribute.
 3. A quiet agent: look in sox first. Nudge a live interactive agent once with
-   a one-line pointer; if the next pass shows no change, relaunch what you
-   launched. An agent the human launched goes on the waiting list.
+   a one-line pointer (`send.sh --kind request`) and confirm a new turn
+   landed; if the next pass shows no change, relaunch what you launched. An
+   agent the human launched goes on the waiting list.
 
 ### Bring decisions to the human
 
@@ -127,9 +128,9 @@ that leads with their items. Their next turn restarts the heartbeat.
    a lane that asks again gets a pointer to the answer. Before listing
    something as waiting on them, check the live sources for their having
    done it.
-3. If they are at the keyboard (their last turn here is minutes old, or they
-   just asked you something) and no timed check falls due before an answer
-   could arrive, ask in one round through the harness's decision
+3. If they are at the keyboard (an attended pass, a turn of theirs minutes
+   ago, or a question they just asked you) and no timed check falls due before
+   an answer could arrive, ask in one round through the harness's decision
    interface, worded to answer cold: plain words and what each option does.
    Otherwise put the questions in "Waiting on the human", batched by theme
    with the time each batch needs, and notify them only for what needs their
@@ -183,15 +184,24 @@ pass; anything that must outlive it is a sox shell.
 
 ### Before the human steps away
 
-Right after an authorization, make everything that could prompt later prompt
-now. Name each prompt before you trigger it. Probe each credential through the
-exact host, path, identity, and flags the unattended work will use. Cover
-every identity and fixture the window touches, host and daemon reachability,
-devices awake and unlocked, and launcher accounts. Collect the window's
-decisions, including the go for anything that starts later, and record the
-window agreement in the charter. Once they have left, a failed check is a
-boundary event: park what depends on it, keep independent work moving, and
-report it. Never repair or reroute credentials.
+Right after an authorization, while they can still answer prompts:
+
+1. List every prompt the window could raise. Before triggering each warm-up,
+   tell them which prompt is coming; they clear it.
+2. Probe each credential through the exact host, path, identity, and flags
+   the unattended work will use; a check through another identity or flag
+   set proves nothing. Cover every fixture, host and daemon, device (awake,
+   unlocked), and launcher account the window touches, with the launcher
+   order for when a quota runs out.
+3. In one question round, collect the window's decisions: the go for
+   anything that starts after they leave, its stop conditions, and any
+   provisional authority.
+4. Record the window agreement in the charter (files.md): what passed, what
+   cannot be warmed, grants, end, stop conditions.
+
+Once they have left, a failed check is a boundary event: park what depends on
+it, keep independent work moving, and report it. Never repair or reroute
+credentials.
 
 ### End of shift
 
