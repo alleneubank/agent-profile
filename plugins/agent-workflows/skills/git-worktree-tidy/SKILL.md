@@ -34,8 +34,10 @@ any repository.
   work under a new SHA, so a fully-shipped branch still shows commits "not in
   main" and a non-ancestor tip. Verify ship status against the forge's PR
   merge state (step 3a) before classifying a gone branch as unmerged.
-- Never switch a live or dirty worktree onto the default branch to restore
-  a checkout. Add a new worktree at the conventional path, or skip.
+- A clean checkout whose branch is verified merged is stale. Switch the
+  primary (non-bare) working tree back to the default branch; remove any other
+  such worktree (step 9). Never switch a dirty checkout, or one whose branch is
+  not verified merged; add a new worktree at the conventional path, or skip.
 - Auto-create a missing default-branch worktree only as a sibling of `.bare`
   named after that branch (`../<default>` from `.bare`). In any other layout,
   report the missing checkout and do not invent a path.
@@ -64,7 +66,10 @@ Report what was pruned (deleted remote-tracking branches, updated refs).
 git branch -vv | grep ': gone]'
 ```
 
-Collect branch names whose upstream is gone.
+Collect branch names whose upstream is gone. Also collect every other local
+branch except the default: a merged PR whose remote branch was never deleted
+leaves no `gone` marker, including on branches checked out in a worktree.
+Step 3a classifies them all.
 
 ### 3a) Verify ship status (gone upstream ≠ merged)
 
@@ -74,7 +79,7 @@ a fully-shipped branch still shows commits "not in main" and a non-ancestor tip.
 Verify against the forge before deleting — gone-but-unmerged branches are the
 only ones that lose real work.
 
-For each gone-upstream branch (GitHub example; substitute your forge CLI):
+For each collected branch (GitHub example; substitute your forge CLI):
 
 ```bash
 # Was there a merged PR from this head?
@@ -87,7 +92,7 @@ gh pr list --state all --head <branch> \
 gh pr view <pr> --json commits --jq '.commits[-1].oid'   # vs: git rev-parse <branch>
 ```
 
-Classify each gone branch:
+Classify each collected branch:
 - **Merged (verified)** — a MERGED PR exists AND its head == local tip → shipped,
   safe to delete.
 - **At risk** — no merged PR, or the tip has commits dated after the merge
@@ -104,16 +109,17 @@ git worktree list
 git worktree prune --dry-run
 ```
 
-Cross-reference worktrees against the gone-branch list. Check each stale
-worktree for dirty state:
+Cross-reference worktrees against the classified branches. Check each
+candidate worktree for dirty state:
 
 ```bash
 cd <worktree-path> && git status --short
 ```
 
 Categorize:
-- **Clean + gone**: safe to remove
-- **Dirty + gone**: flag for user review
+- **Clean + merged**: safe to remove (the primary working tree is switched
+  instead, step 9)
+- **Dirty, or branch at risk**: flag for user review
 - **Prunable metadata**: orphaned worktree entries (directory already gone)
 
 ### 4a) Review stashes
@@ -172,6 +178,9 @@ If removal fails (dirty), report and skip unless user approved force.
 git branch -D <branch1> <branch2> ...
 ```
 
+A merged branch still checked out in the primary working tree is deleted
+after step 9 switches it off.
+
 ### 7a) Resolve stashes
 
 Drop the stashes the user approved, highest index first so the remaining
@@ -206,15 +215,18 @@ Inspect `git worktree list`:
   `cd <path> && git pull --ff-only origin <branch>`.
   If that path is not the conventional `.bare` sibling, say so; do not try
   to add a second checkout (git will refuse).
+- Default branch not checked out, and the primary (non-bare) working tree is
+  clean on a verified-merged branch → `git switch <default>`, ff-only pull,
+  then delete the merged branch.
 - Default branch not checked out, git-common-dir is `.bare`, and
   `../<default>` (relative to `.bare`) does not exist:
   - local ref exists: `git worktree add ../<default> <default>`
   - no local ref: `git worktree add ../<default> -b <default> origin/<default>`
   - then ff-only pull
   Creating that checkout is interior; report the path.
-- Default branch not checked out, but the conventional path exists or this
-  is not a `.bare` sibling layout → skip and report. Do not `git switch`
-  some other worktree onto the branch.
+- Otherwise (the conventional path exists, or the only checkouts are dirty or
+  on unmerged branches) → skip and report. Do not `git switch` such a
+  checkout onto the branch.
 
 If ff-only fails, report the divergence and ask for guidance.
 
