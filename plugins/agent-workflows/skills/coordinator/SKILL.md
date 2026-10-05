@@ -72,7 +72,9 @@ lane host is a hint, never a source.
 2. Read the fleet file, the workspace layer, the charter, the themes file,
    the log head, and any handoff. An agreement the human hands you (a
    `tee-up` result, a draft, a folded design session) sets scope and grants:
-   write them into the charter first.
+   write them into the charter first. Out of scope is only what the human
+   excluded. Work that needs them at some step is in scope: queue it in the
+   themes file's Items, in their order, with the first human gate it stops at.
 3. `lease.sh show`. If another session holds it, record what sox and recall
    say about it; reachable or not, the human's turn decides.
 4. `lease.sh take` with `--reason` quoting the human's words and time.
@@ -91,15 +93,20 @@ lane host is a hint, never a source.
    or parked since the last pass; file claims live state contradicts;
    anomalies.
 3. Handle each change as a lane event (below).
-4. Collect open questions and bring them to the human (below).
-5. Append the log, with a correction for each contradicted claim; fix the
+4. Fill each free lane slot with the next queued item that can move: it runs
+   to its first human gate (a publish go, a credential, device, or biometric
+   step, a budget, a high-risk plan approval), parks there with the gate on
+   the waiting list, and the slot takes the next item.
+5. Collect open questions and bring them to the human (below).
+6. Append the log, with a correction for each contradicted claim; fix the
    themes file in place; rewrite "Waiting on the human".
-6. Report the delta per `sitrep`, by theme; "no change" is one line.
+7. Report the delta per `sitrep`, by theme; "no change" is one line.
 
-When three consecutive passes change nothing and everything left waits on the
-human (no lane, landing, rollout, or watcher in flight), stop the heartbeat,
-set the fleet row to `blocked-on-human`, keep the lease, and end with a sitrep
-that leads with their items. Their next turn restarts the heartbeat.
+When three consecutive passes change nothing and every queued item is done or
+parked at a human gate (no lane, landing, rollout, or watcher in flight), stop
+the heartbeat, set the fleet row to `blocked-on-human`, keep the lease, and
+end with a sitrep that leads with their items. Their next turn restarts the
+heartbeat.
 
 ### A lane event
 
@@ -188,8 +195,8 @@ Right after an authorization, while they can still answer prompts:
 3. In one question round, collect the window's decisions: the go for
    anything that starts after they leave, its stop conditions, and any
    provisional authority.
-4. Record the window agreement in the charter (files.md): what passed, what
-   cannot be warmed, grants, end, stop conditions.
+4. Write the window agreement (files.md): what passed, what cannot be
+   warmed, grants, end, stop conditions.
 
 Once they have left, a failed check is a boundary event: park what depends on
 it, keep independent work moving, and report it. Never repair or reroute
@@ -309,5 +316,7 @@ Breaking a law, plus:
 - A decision that lives only in a prompt, memory, or chat
 - A waiting list or themes file written from memory instead of a stocktake
 - A UI brief that says how to render but not what the user does
+- A free lane slot while a queued item can still run to its gate, or a gated
+  item filed as out of scope
 - A lane fixing code its theme's pending design replaces, or a fix round in a
   theme with two parks

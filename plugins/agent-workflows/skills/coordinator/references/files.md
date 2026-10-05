@@ -43,7 +43,8 @@ past its Until is free.
 
 ```markdown
 # <charter> coordinator charter
-Scope: <workspace host:path; what is in and out>
+Scope: <workspace host:path>. Out: <only what the human excluded, with
+  their words and time>
 Workspace layer: <path of the AGENTS.md layer holding standing grants, if any>
 Lease: <path>. Log: <path>. Lanes: <dir>.
 
@@ -104,7 +105,8 @@ Chosen now: <themes the human picked, in order>
 Design: <RFC, spec section, or "none needed"> - <status>; next step <...>,
 held by <human | lane | coordinator>
 Lanes: <limit>; running <host/sN.gM lane, ...>
-Items: <id> <one line> - <fix lane | folded into design | parked (round N)>
+Items, in the human's order: <id> <one line> - <fix lane | folded into
+  design | parked (round N) | at gate>; runs to <its first human gate | done>
 Parks: <count>; at 2 the theme goes to a design session
 Decisions for the human: <pointer into Waiting on the human>
 ```
@@ -168,7 +170,10 @@ and expire after 7 days.
 
 ## Window agreement
 
-Before the human steps away, add to the charter under a dated heading:
+Before the human steps away, write `~/.handoffs/<charter>/window-<UTC date>.md`
+and add one Grants line in the charter pointing to it. Cite standing grants
+and decisions by their charter line instead of copying them. When the window
+ends, remove its pointer from Grants and log that its grants lapsed.
 
 - Window: start and end with timezone, with the last stretch reserved for
   cleanup and the report.
