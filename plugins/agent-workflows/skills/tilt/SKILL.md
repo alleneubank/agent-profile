@@ -1,6 +1,6 @@
 ---
 name: tilt
-description: Use when checking deployment health, investigating errors, reading logs, or working with Tiltfiles. Queries Tilt resource status, logs, and manages dev environments.
+description: Use when working with Tilt or a Tilt-driven dev environment - starting it, Tiltfile errors, resource status, or logs.
 ---
 
 # Tilt
@@ -119,12 +119,114 @@ config values, prefer `tilt enable <r>` / `tilt disable <r>` over editing the ar
 
 Guard: `export TILT_EDITOR=true` so a stray bare `tilt args` exits instead of hanging.
 
-## Running tilt up
+## Starting Tilt
 
-Start Tilt with the `tiltup` skill: it runs `tilt up` (or the repo's boot
-command) in a detached, labeled sox shell and checks that it stayed up.
-Diagnose from the agent turn with `tilt get ...` and bounded
-`tilt logs "$RESOURCE" ...` commands.
+### Assess current state
+
+1. Check whether Tilt is already running in a labeled sox shell:
+   ```bash
+   ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+   sox ls --json | jq -r --arg root "$ROOT" \
+     'select(.kind == "shell" and .status == "live" and .labels.role == "tilt" and .labels.root == $root) | .backing_id'
+   ```
+   If it is running, check health (First Action above) and skip to monitoring.
+2. Prefer the repo's documented dev-stack command over bare `tilt up`: `silo up`,
+   `yarn localnet:up`, `make tilt-up`, or the README/package script. These often
+   run gen-env or pass the right Tiltfile args.
+3. Check required env files (`.localnet.env`, `.env.local`, `silo.toml`): with
+   `silo.toml`, use `silo up`; run a gen-env script first when one exists;
+   otherwise follow the README bootstrap. Check k3d or Docker prerequisites.
+
+### Start it in a sox shell
+
+Start Tilt in a detached sox shell, which outlives the agent's turn and the
+human can attach to. That shell owns the Tilt UI/API; diagnose from the agent
+turn with `tilt get ...` and bounded `tilt logs "$RESOURCE" ...` commands.
+Never `sox attach` from an agent turn: it blocks.
+
+`--exec` takes argv with no shell, so hold the boot command in an **array**:
+zsh does not word-split unquoted expansions, so a `START_CMD='tilt up'` string
+arrives as one argument there even though it works in bash. sox keeps no
+readable scrollback, so the boot command writes to a log file. Run `sox daemon
+--ensure` first if `sox ls` cannot reach this machine's daemon.
+
+```bash
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+START_CMD=(tilt up)
+# Replace START_CMD with the repo's documented boot command when present, e.g.:
+# START_CMD=(yarn localnet:up)
+# START_CMD=(silo up)
+LOG="${TMPDIR:-/tmp}/tilt-$(basename "$ROOT").log"
+
+SHELL_ID="$(sox ls --json | jq -r --arg root "$ROOT" \
+  'select(.kind == "shell" and .status == "live" and .labels.role == "tilt" and .labels.root == $root) | .backing_id')"
+if [ -n "$SHELL_ID" ]; then
+  echo "Tilt shell already exists: $SHELL_ID"
+else
+  # sh receives the log path as $0 and the boot command as "$@".
+  SHELL_ID="$(sox up "localhost:$ROOT" --detach --no-chrome --no-ext \
+    --exec -- sh -c 'exec "$@" >"$0" 2>&1' "$LOG" "${START_CMD[@]}" | tail -1)"
+  sox label "$SHELL_ID" role=tilt root="$ROOT" >/dev/null
+  # A boot command that dies at once has exited within 5s; exit 3 means it is
+  # still running, which is the healthy case.
+  sox wait "$SHELL_ID" --timeout 5
+  if [ $? -ne 3 ]; then
+    echo "Boot command exited immediately:"
+    tail -20 "$LOG"
+  else
+    echo "Started tilt in sox shell: $SHELL_ID (log: $LOG)"
+  fi
+fi
+```
+
+To stop it: `sox kill "$SHELL_ID"`.
+
+### Monitor bootstrap
+
+After about 10s for resource registration, issue one blocking bounded wait per
+resource, then run the First Action error and compose-health queries once:
+
+```bash
+tilt get uiresources -o json | jq -r '.items[].metadata.name' | \
+  xargs -I{} tilt wait --for=condition=Ready 'uiresource/{}' --timeout=300s
+```
+
+Bootstrap succeeded when every wait returned Ready and the queries report no
+`error`, stuck-`pending`, or `unhealthy` compose resource. `tilt wait` cannot
+see compose HEALTHCHECK state, so the sweep is not optional.
+
+### Report
+
+```
+## Tilt Status: <healthy|degraded|errored>
+
+**Resources**: X/Y ok
+**Shell**: sox $SHELL_ID
+
+### Errors (if any)
+- <resource>: <root cause> — <what was fixed or what remains>
+```
+
+## Fixing Tiltfile Errors
+
+Fix the source config, not the symptom:
+
+- Fix the Tiltfile, Dockerfile, k8s manifest, or helm values directly.
+- No shell workarounds (wrapper scripts, `|| true`, `try/except pass`), no
+  fallbacks that mask the failure, no hard-coded ports, paths, hostnames, image
+  tags, or container names that should be dynamic.
+- Express dependencies declaratively: ordering via `resource_deps()` or
+  `k8s_resource(deps=)`, readiness via probe configs, images via `image_deps`,
+  env via `silo.toml` or gen-env output. No sleep/retry or readiness polling.
+- Port conflicts: fix the allocation source, not a different port.
+
+For each resource in error: read bounded logs, read the Tiltfile and relevant
+manifests, fix the root cause, and let Tilt live-reload. For an unhealthy
+compose probe, read the cause with `docker inspect` (see First Action) and fix
+the probe script rather than disabling the check. After 3 fix iterations on one
+resource without progress, report the error with logs and whether it is a
+Tiltfile bug, upstream dependency, or infrastructure problem; never silently
+skip or disable the resource.
 
 ## Tilt live-reloads
 
