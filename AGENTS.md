@@ -36,19 +36,10 @@ check only for a named risk it would expose.
   claims published to other people are fact-checked per `sitrep`. An
   adversarial reviewer gets the goal, the diff, production behavior, and the
   code, not this profile, and judges each waiver on its merits.
-- Security work states its threat model and hands it to the reviewer. The
-  default trusts the host (root, the user's own account, other local accounts,
-  physical access, installed tools) and defends against the network, remote
-  peers, and untrusted input; `code-law` has the detail. A project crossing a
-  local privilege boundary states a stricter model in its SPEC. A finding
-  outside the model is answered by citing it: it never blocks, forces a
-  redesign, or counts as a waiver.
-- Hold an invariant in the source before checking it: make the defect
-  unwritable through types, visibility, module boundaries, or by keeping the
-  invariant with the state it protects. Correct types need no further proof.
-  Then use the compiler, rules existing linters ship, and behavior tests. Do
-  not write project-specific source checks; an invariant none of these can
-  hold gets a waiver comment at the site saying it is unchecked.
+- Security work states its threat model and hands it to the reviewer;
+  `code-law` holds the default model and how findings outside it are answered.
+- Hold an invariant by construction before checking it, and never write
+  project-specific source checks; `code-law` has the ladder and the waiver form.
 - When review finds a second instance of one defect class, redesign so the
   class cannot be written; do not patch it again or harden a detector.
   Deliberation over one major finding ends by the third review round: if no
@@ -63,10 +54,9 @@ check only for a named risk it would expose.
 - Never bypass required checks with `--no-verify` or an equivalent shortcut; a
   required check that is missing or broken is blocked, not green.
 - Tests assert outcomes, not implementation. Fix causes; never weaken assertions
-  to pass. One-off verification is evidence for the change, not a new test. A
-  shipped bug gets one regression check at the smallest level that reproduces
-  what its user observed, seen failing before the fix; a mistake made and fixed
-  within the task gets none.
+  to pass. One-off verification is evidence for the change, not a new test;
+  `testing-best-practices` decides when a check becomes permanent, including a
+  shipped bug's regression check.
 
 Done claims name the check that ran and what was not checked. Claims of
 pre-existing failures cite evidence. `testing-best-practices` covers test
