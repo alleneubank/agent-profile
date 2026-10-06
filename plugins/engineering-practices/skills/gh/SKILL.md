@@ -327,11 +327,9 @@ Sometimes useful data isn't on the typed commands. Examples:
 ## Outward text discipline
 
 Issue bodies, PR descriptions, review comments, and release notes are published
-claims. Every factual statement in them — counts, "CI is green", "fixed X",
-file/line references, benchmark deltas — must come from a source verified this
-session (command output, file read, API response) or be explicitly labeled as
-inference ("likely", "appears to"). Verify referenced identifiers (issue/PR
-numbers, commit SHAs) resolve before linking them.
+claims: apply `sitrep`'s verification floor. Each factual statement comes from a
+source verified this session or is labeled as inference, and referenced issue/PR
+numbers and commit SHAs resolve before they are linked.
 
 ## Other notes
 

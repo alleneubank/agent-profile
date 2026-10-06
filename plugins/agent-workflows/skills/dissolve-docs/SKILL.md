@@ -42,7 +42,8 @@ necessary, or authoritative:
 | --- | --- |
 | Direction, goals, what "done" means | VISION |
 | Requirements, invariants, acceptance, non-goals | SPEC |
-| Quality bar, taste calls, decided questions | BRIEF (Decisions) |
+| Decided contract questions (behavior, interfaces, invariants) | SPEC (Decisions) |
+| Quality bar, taste calls, decided quality questions | BRIEF (Decisions) |
 | Build / run / operate commands, onboarding | README |
 | Reusable judgment for future agents | a skill (writing-skills) |
 | History, superseded plans, dead ends, status | nowhere — delete |

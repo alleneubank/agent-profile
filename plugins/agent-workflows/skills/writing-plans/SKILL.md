@@ -5,10 +5,8 @@ description: Use when the user requests an implementation plan, or unresolved de
 
 # Implementation plans
 
-Inspect the relevant source, existing requirements, and harness. State the
-outcome, boundaries, concrete files or components, and the check that decides
-completion. Order dependent steps; make reversible implementation choices
-without turning them into permission requests.
+Name the concrete files or components, order the dependent steps, and state
+the check that decides completion.
 
 Keep the plan in the conversation or existing task record. A standalone document
 is useful only when requested or needed for coordination or recovery. An existing

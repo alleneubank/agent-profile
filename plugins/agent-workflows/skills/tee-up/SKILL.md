@@ -1,6 +1,6 @@
 ---
 name: tee-up
-description: Use when the user asks to refine a draft prompt or prepare an agreement before execution; the draft is reviewed, not executed.
+description: Use when the user asks to refine or review a draft prompt before it runs; the draft is reviewed, not executed.
 ---
 
 # Tee up
