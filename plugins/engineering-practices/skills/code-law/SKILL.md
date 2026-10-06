@@ -1,6 +1,6 @@
 ---
 name: code-law
-description: Use when writing or changing code in any language — the craft law (types, assertions, bounds, errors, naming, comments, scope), the default threat model, and the system properties (deterministic, hermetic, idempotent, isolated, observable, evented, contextual) with the floor that proves each one. Not for prose, docs-only, or config-only changes.
+description: Use when writing or changing code in any language. Not for prose, docs-only, or config-only changes.
 ---
 
 # Code Law
