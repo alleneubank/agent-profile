@@ -5,7 +5,7 @@ description: Use when reading or writing Go files (.go, go.mod).
 
 # Go Best Practices
 
-Follows type-first, functional, and error handling patterns from AGENTS.md. This skill covers language-specific idioms only.
+Follows the type, error, and assertion law in `code-law`. This skill covers language-specific idioms only.
 
 ## Make Illegal States Unrepresentable
 

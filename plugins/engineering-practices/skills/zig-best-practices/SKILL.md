@@ -5,7 +5,7 @@ description: Use when reading or writing Zig files (.zig, build.zig, build.zig.z
 
 # Zig Best Practices
 
-Follows type-first, functional, and error handling patterns from AGENTS.md. This skill covers Zig-specific idioms only.
+Follows the type, error, and assertion law in `code-law`. This skill covers Zig-specific idioms only.
 
 ## Type System Patterns
 
@@ -60,7 +60,7 @@ fn createResource(allocator: std.mem.Allocator) !*Resource {
 
 ## Safety Idioms
 
-Runs on the assertions-and-bounds law from AGENTS.md; these are the Zig-specific levers.
+Runs on the assertions-and-bounds law in `code-law`; these are the Zig-specific levers.
 
 - `std.debug.assert` for invariants; `comptime` asserts check design relationships between constants (type sizes, layout invariants) before the program even runs.
 - Prefer explicitly-sized integers (`u32`, `u64`) where the domain owns the type; keep `usize` at the std-lib seam (slice lengths, indices) instead of propagating it inward through `@intCast` chains.

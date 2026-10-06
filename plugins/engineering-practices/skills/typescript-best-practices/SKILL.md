@@ -5,11 +5,7 @@ description: Use when reading or writing TypeScript or JavaScript files (.ts, .t
 
 # TypeScript Best Practices
 
-Follows type-first, functional, and error handling patterns from AGENTS.md. This skill covers language-specific idioms only.
-
-## Pair with React Best Practices
-
-When working with React components (`.tsx`, `.jsx` files or `@react` imports), always load `react-best-practices` alongside this skill. This skill covers TypeScript fundamentals; React-specific patterns (effects, hooks, refs, component design) are in the dedicated React skill.
+Follows the type, error, and assertion law in `code-law`. This skill covers language-specific idioms only.
 
 ## Make Illegal States Unrepresentable
 
