@@ -38,10 +38,19 @@ unlabeled, and invisible to later sessions.
 
 ### Commit Discipline
 
+- Group changes by intent, not by file extension; when the tree holds several
+  unrelated changes, stage and commit them one logical change at a time
 - Stage files explicitly by name: `git add src/auth.ts src/auth.test.ts`
-- Verify staged content with `git status` before committing
+- Verify staged content with `git status` before committing, and run the
+  relevant verifier before committing a non-trivial change
+- Leave unrelated drift out, and never rewrite or discard user changes unless asked
+- Keep a behavior-preserving prefactor and the behavior change as separate
+  commits when each is green on its own (see Sizing)
 - Keep secrets and large binaries out of commits (secret handling: rules of engagement) — warn the user if staged files look sensitive
+- Keep `.hunk/` out of the commit; a requested `.hunk/agent-context.json` review
+  sidecar lands before the commit so its line numbers match the working-tree diff
 - Target one logical change per commit in final PR-ready state
+- Mention uncommitted leftovers after committing
 
 ### Force Push
 
