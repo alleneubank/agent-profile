@@ -21,6 +21,5 @@ change.
   their own, keep them as separate logical commits; do not split a change into
   invalid intermediate states merely to make it smaller.
 - Mention uncommitted leftovers after committing.
-- Keep `.hunk/` out of the commit. A `.hunk/agent-context.json` review sidecar is
-  written only on request (see `hunk-notes`); when one is requested, it lands
-  before the commit so its line numbers match the working-tree diff.
+- Keep `.hunk/` out of the commit. A requested `.hunk/agent-context.json` review
+  sidecar lands before the commit so its line numbers match the working-tree diff.
