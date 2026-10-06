@@ -41,6 +41,8 @@ Always prefer user-facing attributes:
 - Manual assertions without await — use web-first assertions
 - Asserting a `page.route` handler fired — a change detector; assert the DOM the user sees (`testing-best-practices`)
 - Hardcoded waits — rely on Playwright's auto-waiting
+- Retry loops around assertions — web-first assertions already retry
+- Registering `page.route` mocks after navigation — set them up before `goto`
 - Default reporter in CI/agent — use `--reporter=line` or `--reporter=dot`
 
 See `playwright-patterns.md` for Page Object Model, fixtures, network mocking, and configuration examples.

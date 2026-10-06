@@ -1,6 +1,6 @@
 ---
 name: e2e
-description: Use when running e2e tests, debugging test failures, or fixing flaky tests. Covers failure taxonomy, fix rules, and workflow. Never changes source code logic or API without spec backing.
+description: Use when running or repairing a scripted end-to-end test suite.
 ---
 
 # E2E Testing
@@ -36,12 +36,9 @@ exonerate the product.
 ## Fix Rules by Category
 
 **Flaky fixes:**
-- Replace `waitForTimeout` with auto-waiting locators
-- Replace brittle CSS selectors with `getByRole`/`getByLabel`/`getByTestId`
-- Fix race conditions with `expect()` web-first assertions
-- Fix mock/route setup ordering (before navigation)
-- **Never add arbitrary delays** - fix the underlying wait
-- **Never add retry loops around assertions** - use the framework's built-in retry
+- **Never add arbitrary delays or retry loops around assertions** - fix the
+  underlying wait and use the framework's built-in retry; locator, wait, and
+  mock-ordering rules live in the framework skill (e.g. `playwright-best-practices`)
 - Fix the owner of the nondeterminism: product races are product fixes; shared
   fixture, clock, selector, and synchronization defects belong to the harness
 
