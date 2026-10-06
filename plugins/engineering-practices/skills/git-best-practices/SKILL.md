@@ -175,24 +175,8 @@ title, a summary that says what changed and why, and a test plan as a checklist.
 Dependent PRs form a native GitHub stack, never hand-chained `--base` PRs; see
 the `gh` skill.
 
-### Merge Readiness
+### Merge Readiness and History
 
-- A PR is "mergeable" only with zero unresolved review threads; query them via
-  the API before claiming it (see the `gh` skill for mechanics) — green checks
-  alone do not clear it.
-- Never volunteer an admin/bypass merge; branch protection is the human's gate.
-- PR description edits are destructive by default (`gh pr edit --body`
-  replaces wholesale): fetch the current body, merge additively, show the
-  proposed body before writing.
-
-### History Rewriting Before PR
-
-For branches with messy WIP history, use the `rewrite-history` skill to:
-1. Backup the branch
-2. Reset to the base branch tip
-3. Recommit changes as a clean narrative sequence
-4. Verify byte-for-byte match with backup
-5. Force-push the feature branch with `--force-with-lease` (backed up in step 1; your own non-deploying branch is a proposal per the rules of engagement)
-6. Open PR with link to backup branch
-
-Each rewritten commit introduces one coherent idea, building on the previous — like a tutorial teaching the reader how the feature was built.
+Before calling a PR mergeable or editing its description, apply the `gh` skill's
+PR-state rules. To turn messy WIP history into a clean narrative before a PR,
+use the `rewrite-history` skill.
