@@ -17,7 +17,7 @@ Use this skill when you need to sync a feature branch onto the latest `origin/{b
 - Print each history-rewriting command (`git rebase ...`, `git push --force*`) as a one-line status before running it.
 - Create a local backup ref (prefer an annotated tag) before starting the rebase. Do not push backup refs unless the user explicitly asks.
 - Prefer `git push --force-with-lease`, never plain `--force`.
-- Pushing a deploy-tracked ref is a publish and stays with the user; discover which refs pipelines track before pushing. A ref that is shared (other authors, a collaborative PR) stays with the user as well.
+- Push per step 9; shared and deploy-tracked refs stay with the user.
 - Resolve conflicts as step 7 describes. Do not invent product behavior.
 
 ## Workflow
@@ -114,7 +114,6 @@ Helpful commands during conflicts:
     - `git push --force-with-lease origin HEAD:{branch_name}`
   - Each moved stacked branch that passed the ownership check and exists on origin (repeat per branch):
     - `git push --force-with-lease origin {stacked_branch}`
-- Pushing or merging a deploy-tracked ref is a publish: restate the concrete ref and leave it to the user.
 - Any branch skipped because it is checked out in another worktree was not moved — verify it before pushing.
 
 ## Recovery

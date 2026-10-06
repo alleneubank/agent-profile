@@ -25,10 +25,8 @@ reversible interior work — print each command as status and proceed.
 - Print each destructive command as a one-line status before running it; the
   backup tag keeps every local step reversible.
 - Use a local annotated backup tag and do not push backup refs unless asked.
-- Push per-ref: a `--force-with-lease` push to your own
-  non-deploying feature branch is a proposal needing no extra authorization;
-  a shared (other authors, collaborative PR) or deploy-tracked ref is a
-  publish — restate the ref and leave it to the user.
+- Force-push (`--force-with-lease`) only your own non-deploying branch; shared
+  or deploy-tracked refs stay with the user.
 - If syncing with the default branch conflicts, resolve via the
   `git-rebase-sync` skill's conflict ladder; if genuinely stuck, stop with an
   honest block: what was tried, why it cannot converge, and a proposed path.

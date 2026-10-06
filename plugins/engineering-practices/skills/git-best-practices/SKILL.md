@@ -13,7 +13,7 @@ When this skill is loaded, follow these directives for all git operations:
 2. **Conventional commits** — every commit uses `type(scope): description` format
 3. **Stage explicitly** — add files by name so only intended changes are committed
 4. **Protect shared history** — use `--force-with-lease` for force pushes, never plain `--force`; a force push is routine only when the ordered work requires it and a backup ref exists — force-pushing a shared or deploy-tracked ref belongs to the user
-5. **Push per-ref** — discover which refs deploy pipelines track before pushing (CI/CD config, repo docs). A push to a non-deploying branch is a proposal; a push to a deploy-tracked ref — or any push in a direct-push repo — is a publish and belongs to the user (rules of engagement). Force-with-lease only for rewritten history
+5. **Push per-ref** — before pushing, discover which refs deploy pipelines track (CI/CD config, repo docs) and apply the publish law in AGENTS.md
 
 ## Agent Git Workflow
 
@@ -59,8 +59,6 @@ Use `--force-with-lease` exclusively to protect against overwriting upstream cha
 ```bash
 git push --force-with-lease origin feat/my-branch
 ```
-
-Apply per-ref publish semantics: a force-with-lease push to your own non-deploying feature branch, with a backup ref in place, is a proposal — routine when the ordered work (a rebase, a history rewrite) requires it. A ref that is shared (other authors, a collaborative PR) or deploy-tracked is the user's: restate the ref and wait.
 
 ### Rebasing a Stack
 
@@ -151,7 +149,7 @@ Use repository branch flow policy first. If policy is undocumented, a common bas
 - PRs target the default branch unless the repo uses a single-branch flow
 - When default branch and production branch are the same, all PRs target that branch directly
 
-The deploy annotations in the diagram are the publish map: merging into a deploy-tracked ref IS a publish to that environment, and publish is the user's, per-artifact (rules of engagement). Opening a PR against a tracked ref is still a proposal; the merge is the publish.
+The deploy annotations in the diagram are the publish map for the AGENTS.md publish law.
 
 ### Merge Strategy
 
@@ -165,7 +163,7 @@ If no policy exists, these defaults are reasonable:
 | Default → production | Merge commit | Preserves the release boundary; visible deploy points |
 | Hotfix → production | Squash merge | Single atomic fix on production |
 
-Executing any of these merges into a deploy-tracked ref is a publish: restate the concrete artifact (branch, PR) before acting, and act only on the user's per-artifact order. A promotion merge (default → production) always needs its own explicit order — authorization to land work on the default branch never covers it.
+A promotion merge (default → production) always needs its own explicit order — authorization to land work on the default branch never covers it.
 
 ## PR Workflow
 
