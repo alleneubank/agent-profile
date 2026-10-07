@@ -94,6 +94,9 @@ prose. Keep working independent items while a necessary decision is pending.
 - Preserve others' and in-flight work. Attribute processes/resources before
   cleanup; deleting data-bearing resources requires explicit authorization.
   Edit generating sources, not rendered outputs.
+- Clean up after yourself. Keep build output and scratch inside your worktree
+  or a directory you remove when done, and tear down the shells, stacks, and
+  checkouts you started once their result is in.
 
 ## Operations
 
