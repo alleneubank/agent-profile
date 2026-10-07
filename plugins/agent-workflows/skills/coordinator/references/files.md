@@ -8,36 +8,45 @@ ssh quoting.
 
 ## Fleet file: `~/.handoffs/fleet.md` on the control host
 
+One file for the whole fleet, whichever host a charter runs on. It holds
+machine facts every charter shares and names no project: which hosts a
+project's lanes use, its lane directories, and its own never-touch list go in
+its charter.
+
 ```markdown
 # Fleet
-Read by every coordinator at start. Update when a host, device, launcher, or
-coordinator changes.
+Read by every coordinator at start. Machine facts only; project facts live in
+each charter.
 
 ## Hosts
-| Host | Role | Lane budget | Disk floor | Never touch | Notes |
-|---|---|---|---|---|---|
+| Host | Reach (ssh alias, sox name) | OS, cores, memory | Capabilities (toolchains, SDKs, containers, attached devices) | Lane budget | Disk floor | Never touch (the human's own) | Verified |
+|---|---|---|---|---|---|---|---|
 
 ## Devices
-<test devices by id; devices never to use>
+<test devices by id and the host they attach to; devices never to use>
 
 ## Launchers (in order of preference)
-| Launcher | Harness and model | Hosts | Use for |
-|---|---|---|---|
+| Launcher | Harness and model | Account | Hosts logged in | Use for | Verified |
+|---|---|---|---|---|---|
+Fallback when a quota runs out: <order>
 
 ## Reservations
 | Resource (device, host, account) | Owner charter | Until | Notes |
 |---|---|---|---|
 
-## Coordinators
-| Charter | Workspace (host:path) | Charter file | Log | Shell (host/sN.gM) | Session | State | Since |
-|---|---|---|---|---|---|---|---|
+## Charters
+| Charter | Charter file (host:path) | State |
+|---|---|---|
 ```
 
-State is `live`, `blocked-on-human` (heartbeat stopped, lease kept; the
-human's next turn resumes it), `parked` (the human stood it down and the
-lease is released; a fresh coordinator resumes from the handoff), or
-`archived`. Session is the coordinator's harness session id. A reservation
-past its Until is free.
+Verified is the date a fact was last checked on the host. State is `live`,
+`blocked-on-human` (heartbeat stopped, lease kept; the human's next turn
+resumes it), or `parked` (the human stood it down and the lease is released;
+a fresh coordinator resumes from the handoff). Who holds a watch, in which
+shell and session, is the lease's to answer (`lease.sh show` or `list` on the
+charter's host), never a column here. An archived charter leaves the
+registry; its charter and log keep its history. A reservation past its Until
+is free.
 
 ## Charter: `~/.handoffs/<charter>/charter.md`
 
@@ -47,6 +56,8 @@ Scope: <workspace host:path>. Out: <only what the human excluded, with
   their words and time>
 Workspace layer: <path of the AGENTS.md layer holding standing grants, if any>
 Lease: <path>. Log: <path>. Lanes: <dir>.
+Hosts: <fleet hosts this charter's lanes use, with its lane directory on each
+  and anything of this project's lanes must never touch there>
 
 ## Grants
 - <UTC time, where given> <action> on <artifacts or refs> when <conditions>;

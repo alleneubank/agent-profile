@@ -5,6 +5,10 @@
 #   lease.sh take    <charter> --reason TEXT
 #   lease.sh check   <charter>
 #   lease.sh release <charter> --handoff PATH
+#   lease.sh list
+#
+# list prints one tab-separated line per charter with a lease on this host:
+# charter, watch, held or released, session, shell, taken_at.
 #
 # Exit: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the watch, 5 lease busy.
 #
@@ -19,7 +23,7 @@ set -eu
 FIELDS="charter watch session shell harness taken_at prior reason released_at handoff"
 
 usage() {
-  sed -n '4,7p' "$0" | sed 's/^# \{0,1\}//' >&2
+  sed -n '4,8p' "$0" | sed 's/^# \{0,1\}//' >&2
   exit 2
 }
 
@@ -76,6 +80,19 @@ write() {
 holds() {
   [ -z "$(field released_at)" ] && [ "$(field session)" = "$session" ] && [ "$(field shell)" = "$shell" ]
 }
+
+# list: every lease under the coordination home, in charter-name order.
+if [ "${1:-}" = list ]; then
+  [ $# -eq 1 ] || usage
+  LC_ALL=C
+  for lease in "${COORDINATION_HOME:-$HOME/.handoffs}"/*/lease; do
+    [ -f "$lease" ] || continue
+    if [ -n "$(field released_at)" ]; then held=released; else held=held; fi
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$(field charter)" "$(field watch)" "$held" \
+      "$(field session)" "$(field shell)" "$(field taken_at)"
+  done
+  exit 0
+fi
 
 [ $# -ge 2 ] || usage
 command=$1 charter=$2

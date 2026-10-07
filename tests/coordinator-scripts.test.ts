@@ -134,6 +134,21 @@ describe("lease.sh", () => {
     expect(f.run(LEASE, ["check", "demo"], ONE).status).toBe(4);
   });
 
+  it("lists every charter's lease with its holder and whether it is released", () => {
+    const f = fleet();
+    mkdirSync(join(f.coordination, "alpha"));
+    mkdirSync(join(f.coordination, "no-lease"));
+    f.run(LEASE, ["take", "alpha", "--reason", "Allen: become the coordinator"], TWO);
+    f.take(ONE);
+    f.run(LEASE, ["release", "demo", "--handoff", "/tmp/h.md"], ONE, "", "2026-10-04T21:00:00Z");
+    const listed = f.run(LEASE, ["list"], null);
+    expect(listed.status).toBe(0);
+    expect(listed.stdout).toBe(
+      "alpha\t1\theld\ts-two\ts2.g1\t2026-10-04T20:00:00Z\n" +
+        "demo\t1\treleased\ts-one\ts1.g1\t2026-10-04T20:00:00Z\n",
+    );
+  });
+
   it("says when there is no lease", () => {
     const f = fleet();
     expect(f.run(LEASE, ["show", "demo"], ONE).status).toBe(3);
