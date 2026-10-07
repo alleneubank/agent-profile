@@ -80,7 +80,7 @@ a relaunch. pi may not submit on `--enter`; confirm the turn landed, and try
 Put the launch in a `run.sh` in the lane's brief directory and pass it to
 `sox up ... --exec -- <run.sh>`. Everything after `--` is argv with no shell,
 so the script owns `cd`, `direnv exec`, redirections, and writing the exit
-file. It also points scratch into the lane root (`TMPDIR=<lane root>/tmp`),
+file. It points scratch into the lane root under `~/Work` (`TMPDIR=<lane root>/tmp`),
 and build output there when a tool writes it elsewhere by default
 (`CARGO_TARGET_DIR`, `xcodebuild -derivedDataPath`). The agent's exit ends
 the shell; for an interactive lane the human may attach to later, end the script with `exec "$SHELL" -l` so the pane stays.

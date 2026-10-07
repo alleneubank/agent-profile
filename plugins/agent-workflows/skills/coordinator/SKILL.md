@@ -73,8 +73,12 @@ lane host is a hint, never a source.
 What the charter creates on a host is its **footprint**: shells, worktrees,
 build output and caches, scratch, and any container project, simulator, VM,
 or localnet. Each lane keeps its footprint under one **lane root** on its
-host; what cannot live there goes in the lane directory's `resources` file,
-with its teardown command, when it is created. Review checkouts and probe
+host, under `~/Work` at the path its repository's checkouts have under `~`
+(`~/Work/alleneubank/0xsend/sendapp.worktrees/<charter>-<lane>/`) so the same
+instruction files apply; a cross-repo lane is a workspace at
+`~/Work/<org path>/<charter>-<lane>/`. What cannot live there goes in the
+lane directory's `resources` file, with its teardown command, when it is
+created. Review checkouts and probe
 shells you start are footprint too. Clear each piece once its result is
 read. Anything you cannot attribute to the charter belongs to another owner
 (`host-tidy`).

@@ -94,9 +94,14 @@ prose. Keep working independent items while a necessary decision is pending.
 - Preserve others' and in-flight work. Attribute processes/resources before
   cleanup; deleting data-bearing resources requires explicit authorization.
   Edit generating sources, not rendered outputs.
-- Clean up after yourself. Keep build output and scratch inside your worktree
-  or a directory you remove when done, and tear down the shells, stacks, and
-  checkouts you started once their result is in.
+- Clean up after yourself. Put everything you create (worktrees, clones,
+  build output, scratch, logs, browser profiles) under `~/Work`, at the path
+  the work would have under `~` (a worktree of `~/src/app.worktrees` goes in
+  `~/Work/src/app.worktrees/<task>`); `~/Work` carries the same instruction
+  files. Point tools that write elsewhere by default into it (`TMPDIR`,
+  `CARGO_TARGET_DIR`, `-derivedDataPath`, `ANDROID_AVD_HOME`). Tear down the
+  shells and stacks you started and delete the task folder once its result
+  is in.
 
 ## Operations
 
