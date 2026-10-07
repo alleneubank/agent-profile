@@ -68,6 +68,15 @@ the **log** (append-only under a rewritten "Waiting on the human"), the
 acting on it; never record what a live source answers. A charter copied to a
 lane host is a hint, never a source.
 
+What the charter creates on a host is its **footprint**: shells, worktrees,
+build output and caches, scratch, and any container project, simulator, VM,
+or localnet. Each lane keeps its footprint under one **lane root** on its
+host; what cannot live there goes in the lane directory's `resources` file,
+with its teardown command, when it is created. Review checkouts and probe
+shells you start are footprint too. Clear each piece once its result is
+read. Anything you cannot attribute to the charter belongs to another owner
+(`host-tidy`).
+
 ## Procedures
 
 ### Take the watch
@@ -96,12 +105,15 @@ lane host is a hint, never a source.
    report and exit files, queues, git, the forge; the workspace's stocktake
    script first, when one exists) and returns only drift: running; finished
    or parked since the last pass; file claims live state contradicts;
-   anomalies.
+   anomalies; free disk on each lane host.
 3. Handle each change as a lane event (below).
 4. Fill each free lane slot with the next queued item that can move: it runs
    to its first human gate (a publish go, a credential, device, or biometric
    step, a budget, a high-risk plan approval), parks there with the gate on
-   the waiting list, and the slot takes the next item.
+   the waiting list, and the slot takes the next item. A host below its disk
+   floor (fleet file; 10% free when unset) takes no launch until you clear
+   the charter's finished footprint there; whatever still holds it below the
+   floor goes on the waiting list.
 5. Collect open questions and bring them to the human (below).
 6. Append the log, with a correction for each contradicted claim; fix the
    themes file in place; rewrite "Waiting on the human".
@@ -118,8 +130,11 @@ their items. Their next turn restarts the heartbeat.
 1. Verify the claim (law 9). "Landing" needs a log line showing it started;
    a launched agent is "launching" until its transcript holds a first turn.
 2. Then exactly one of: land, send back with an addendum quoting the finding
-   verbatim, relaunch, or retire. Retire the shell in the pass that processes
-   it, and clean up only what you can attribute.
+   verbatim, relaunch, or retire. Retiring tears the lane down in the pass
+   that processes it: kill its shell, run each `resources` teardown, and
+   delete its lane root. Keep only what could lose work: a root with
+   uncommitted changes or commits on no remote, or a resource holding data.
+   Each kept item gets a waiting-list line naming what it holds.
 3. A quiet agent: look in sox first. Nudge a live interactive agent once with
    a one-line pointer (`send.sh --kind request`) and confirm a new turn
    landed; if the next pass shows no change, relaunch what you launched. An
@@ -172,10 +187,10 @@ Change a running agent's brief only by addendum and pointer.
    run the repo's secrets preflight in that worktree, with the lane's shell
    and flags, while the human can approve prompts.
 2. Brief with files, not conversation (shape in files.md): outcome,
-   acceptance, gates, budget, boundaries, the human's decisions verbatim, the
-   report path, and the Coordination section. A brief touching UI states, as
-   acceptance, what each touched control does on production today and what
-   the user does.
+   acceptance, gates, budget, boundaries, the lane root, the human's
+   decisions verbatim, the report path, and the Coordination section. A
+   brief touching UI states, as acceptance, what each touched control does on
+   production today and what the user does.
 3. The launcher comes from the fleet file's Launchers table, in its order,
    narrowed by the charter; the brief names it. A quota failure moves to the
    next launcher and is logged.
@@ -220,14 +235,16 @@ The watch changes hands only when the session has ended or the human asks
   Blocked-on-human sums the hours the fleet row held `blocked-on-human` this
   shift.
 - **Rotate** (the human asks): write the handoff (scorecard, handover table,
-  waiting list, grants in force), then launch a successor in a sox shell on
-  the control host with the coordinator skill, the handoff, and your session
-  id for `/recall continue`. It takes the watch with `lease.sh take <charter> --reason`
-  quoting the request. Once your `lease.sh check <charter>` fails, stop the heartbeat
-  and end with the handoff path; the successor retires your shell unless the
+  waiting list, grants in force, footprint left on each host and why), then
+  launch a successor in a sox shell on the control host with the coordinator
+  skill, the handoff, and your session id for `/recall continue`. It takes
+  the watch with `lease.sh take <charter> --reason` quoting the request. Once
+  your `lease.sh check <charter>` fails, stop the heartbeat and end with the
+  handoff path; the successor retires your shell unless the
   human started it.
-- **Park or retire** (the human asks): write the handoff, stop the heartbeat
-  and any watchers, `lease.sh release <charter> --handoff <path>`, log it, and end with
+- **Park or retire** (the human asks): tear down finished lanes, write the
+  handoff, stop the heartbeat and any watchers,
+  `lease.sh release <charter> --handoff <path>`, log it, and end with
   `SHIFT ENDED <handoff path>`. When that would orphan work in flight, end
   with `SHIFT CONTINUES` and the reason.
 - **A session that ended** without a handoff: the human's next turn appoints
@@ -316,6 +333,8 @@ Breaking a law, plus:
 - A decision that lives only in a prompt, memory, or chat
 - A waiting list or themes file written from memory instead of a stocktake
 - A UI brief that says how to render but not what the user does
+- A retired lane whose shell, root, or resources remain with no line on the
+  waiting list
 - A free lane slot while a queued item can still run to its gate, or a gated
   item filed as out of scope
 - A lane fixing code its theme's pending design replaces, or a fix round in a

@@ -80,8 +80,10 @@ a relaunch. pi may not submit on `--enter`; confirm the turn landed, and try
 Put the launch in a `run.sh` in the lane's brief directory and pass it to
 `sox up ... --exec -- <run.sh>`. Everything after `--` is argv with no shell,
 so the script owns `cd`, `direnv exec`, redirections, and writing the exit
-file. The agent's exit ends the shell; for an interactive lane the human may
-attach to later, end the script with `exec "$SHELL" -l` so the pane stays.
+file. It also points scratch into the lane root (`TMPDIR=<lane root>/tmp`),
+and build output there when a tool writes it elsewhere by default
+(`CARGO_TARGET_DIR`, `xcodebuild -derivedDataPath`). The agent's exit ends
+the shell; for an interactive lane the human may attach to later, end the script with `exec "$SHELL" -l` so the pane stays.
 
 Start the agent under the human's interactive shell:
 `zsh -ic 'cd <worktree> && direnv exec . <launcher> ...'`. Credentials the
@@ -166,7 +168,8 @@ the pane, and the dialog's default answer exits the agent.
 A second model family reviews a lane's diff as a one-shot print-mode run of a
 launcher the fleet file lists: a read-only brief, run in a detached worktree
 of the lane's ref, writing a verdict file. Only the prompt keeps it
-read-only, so give it a checkout whose writes cannot land.
+read-only, so give it a checkout whose writes cannot land. Remove the
+checkout once its verdict is read.
 
 ## Credentials
 

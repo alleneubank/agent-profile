@@ -14,8 +14,8 @@ Read by every coordinator at start. Update when a host, device, launcher, or
 coordinator changes.
 
 ## Hosts
-| Host | Role | Lane budget | Never touch | Notes |
-|---|---|---|---|---|
+| Host | Role | Lane budget | Disk floor | Never touch | Notes |
+|---|---|---|---|---|---|
 
 ## Devices
 <test devices by id; devices never to use>
@@ -120,13 +120,18 @@ with these files.
 
 ## Lane directory: `~/.handoffs/<charter>/<lane>/`
 
-`brief.md`, `addendum-N.md`, `run.sh`, `report.md`, `worker.log`, and
-`worker.exit`. Agent mail receipts go to `~/.handoffs/<charter>/sent.log` on
-the sending host. Copy the brief and each
+`brief.md`, `addendum-N.md`, `run.sh`, `report.md`, `worker.log`,
+`worker.exit`, and `resources` (one line per footprint item outside the lane
+root: host, what it is, its teardown command). Agent mail receipts go to
+`~/.handoffs/<charter>/sent.log` on the sending host. Copy the brief and each
 addendum to the lane host before launching or pointing the lane at it.
 
 The brief carries: Outcome. Acceptance (evidence to show). Gates: each
 command, run in the foreground, and what green means. Budget: iterations or a stop time. Boundaries.
+Lane root: its path on the lane host; build output, caches, and scratch stay
+inside it, and anything that cannot (a container project, simulator, VM,
+localnet) is appended to `resources` with its teardown command as the lane
+creates it.
 Decisions (the human's words, with times). Report: its path; a first line
 naming the end state (done, blocked with numbered questions, or out of
 budget), commits, gates and their results, new shared identifiers, and open
