@@ -1,82 +1,93 @@
 #!/usr/bin/env bash
 # The coordinator lease: which session holds a charter's watch.
 #
-#   lease.sh show    <lease>
-#   lease.sh take    <lease> --charter C --session S --shell HOST/sN.gM --harness H --reason TEXT
-#   lease.sh check   <lease> --session S --shell HOST/sN.gM
-#   lease.sh release <lease> --session S --shell HOST/sN.gM --handoff PATH
+#   lease.sh show    <charter>
+#   lease.sh take    <charter> --reason TEXT
+#   lease.sh check   <charter>
+#   lease.sh release <charter> --handoff PATH
 #
 # Exit: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the watch, 5 lease busy.
 #
-# The file is key=value lines in a fixed order. Writes take a lock directory
-# and replace the file by rename, so a reader never sees half a lease and two
-# takes never both succeed. LEASE_NOW overrides the clock (tests).
+# The lease is ~/.handoffs/<charter>/lease. The caller is this Claude Code
+# session (CLAUDE_CODE_SESSION_ID) in the sox shell `sox which` names, so a
+# caller cannot claim another's identity by passing it. The file is key=value
+# lines in a fixed order. Writes take a lock directory and replace the file by
+# rename, so a reader never sees half a lease and two takes never both
+# succeed. Tests override COORDINATION_HOME, SOX_BIN and LEASE_NOW.
 set -eu
 
 FIELDS="charter watch session shell harness taken_at prior reason released_at handoff"
 
 usage() {
-  sed -n '3,9p' "$0" | sed 's/^# \{0,1\}//' >&2
+  sed -n '4,7p' "$0" | sed 's/^# \{0,1\}//' >&2
   exit 2
+}
+
+fail() {
+  echo "lease.sh: $1" >&2
+  exit "$2"
 }
 
 now() {
   if [ -n "${LEASE_NOW:-}" ]; then printf '%s\n' "$LEASE_NOW"; else date -u +%Y-%m-%dT%H:%M:%SZ; fi
 }
 
-# field <lease> <key>: the value of one key, empty when absent.
+# field <key>: the value of one key in the lease, empty when absent.
 field() {
-  sed -n "s/^$2=//p" "$1" | head -n 1
+  sed -n "s/^$1=//p" "$lease" | head -n 1
 }
 
 # One line only: a newline inside a value would forge another key.
 one_line() {
   case "$2" in
     *"
-"*) echo "lease.sh: --$1 must be one line" >&2; exit 2 ;;
+"*) fail "--$1 must be one line" 2 ;;
   esac
 }
 
-lock() {
-  if ! mkdir "$1.lock" 2>/dev/null; then
-    echo "lease.sh: $1 is being written by another process" >&2
-    exit 5
-  fi
-  trap 'rmdir "'"$1"'.lock" 2>/dev/null || true' EXIT
+# caller: set session and shell to this process's Claude Code session and
+# sox shell. Run from /tmp so no directory's .envrc re-points the sox home.
+caller() {
+  session=${CLAUDE_CODE_SESSION_ID:-}
+  [ -n "$session" ] || fail "no CLAUDE_CODE_SESSION_ID: coordinators run in Claude Code" 2
+  shell=$(cd /tmp && env SOX_HOME="$HOME/.sox" "${SOX_BIN:-sox}" which $$) ||
+    fail "sox which could not name this process's shell: run the coordinator in a sox shell" 2
+  [ -n "$shell" ] || fail "sox which named no shell" 2
 }
 
-# write <lease> <one value per FIELDS key, in order>: replace the lease,
-# leaving out empty values.
+lock() {
+  mkdir "$lease.lock" 2>/dev/null || fail "$lease is being written by another process" 5
+  trap 'rmdir "$lease.lock" 2>/dev/null || true' EXIT
+}
+
+# write <one value per FIELDS key, in order>: replace the lease, leaving out
+# empty values.
 write() {
-  target=$1 tmp="$1.tmp.$$"
-  shift
+  tmp="$lease.tmp.$$"
   : > "$tmp"
   for key in $FIELDS; do
     if [ -n "$1" ]; then printf '%s=%s\n' "$key" "$1" >> "$tmp"; fi
     shift
   done
-  mv -f "$tmp" "$target"
+  mv -f "$tmp" "$lease"
 }
 
+# holds: 0 when the caller holds an unreleased watch.
 holds() {
-  # holds <lease> <session> <shell>: 0 when the caller holds an unreleased watch.
-  [ -f "$1" ] || return 1
-  [ -z "$(field "$1" released_at)" ] || return 1
-  [ "$(field "$1" session)" = "$2" ] && [ "$(field "$1" shell)" = "$3" ]
+  [ -z "$(field released_at)" ] && [ "$(field session)" = "$session" ] && [ "$(field shell)" = "$shell" ]
 }
 
 [ $# -ge 2 ] || usage
-command=$1 lease=$2
+command=$1 charter=$2
 shift 2
+case "$charter" in ''|*[!A-Za-z0-9._-]*|.*) fail "charter must be a plain name like op-forward" 2 ;; esac
+dir="${COORDINATION_HOME:-$HOME/.handoffs}/$charter"
+lease="$dir/lease"
 
-charter="" session="" shell="" harness="" reason="" handoff=""
+reason="" handoff=""
 while [ $# -gt 0 ]; do
   [ $# -ge 2 ] || usage
   case "$1" in
-    --charter) charter=$2 ;;
-    --session) session=$2 ;;
-    --shell) shell=$2 ;;
-    --harness) harness=$2 ;;
     --reason) reason=$2 ;;
     --handoff) handoff=$2 ;;
     *) usage ;;
@@ -87,46 +98,43 @@ done
 
 case "$command" in
   show)
-    if [ ! -f "$lease" ]; then echo "lease.sh: no lease at $lease" >&2; exit 3; fi
+    [ -f "$lease" ] || fail "no lease at $lease" 3
     cat "$lease"
     ;;
 
   take)
-    [ -n "$charter" ] && [ -n "$session" ] && [ -n "$shell" ] && [ -n "$harness" ] && [ -n "$reason" ] || usage
-    lock "$lease"
+    [ -n "$reason" ] || usage
+    caller
+    [ -d "$dir" ] || fail "no charter directory at $dir" 3
+    lock
     watch=0 prior=""
     if [ -f "$lease" ]; then
-      watch=$(field "$lease" watch)
-      prior="$(field "$lease" session) $(field "$lease" shell) watch $watch"
+      watch=$(field watch)
+      prior="$(field session) $(field shell) watch $watch"
     fi
-    case "$watch" in ''|*[!0-9]*) echo "lease.sh: $lease has no numeric watch" >&2; exit 2 ;; esac
-    write "$lease" "$charter" $((watch + 1)) "$session" "$shell" "$harness" "$(now)" "$prior" "$reason" "" ""
+    case "$watch" in ''|*[!0-9]*) fail "$lease has no numeric watch" 2 ;; esac
+    write "$charter" $((watch + 1)) "$session" "$shell" "${AI_AGENT:-claude-code}" "$(now)" "$prior" "$reason" "" ""
     cat "$lease"
     ;;
 
   check)
-    [ -n "$session" ] && [ -n "$shell" ] || usage
-    if [ ! -f "$lease" ]; then echo "lease.sh: no lease at $lease" >&2; exit 3; fi
-    if holds "$lease" "$session" "$shell"; then exit 0; fi
-    if [ -n "$(field "$lease" released_at)" ]; then
-      echo "lease.sh: watch $(field "$lease" watch) was released at $(field "$lease" released_at)" >&2
-    else
-      echo "lease.sh: watch $(field "$lease" watch) is held by $(field "$lease" session) at $(field "$lease" shell)" >&2
+    caller
+    [ -f "$lease" ] || fail "no lease at $lease" 3
+    holds && exit 0
+    if [ -n "$(field released_at)" ]; then
+      fail "watch $(field watch) was released at $(field released_at)" 4
     fi
-    exit 4
+    fail "watch $(field watch) is held by $(field session) at $(field shell)" 4
     ;;
 
   release)
-    [ -n "$session" ] && [ -n "$shell" ] && [ -n "$handoff" ] || usage
-    if [ ! -f "$lease" ]; then echo "lease.sh: no lease at $lease" >&2; exit 3; fi
-    lock "$lease"
-    if ! holds "$lease" "$session" "$shell"; then
-      echo "lease.sh: only the holder of watch $(field "$lease" watch) may release it" >&2
-      exit 4
-    fi
-    write "$lease" "$(field "$lease" charter)" "$(field "$lease" watch)" "$(field "$lease" session)" \
-      "$(field "$lease" shell)" "$(field "$lease" harness)" "$(field "$lease" taken_at)" \
-      "$(field "$lease" prior)" "$(field "$lease" reason)" "$(now)" "$handoff"
+    [ -n "$handoff" ] || usage
+    caller
+    [ -f "$lease" ] || fail "no lease at $lease" 3
+    lock
+    holds || fail "only the holder of watch $(field watch) may release it" 4
+    write "$(field charter)" "$(field watch)" "$(field session)" "$(field shell)" "$(field harness)" \
+      "$(field taken_at)" "$(field prior)" "$(field reason)" "$(now)" "$handoff"
     ;;
 
   *) usage ;;

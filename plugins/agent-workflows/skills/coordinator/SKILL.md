@@ -15,12 +15,17 @@ Coordinators run on Claude Code with Opus 5.5 until the human names another
 model; other models work as lanes and reviewers. In any other session,
 prepare the charter and hand it to such a coordinator. Commands and traps: [stack.md](references/stack.md).
 File shapes: [files.md](references/files.md). The lease and agent mail go
-through [scripts/lease.sh](scripts/lease.sh) and [scripts/send.sh](scripts/send.sh).
+through [scripts/lease.sh](scripts/lease.sh)
+(`lease.sh show|take|check|release <charter>`) and
+[scripts/send.sh](scripts/send.sh)
+(`send.sh --charter <c> --role coordinator --to <host/sN.gM> --kind <k> < line`).
+Both identify your session and shell themselves; `send.sh` checks the lease
+and refuses a target that is not running an agent.
 
 ## Laws
 
-1. **The lease gates every act.** Before each launch, relay, land, retire,
-   release, or send, run `lease.sh check` with your session and shell. A
+1. **The lease gates every act.** Before each launch, land, retire, or
+   release, run `lease.sh check <charter>`; `send.sh` checks it for you. A
    non-zero exit means you do not hold the watch: observe and report only.
    A decision the human gives you then still counts: record it in the
    charter's Decisions with its time, send the holder a pointer
@@ -75,9 +80,9 @@ lane host is a hint, never a source.
    write them into the charter first. Out of scope is only what the human
    excluded. Work that needs them at some step is in scope: queue it in the
    themes file's Items, in their order, with the first human gate it stops at.
-3. `lease.sh show`. If another session holds it, record what sox and recall
-   say about it; reachable or not, the human's turn decides.
-4. `lease.sh take` with `--reason` quoting the human's words and time.
+3. `lease.sh show <charter>`. If another session holds it, record what sox
+   and recall say about it; reachable or not, the human's turn decides.
+4. `lease.sh take <charter> --reason "<the human's words and time>"`.
 5. Label your shell as the coordinator, set your fleet row (Shell, Session,
    State `live`), start the heartbeat, and run a pass. Its report is your
    opening sitrep. A workspace without a themes file gets a portfolio review
@@ -85,7 +90,7 @@ lane host is a hint, never a source.
 
 ### Run a pass
 
-1. `lease.sh check` (law 1).
+1. `lease.sh check <charter>` (law 1).
 2. Take stock through a subagent, given the last pass time and the log and
    themes paths. It surveys live sources (sox, each lane's latest turn,
    report and exit files, queues, git, the forge; the workspace's stocktake
@@ -147,8 +152,7 @@ and ask, or route it to a design session.
 1. Write it as the next numbered addendum in the lane's brief directory:
    the human's words, their time, and the question it answered. Relay only
    what they decided, naming the action exactly.
-2. Send the pointer with `send.sh --kind relay`, which checks the lease, in
-   the form the lane's brief (as amended by its addenda) names; today's form
+2. Send the pointer with `send.sh --kind relay` in the form the lane's brief (as amended by its addenda) names; today's form
    is `Human decision (<UTC time>, via coordinator, addendum-N): <exact
    action>`, and older briefs may name "Relayed decision".
 3. Confirm a new turn landed. A headless lane is relaunched with the
@@ -218,16 +222,16 @@ The watch changes hands only when the session has ended or the human asks
 - **Rotate** (the human asks): write the handoff (scorecard, handover table,
   waiting list, grants in force), then launch a successor in a sox shell on
   the control host with the coordinator skill, the handoff, and your session
-  id for `/recall continue`. It takes the watch with `lease.sh take --reason`
-  quoting the request. Once your `lease.sh check` fails, stop the heartbeat
+  id for `/recall continue`. It takes the watch with `lease.sh take <charter> --reason`
+  quoting the request. Once your `lease.sh check <charter>` fails, stop the heartbeat
   and end with the handoff path; the successor retires your shell unless the
   human started it.
 - **Park or retire** (the human asks): write the handoff, stop the heartbeat
-  and any watchers, `lease.sh release --handoff`, log it, and end with
+  and any watchers, `lease.sh release <charter> --handoff <path>`, log it, and end with
   `SHIFT ENDED <handoff path>`. When that would orphan work in flight, end
   with `SHIFT CONTINUES` and the reason.
 - **A session that ended** without a handoff: the human's next turn appoints
-  a successor, which records the prior holder from `lease.sh show`.
+  a successor, which records the prior holder from `lease.sh show <charter>`.
 
 ## Grants
 

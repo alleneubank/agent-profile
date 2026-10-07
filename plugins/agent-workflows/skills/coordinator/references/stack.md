@@ -20,11 +20,14 @@ The coordinator runs on Claude Code (SKILL.md); these are its tools.
 ## Scripts
 
 `lease.sh` and `send.sh` live in `scripts/` beside the skill's `SKILL.md`
-(the harness shows the skill's base directory when it loads). On a lane host,
-find the installed copy before writing it into a brief:
+(the harness shows the skill's base directory when it loads). Each script's
+header is its reference. The caller is `CLAUDE_CODE_SESSION_ID` in the shell
+`sox which` names; the target's foreground comes from `sox ls <host>`, and
+`sox send --expect-fg` refuses if it changes before the write. Receipts go
+to `~/.handoffs/<charter>/sent.log` on the sending host. On a lane host, find
+the installed `send.sh` before writing it into a brief:
 `ls ~/.claude/plugins/cache/agent-profile/agent-workflows/*/skills/coordinator/scripts/send.sh ~/.codex/plugins/cache/agent-profile/agent-workflows/*/skills/coordinator/scripts/send.sh 2>/dev/null | tail -1`.
-Both need only bash 3.2 or later and coreutils; `send.sh` calls `sox send`
-with the home pinned and from `/tmp`.
+Both need only bash 3.2 or later and coreutils.
 
 ## Who sent a turn
 
@@ -57,7 +60,7 @@ refused by name.
 |---|---|---|
 | Roster | `sox ls [host] [--json]` | Each answering daemon's rows now, with labels. A silent host still exits 0: check `complete` in `--json`. `no-reply`, `unknown`, and `cold` do not mean dead. `cmd` shows a wrapper shell (`zsh`, `bash`) or a version string for a running agent: confirm the agent with `ps` on its host. |
 | Attention | `sox watch <sN.gM> --until done\|blocked --timeout 3` | Last observed state (exit 3 on timeout). An agent waiting on its own question, or one held at a [startup dialog](#startup-dialogs), can still read `working`: read its latest turn. |
-| Message | `send.sh ... < message` (wraps `sox send <host>/<sN.gM> --expect-fg <cmd as sox ls prints it> --enter`) | Delivery only; stderr names the shell, command, and cwd it reached. Without `--enter` the text sits unsubmitted, and a send into a finished row still reports sent. Confirm a new user turn in the agent's transcript. A sent line looks like the human's typing to the target, which is why `send.sh` adds the header. |
+| Message | `send.sh --charter <c> --role <r> --to <host/sN.gM> --kind <k> < message` | Delivery only; stderr names the shell, command, and cwd it reached. Without `--enter` the text sits unsubmitted, and a send into a finished row still reports sent. Confirm a new user turn in the agent's transcript. A sent line looks like the human's typing to the target, which is why `send.sh` adds the header. |
 | Launch | `sox up <host>:<abs path> --detach --no-forward-agent --no-chrome --no-ext --exec -- <run.sh>` | The last output line is the new `sN.gM`: a minted shell, not a running agent. Local work uses `localhost:<path>`; a bare path is read as a host. Forward the agent only when the brief needs the human's keys on that host. |
 | Label | `sox label <sN.gM> owner=<charter> lane=<l>` | Labels belong to that generation only. If it fails, `ssh <host> '<host SOX_HOME> ~/.sox/bin/soxd label <sN.gM> k=v'` has worked. Your own shell is `$ZMX_SESSION`; label it `role=coordinator charter=<name>`. |
 | Wait | `sox wait <sN.gM> --timeout S` | Exit code of a `--detach --exec` task (3 timeout, 42 gone); not task success. |
