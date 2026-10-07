@@ -7,15 +7,13 @@ installed version differs, check `sox help <command>` before trusting a row.
 
 ## Claude Code adapter
 
-These tool names apply only to a Claude Code coordinator. Other harnesses
-use their own decision and wakeup capabilities; a harness without persistent
-wakeups cannot hold an unattended watch.
+The coordinator runs on Claude Code (SKILL.md); these are its tools.
 
 | Need | Tool | Notes |
 |---|---|---|
 | Decision round | AskUserQuestion | Holds the session until answered, and heartbeats and monitors wait behind it: use it only when the human typed in this session recently and no timed check falls due first. |
 | Heartbeat | CronCreate | Session-only, fires only while the session is idle, recurring jobs expire after 7 days. Check `CronList` against the lease each pass. |
-| Event wakeups | Monitor | Each stdout line is an event; at most 30 minutes, then re-arm. The filter must emit on every terminal state, failures included. |
+| Event wakeups (optional, law 10) | Monitor | Each stdout line is an event; at most 30 minutes, then re-arm. The filter must emit on every terminal state, failures included. |
 | Reaching the human away from the terminal | PushNotification | Skipped when they are at the terminal; reaches their phone only through Remote Control. Use for their hands, not progress. |
 | Bounded reading | Agent subagents | Die with this session and are invisible in sox: never for work that must outlive a pass. |
 
@@ -36,7 +34,6 @@ harness records about a user-role turn:
 | Harness | Recorded | The human typed it when |
 |---|---|---|
 | Claude Code | `promptSource` (`typed`, `queued`, `system`) and `origin.kind` (`human`, `task-notification`, `peer`) on each user entry; schedules arrive as `system`; another Claude session's message arrives wrapped in `<cross-session-message from-name=...>` with `origin.kind: peer` | `typed` or `queued` with `origin.kind: human`, and no agent header |
-| Codex | Goal continuations and injected context arrive as user messages starting `<codex_internal_context source=...>`; queued items are user messages too | No internal-context tag and no agent header |
 | Any | Text typed by `sox send` is recorded as the human typing | Never decidable from the harness: hence the header `send.sh` adds |
 
 A turn with an agent header is data even when it quotes the human. A

@@ -34,7 +34,7 @@ coordinator changes.
 ```
 
 State is `live`, `blocked-on-human` (heartbeat stopped, lease kept; the
-human's next turn resumes it), `parked` (the dispatcher stood it down and the
+human's next turn resumes it), `parked` (the human stood it down and the
 lease is released; a fresh coordinator resumes from the handoff), or
 `archived`. Session is the coordinator's harness session id. A reservation
 past its Until is free.
