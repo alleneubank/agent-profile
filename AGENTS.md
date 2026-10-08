@@ -92,7 +92,10 @@ prose. Keep working independent items while a necessary decision is pending.
   is the only remaining ask; do not ask before the prompt. Unattended, a pending
   approval is a boundary event, not permission to bypass it.
 - Preserve others' and in-flight work. Attribute processes/resources before
-  cleanup; deleting data-bearing resources requires explicit authorization.
+  cleanup. Signal what you started through the PID or process group your
+  launch returned; anything else only by individually attributed PID, never
+  through a selector computed over the process table.
+  Deleting data-bearing resources requires explicit authorization.
   Edit generating sources, not rendered outputs.
 - Clean up after yourself. Put everything you create (worktrees, clones,
   build output, scratch, logs, browser profiles) under `~/Work`, at the path
