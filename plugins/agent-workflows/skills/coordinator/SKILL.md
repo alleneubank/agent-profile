@@ -197,7 +197,8 @@ Change a running agent's brief only by addendum and pointer.
    acceptance, gates, budget, boundaries, the lane root, the human's
    decisions verbatim, the report path, and the Coordination section. A
    brief touching UI states, as acceptance, what each touched control does on
-   production today and what the user does.
+   production today and what the user does. A high-risk brief puts the
+   author's rehearsal (Verification law) in that lane's own acceptance.
 3. The launcher comes from the fleet file's Launchers section, re-read at
    this launch: the table in its order, narrowed by the charter and by any
    tier window that has not lapsed; the brief names it. A quota failure
@@ -279,6 +280,8 @@ The watch changes hands only when the session has ended or the human asks
 - Give each lane the narrowest grant its outcome needs. Before asking for a
   merge grant on a user-facing change, give a behavior diff next to the risk
   list: what a user does differently, per changed control.
+  On a high-risk change, first find its author's rehearsal record at the
+  head that merges; another lane's run of the existing suite is not one.
 
 ## Themes
 
