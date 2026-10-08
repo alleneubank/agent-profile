@@ -24,14 +24,16 @@ sessions; apply them instead of re-asking.
 
 Run the cheapest check that can catch the likely failure of the requested
 behavior, starting with the repository's existing harness. Prefer the real
-command, app, or service when a component test cannot show the outcome. A
-check verifies only what it ran for real: whatever a mock or stub replaced
-stays unverified, and the change record says so. Stop when it passes; add a
-check only for a named risk it would expose.
+command, app, or service when a component test cannot show the outcome. What
+a mock or stub replaced stays unverified, and the change record says so. Stop
+when it passes; add a check only for a named risk it would expose.
 
 - High-risk changes — schema/data migrations, auth/security boundaries, public
   API compatibility or contract changes, infra/deploy configuration — require
-  plan approval and a matching specialist review. Only the human may waive it.
+  plan approval, a matching specialist review, and an author rehearsal of the
+  change's own risk scenarios in the closest real environment at the merging
+  head (a stack's top), recording environment, head, scenarios, and gaps;
+  without one it stays a draft, saying why. Only the human may waive these.
   Other work gets an independent reviewer or a bug bash only when asked;
   claims published to other people are fact-checked per `sitrep`. An
   adversarial reviewer gets the goal, the diff, production behavior, and the
@@ -46,8 +48,8 @@ check only for a named risk it would expose.
   redesign or existing check can hold it, add a code-law waiver and proceed,
   attended or not. A redesign larger than the task's scope becomes the
   waiver's debt and a follow-up. Done claims list the waivers added. A waiver
-  never covers a high-risk change's approval or review, a required check, or a
-  weakened assertion; those stay with the human.
+  never covers a high-risk change's gates, a required check, or a weakened
+  assertion; those stay with the human.
 - Reuse evidence while the inputs it covered are unchanged; a new commit id,
   message, or squash alone does not invalidate it. After a change, rerun only
   the checks it can affect.
