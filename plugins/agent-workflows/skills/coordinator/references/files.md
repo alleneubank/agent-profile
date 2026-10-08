@@ -29,6 +29,8 @@ each charter.
 | Launcher | Harness and model | Account | Hosts logged in | Use for | Verified |
 |---|---|---|---|---|---|
 Fallback when a quota runs out: <order>
+Tier windows: <tier> allowed until <date or reset> (the human's; a lapsed
+window means the tier is not used)
 
 ## Reservations
 | Resource (device, host, account) | Owner charter | Until | Notes |

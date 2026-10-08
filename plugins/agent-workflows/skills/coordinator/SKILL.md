@@ -198,9 +198,10 @@ Change a running agent's brief only by addendum and pointer.
    decisions verbatim, the report path, and the Coordination section. A
    brief touching UI states, as acceptance, what each touched control does on
    production today and what the user does.
-3. The launcher comes from the fleet file's Launchers table, in its order,
-   narrowed by the charter; the brief names it. A quota failure moves to the
-   next launcher and is logged.
+3. The launcher comes from the fleet file's Launchers section, re-read at
+   this launch: the table in its order, narrowed by the charter and by any
+   tier window that has not lapsed; the brief names it. A quota failure
+   moves to the next launcher and is logged.
 4. Launch as a sox shell on the lane host, labeled with owner and lane, named
    after the lane. Proof of start is the transcript's first turn.
 
