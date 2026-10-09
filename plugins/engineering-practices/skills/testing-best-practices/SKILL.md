@@ -19,7 +19,7 @@ limits rather than claiming an unobserved failure.
   test: the user story, a spec, a published contract, the real system, or a
   property, or a simpler reference implementation. A **tautological test**
   derives its expectation from the code it checks (the same formula, a
-  production helper the code also calls, or the code's output pasted back), so
+  production helper the code also calls, or its output pasted back unchecked), so
   it shares that code's faults. Write the literal you worked out. Sharing a
   helper is fine when its own tests own its exact output and this test only
   checks that its result appears.
