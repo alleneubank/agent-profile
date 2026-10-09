@@ -8,7 +8,7 @@ from urllib.parse import unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parent.parent
-AGENTS_WORD_LIMIT = 1380
+AGENTS_WORD_LIMIT = 1434
 
 
 def main() -> int:

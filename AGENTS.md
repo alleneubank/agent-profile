@@ -30,12 +30,13 @@ passes; add a check only for a named risk it would expose.
 - A changed flow people or agents drive (screens, commands, service
   calls) is done only once its author has driven it end to end, as its user
   would, on the closest-to-live surface an agent can reach (simulator,
-  emulator, localnet, staging), fixing what that found; reviews and component
-  tests do not substitute. Human, device, and production gates qualify only
-  what agents cannot reach. A changed UI's record shows each changed
-  interaction in production and after. New features and changed flows get
-  a `bugbash` with its visual pass. Copy-only changes, and logic whose
-  tests show what its callers get, need neither.
+  emulator, localnet, staging, or the vendor's sandbox when it crosses a
+  vendor, whose local stand-in proves only itself), fixing what that found;
+  reviews and component tests do not substitute. Human, device, and production
+  gates qualify only what agents cannot reach. A changed UI's record shows
+  each changed interaction in production and after. New features and changed
+  flows get a `bugbash` with its visual pass. Copy-only changes, and logic
+  whose tests show what its callers get, need neither.
 - High-risk changes — schema/data migrations, auth/security boundaries, public
   API compatibility or contract changes, infra/deploy configuration — require
   plan approval, a matching specialist review, and an author rehearsal of the
@@ -50,6 +51,9 @@ passes; add a check only for a named risk it would expose.
   `code-law` holds the default model and how findings outside it are answered.
 - Hold an invariant by construction before checking it, and never write
   project-specific source checks; `code-law` has the ladder and the waiver form.
+- When runs keep stopping on missing settings, secrets, or seeds in your own
+  environment, add a check that fails before the next run starts and names
+  what is missing; a third party's outage gets attribution, not a gate.
 - When review finds a second instance of one defect class, redesign so the
   class cannot be written; do not patch it again or harden a detector.
   Deliberation over one major finding ends by the third review round: if no

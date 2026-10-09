@@ -31,7 +31,7 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   requested; bug bashes run when requested and on new features and changed
   user flows (REQ-PROFILE-010).
 - REQ-PROFILE-006 — **Measurable context:** universal `AGENTS.md` stays at or
-  below 1,380 whitespace-delimited words, from a 2,325-word baseline. This is a
+  below 1,434 whitespace-delimited words, from a 2,325-word baseline. This is a
   size constraint, not proof of behavior; fresh scenarios judge decision quality.
 - REQ-PROFILE-007 — **Verification proportionality:** verification runs the
   cheapest check that can catch the likely failure of the requested behavior,
@@ -50,7 +50,14 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   changed flows get a fresh-participant bug bash with a visual pass against
   the repository's design standard; copy-only changes, and logic whose tests
   show what its callers get, skip captures and the bug bash. Evidence: 28 interventions across 9 repositories, 2026-08-25 to
-  2026-10-09 (ai-wiki EXP-017).
+  2026-10-09 (ai-wiki EXP-017). A flow that crosses a vendor is driven on
+  the vendor's sandbox; a local stand-in of the vendor proves only itself
+  (ai-wiki EXP-018).
+- REQ-PROFILE-011 — **Environment faults become checks:** when runs keep
+  stopping on missing settings, secrets, or seeds in the agent's own
+  environment, a check that fails before the next run and names what is
+  missing replaces the note and the retry; a third party's outage is
+  attributed, not gated (ai-wiki EXP-020).
 - REQ-PROFILE-008 — **Completion boundary:** work stops when the selected
   check passes; another check needs a named risk it would expose. Done claims
   name the check that ran and what was not checked, not the author's assurance.
@@ -107,6 +114,13 @@ guidance is not counted as universally loaded context.
   captures, and a bug bash with a visual pass on new features and changed flows
   (REQ-PROFILE-010). Raise the universal budget to 1,380 words to carry it.
   Copy-only changes stay lean. **ratified (human)**
+- 2026-10-09 — From the pay-page-checkout retro (ai-wiki EXP-018, EXP-020):
+  a vendor's sandbox joins the closest-to-live surfaces, and recurring
+  environment faults become pre-run checks. Raise the universal budget to
+  1,434 words to carry them. A third candidate, writing re-raised rulings into
+  the spec or check (EXP-019), tied the baseline in blind evals and
+  over-triggered on a one-off instruction, so it is not adopted.
+  **provisional (driver)**, for the human to ratify.
 
 ### Acceptance
 
