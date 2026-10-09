@@ -17,12 +17,12 @@ limits rather than claiming an unobserved failure.
   destination's result; startup or a screenshot cannot establish either.
 - Take every expected result from an oracle independent of the code under
   test: the user story, a spec, a published contract, the real system, or a
-  property. A **tautological test** restates the code instead: its expectation
-  comes from the same formula, a production helper the code also calls, the
-  code's own output pasted back, or a stub whose return is asserted as the
-  result. It passes whatever the code does. Write the literal you worked out;
-  share a helper only when this test does not care about its output and the
-  helper is tested on its own.
+  property, or a simpler reference implementation. A **tautological test**
+  derives its expectation from the code it checks (the same formula, a
+  production helper the code also calls, or the code's output pasted back), so
+  it shares that code's faults. Write the literal you worked out. Sharing a
+  helper is fine when its own tests own its exact output and this test only
+  checks that its result appears.
 - Prefer real dependencies, then behaviorally conformant fakes. A mock of a
   boundary you own may isolate the unit under test for speed; it checks that
   unit, not what it replaced, which needs its own run against the real thing.
