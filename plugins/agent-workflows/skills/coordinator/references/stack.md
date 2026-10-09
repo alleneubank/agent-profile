@@ -86,11 +86,11 @@ and build output there when a tool writes it elsewhere by default
 the shell; for an interactive lane the human may attach to later, end the script with `exec "$SHELL" -l` so the pane stays.
 
 Start the agent under the human's interactive shell:
-`zsh -ic 'cd <worktree> && direnv exec . <launcher> ...'`. Credentials the
-interactive rc resolves (a package-registry token, for one) never reach a
-non-interactive `bash` script, so installs there run anonymously and fail on
-private packages. Never write the credential into the brief, argv, or env
-yourself.
+`zsh -ic 'cd <worktree> && direnv exec . <launcher> ...'`, so it inherits the
+interactive PATH and rc setup. Credentials do not travel this way: the shell
+exports none, and each tool resolves its own per command (package managers
+read the registry token from the gh keyring inside the agent's own tool
+shells). Never write a credential into the brief, argv, or env yourself.
 
 A headless agent (`-p`, `exec`) ends when its turn ends, and anything it left
 in the background dies with it: briefs say to run gates in the foreground.
