@@ -12,11 +12,9 @@ and remaining risks.
 
 ## When it runs
 
-A new feature or changed user flow gets one without being asked, after its
-author's own end-to-end run and any specialist review, and before the human is
-asked for acceptance, a merge, or device or walk time. In a stack, bash each
-stack top as it forms rather than once at the end. Copy-only changes, and
-logic whose tests show what its callers get, skip it.
+When the Verification law calls for one, run it after the author's own run and
+any specialist review, before the human is asked for acceptance, a merge, or
+device time. In a stack, bash each stack top as it forms, not once at the end.
 
 Record the artifact, environment, starting state, tasks, blocking severity, and
 time/task budget in the existing task record. Use owned fixtures and safe test

@@ -32,21 +32,15 @@ limits rather than claiming an unobserved failure.
 
 ## User-facing work
 
-- Use the repository's surface ladder: each surface from cheapest to
-  closest-to-live, what it can show, and where it runs. When the repository
-  has none, record the one you used with the change. Climb to the highest
-  surface an agent can drive; name what it cannot qualify (real biometrics,
-  signed bytes, push delivery, production data) and leave only that to the
-  human or device gate.
-- A finding that "needs real-environment evidence" gets the cheapest
-  executable probe now, not a deferral to the gate.
-- Keep a target agents can run beside any build shaped for a gate (frozen,
-  single host, production credentials).
-- Walk each changed interaction, not first paint: what production does today,
-  then what the change does. Capture both states of each changed screen,
-  including the states the change touches (empty, error, loading, larger
-  text, dark). Recordings play slowly enough to read. Captures go in the
-  change record, never committed. A capture shows visible state only.
+- Use the repository's surface ladder (each surface, what it can show, where it
+  runs), or record the one you used. Name what the highest drivable surface
+  cannot qualify (real biometrics, signed bytes, push delivery, production
+  data); only that waits for the human or device gate. A finding that "needs
+  real-environment evidence" gets the cheapest executable probe now.
+- Captures walk each changed interaction, not first paint: production today,
+  then the change, in each state it touches (empty, error, loading, larger
+  text, dark). They go in the change record, never committed, and show
+  visible state only.
 
 ## Evidence or permanent test
 
