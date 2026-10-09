@@ -120,7 +120,7 @@ guidance is not counted as universally loaded context.
   1,434 words to carry them. A third candidate, writing re-raised rulings into
   the spec or check (EXP-019), tied the baseline in blind evals and
   over-triggered on a one-off instruction, so it is not adopted.
-  **provisional (driver)**, for the human to ratify.
+  **ratified (human)**
 
 ### Acceptance
 
