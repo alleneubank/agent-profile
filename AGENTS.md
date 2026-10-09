@@ -23,21 +23,29 @@ sessions; apply them instead of re-asking.
 ## Verification
 
 Run the cheapest check that can catch the likely failure of the requested
-behavior, starting with the repository's existing harness. Prefer the real
-command, app, or service when a component test cannot show the outcome. What
-a mock or stub replaced stays unverified, and the change record says so. Stop
-when it passes; add a check only for a named risk it would expose.
+behavior, starting with the repository's existing harness. What a mock or
+stub replaced stays unverified, and the change record says so. Stop when it
+passes; add a check only for a named risk it would expose.
 
+- A changed flow people or agents drive (screens, commands, service
+  calls) is done only once its author has driven it end to end, as its user
+  would, on the closest-to-live surface an agent can reach (simulator,
+  emulator, localnet, staging), fixing what that found; reviews and component
+  tests do not substitute. Human, device, and production gates qualify only
+  what agents cannot reach. A changed UI's record shows each changed
+  interaction in production and after. New features and changed flows get
+  a `bugbash` with its visual pass. Copy-only changes, and logic whose
+  tests show what its callers get, need neither.
 - High-risk changes — schema/data migrations, auth/security boundaries, public
   API compatibility or contract changes, infra/deploy configuration — require
   plan approval, a matching specialist review, and an author rehearsal of the
   change's own risk scenarios in the closest real environment at the merging
   head (a stack's top), recording environment, head, scenarios, and gaps;
   without one it stays a draft, saying why. Only the human may waive these.
-  Other work gets an independent reviewer or a bug bash only when asked;
-  claims published to other people are fact-checked per `sitrep`. An
-  adversarial reviewer gets the goal, the diff, production behavior, and the
-  code, not this profile, and judges each waiver on its merits.
+  Other work gets an independent reviewer only when asked; claims published
+  to other people are fact-checked per `sitrep`. An adversarial reviewer gets
+  the goal, the diff, production behavior, and the code, not this profile,
+  and judges each waiver on its merits.
 - Security work states its threat model and hands it to the reviewer;
   `code-law` holds the default model and how findings outside it are answered.
 - Hold an invariant by construction before checking it, and never write

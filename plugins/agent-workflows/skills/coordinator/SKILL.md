@@ -197,10 +197,12 @@ Change a running agent's brief only by addendum and pointer.
    acceptance, gates, budget, boundaries, the lane root, the human's
    decisions verbatim, the report path, and the Coordination section. A
    brief touching UI states, as acceptance, what each touched control does on
-   production today and what the user does. A high-risk change's rehearsal
-   (Verification law) goes in the acceptance of the lane that owns the
-   merging head, a stack's top, by addendum when it is running; never a
-   separate runtime lane.
+   production today and what the user does. User-facing work carries the
+   Verification law's end-to-end run and captures in its acceptance; a new
+   feature or flow also gets a fresh bug-bash lane on each stack top as it
+   forms. A high-risk change's rehearsal (Verification law) goes in the
+   acceptance of the lane that owns the merging head, a stack's top, by
+   addendum when it is running; never a separate runtime lane.
 3. The launcher comes from the fleet file's Launchers section, re-read at
    this launch: the table in its order, narrowed by the charter and by any
    tier window that has not lapsed; the brief names it. A quota failure
@@ -284,10 +286,11 @@ The watch changes hands only when the session has ended or the human asks
   list: what a user does differently, per changed control.
   On a high-risk change, first find its rehearsal record at the merging head
   (a stack's top); another lane's run of the existing suite is not one.
-  Before asking the human for device, biometric, or walk time on a feature,
-  find its end-to-end run on the closest surface a lane can drive (simulator,
-  emulator, local stack); review of the artifact is not one, and a build that
-  cannot run there gets a target that can.
+  Before asking the human for acceptance, a merge, or device, biometric, or
+  walk time on user-facing work, find the author's end-to-end run on the
+  closest-to-live surface, its before/after captures when UI changed, and
+  for a new feature or flow its bug bash (Verification law); reviews of the
+  artifact are none of these.
 
 ## Themes
 

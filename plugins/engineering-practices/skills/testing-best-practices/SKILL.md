@@ -1,6 +1,6 @@
 ---
 name: testing-best-practices
-description: Use when choosing a verifier, deciding whether a check becomes a permanent test, diagnosing an unreliable test, or designing nontrivial regression coverage; routine execution of an established check needs no extra workflow.
+description: Use when choosing a verifier, running a feature on its closest-to-live surface, capturing UI evidence, deciding whether a check becomes a permanent test, diagnosing an unreliable test, or designing nontrivial regression coverage; routine execution of an established check needs no extra workflow.
 ---
 
 # Verification
@@ -29,6 +29,24 @@ limits rather than claiming an unobserved failure.
 - Unit tests, TDD, integration tests, and exploratory use are alternatives or
   complements selected by risk, not a checklist of layers. A property held by
   types needs no test of its own.
+
+## User-facing work
+
+- Use the repository's surface ladder: each surface from cheapest to
+  closest-to-live, what it can show, and where it runs. When the repository
+  has none, record the one you used with the change. Climb to the highest
+  surface an agent can drive; name what it cannot qualify (real biometrics,
+  signed bytes, push delivery, production data) and leave only that to the
+  human or device gate.
+- A finding that "needs real-environment evidence" gets the cheapest
+  executable probe now, not a deferral to the gate.
+- Keep a target agents can run beside any build shaped for a gate (frozen,
+  single host, production credentials).
+- Walk each changed interaction, not first paint: what production does today,
+  then what the change does. Capture both states of each changed screen,
+  including the states the change touches (empty, error, loading, larger
+  text, dark). Recordings play slowly enough to read. Captures go in the
+  change record, never committed. A capture shows visible state only.
 
 ## Evidence or permanent test
 

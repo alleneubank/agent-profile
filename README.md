@@ -174,7 +174,7 @@ evidence.
 `AGENTS.md` is the universal instruction source. It keeps scope, authority,
 secrets, verification, and operational safety; action-specific procedures load
 through the skill catalog when needed. The instruction validator enforces the
-1,300-word universal budget and checks local links and retired default guidance.
+1,380-word universal budget and checks local links and retired default guidance.
 Decision scenarios are smoke tests. Real baseline/candidate tasks evaluate
 delivered behavior and supervision cost; word count is not a behavioral verifier.
 

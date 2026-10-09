@@ -27,10 +27,11 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   invalidate it.
 - REQ-PROFILE-005 — **Preserved safety:** high-risk approval and specialist
   review, publish scope, secrets, fail-closed required checks, and direnv trust
-  boundaries remain enforced. Other independent review and bug bashes run only
-  when requested.
+  boundaries remain enforced. Other independent review runs only when
+  requested; bug bashes run when requested and on new features and changed
+  user flows (REQ-PROFILE-010).
 - REQ-PROFILE-006 — **Measurable context:** universal `AGENTS.md` stays at or
-  below 1,300 whitespace-delimited words, from a 2,325-word baseline. This is a
+  below 1,380 whitespace-delimited words, from a 2,325-word baseline. This is a
   size constraint, not proof of behavior; fresh scenarios judge decision quality.
 - REQ-PROFILE-007 — **Verification proportionality:** verification runs the
   cheapest check that can catch the likely failure of the requested behavior,
@@ -40,6 +41,16 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   regression check at the smallest level that reproduces what its user
   observed, and one-off verification stays evidence rather than a permanent
   test. Existing required gates remain required.
+- REQ-PROFILE-010 — **User-facing completion:** a changed flow people or
+  agents drive is done only after its author drives each changed flow end to end on the
+  closest-to-live surface an agent can reach and fixes what that finds; tests
+  and reviews do not substitute, and human, device, and production gates
+  qualify only what agents cannot reach. A changed UI's record compares each
+  changed interaction in production and after the change. New features and
+  changed flows get a fresh-participant bug bash with a visual pass against
+  the repository's design standard; copy-only changes, and logic whose tests
+  show what its callers get, skip captures and the bug bash. Evidence: 28 interventions across 9 repositories, 2026-08-25 to
+  2026-10-09 (ai-wiki EXP-017).
 - REQ-PROFILE-008 — **Completion boundary:** work stops when the selected
   check passes; another check needs a named risk it would expose. Done claims
   name the check that ran and what was not checked, not the author's assurance.
@@ -91,6 +102,11 @@ guidance is not counted as universally loaded context.
   `wiki/threat-model-scoping.md` and
   `raw/agentic-engineering/2026-10-02-default-threat-model-decision.md`.
   **ratified (human)**
+- 2026-10-09 — Reverse the lean-verification default for user-facing work:
+  the author's end-to-end run on the closest-to-live surface, before/after UI
+  captures, and a bug bash with a visual pass on new features and changed flows
+  (REQ-PROFILE-010). Raise the universal budget to 1,380 words to carry it.
+  Copy-only changes stay lean. **ratified (human)**
 
 ### Acceptance
 
@@ -237,12 +253,15 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   Generic generative code review is not a default delivery gate. Specialized
   review is bounded to a named risk and severity floor; shared high-risk classes
   receive the matching review by default unless the human records a PLAN waiver.
-- REQ-BUGBASH-002 — **Real-use gate:** a requested bug bash exercises the
+- REQ-BUGBASH-002 — **Real-use gate:** a bug bash, requested or required by
+  REQ-PROFILE-010, exercises the
   operable application or system through real tasks. The charter names the
   exact artifact and environment, roles, tasks, expected outcomes, evidence,
   severity floor, budget, and boundaries.
 - REQ-BUGBASH-003 — **Independent terminal:** use a fresh, task-briefed
-  participant when the request or agreement requires independence. Author
+  participant for an unrequested bash and when the request or agreement
+  requires independence. A UI change gets a visual pass against the
+  repository's design standard, defaulting to the platform's guidelines. Author
   execution is never represented as independent. A required device, biometric,
   live secret, or subjective human response remains a Boundary item.
 - REQ-BUGBASH-004 — **Findings and boundedness:** findings are observable and

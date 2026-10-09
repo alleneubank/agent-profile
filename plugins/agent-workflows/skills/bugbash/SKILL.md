@@ -1,6 +1,6 @@
 ---
 name: bugbash
-description: Use when a bug bash, dogfood run, or exploratory readiness check of an application or system is requested.
+description: Use when a bug bash, dogfood run, visual review, or exploratory readiness check is requested, or a new feature or changed user flow is ready for acceptance.
 ---
 
 # Bug bash
@@ -10,16 +10,37 @@ not a source critique or a renamed unit-test run. Select a few realistic tasks,
 including an important failure or interruption path, from the requested behavior
 and remaining risks.
 
+## When it runs
+
+A new feature or changed user flow gets one without being asked, after its
+author's own end-to-end run and any specialist review, and before the human is
+asked for acceptance, a merge, or device or walk time. In a stack, bash each
+stack top as it forms rather than once at the end. Copy-only changes, and
+logic whose tests show what its callers get, skip it.
+
 Record the artifact, environment, starting state, tasks, blocking severity, and
 time/task budget in the existing task record. Use owned fixtures and safe test
-instances. An unavailable environment is a block, not permission to substitute
-source inspection.
+instances on the closest-to-live surface an agent can drive. An unavailable
+environment is a block, not permission to substitute source inspection.
 
-Use a fresh, task-briefed participant when the request or agreement requires
-independent acceptance. Author dogfood remains useful; do not label it
-independent. A fresh participant gets the task and artifact, not the author's
+Use a fresh, task-briefed participant for an unrequested bash and whenever
+independent acceptance is required. Author dogfood remains useful; do not label
+it independent. A fresh participant gets the task and artifact, not the author's
 preferred verdict. Physical-device, biometric, and other genuinely human-only
 steps stay at the boundary.
+
+## Visual pass
+
+When the change has UI, judge the live screens and the author's before/after
+captures against the repository's declared design standard; without one, use
+the platform's own guidelines (Apple Human Interface Guidelines on Apple
+platforms). Check each changed screen for clipping and layout at larger text
+sizes and in dark mode, a clear primary action, labels a user and assistive
+technology can read, and consistency with neighboring screens and other
+platforms of the same app. Cite the guideline or neighboring screen a finding
+departs from; taste without a reference is a note, not a finding.
+
+## Findings
 
 Capture observed behavior before diagnosing. A finding states expected and
 observed behavior, shortest reproduction, severity, and evidence. Do not invent
