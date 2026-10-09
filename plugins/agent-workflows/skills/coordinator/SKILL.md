@@ -284,6 +284,10 @@ The watch changes hands only when the session has ended or the human asks
   list: what a user does differently, per changed control.
   On a high-risk change, first find its rehearsal record at the merging head
   (a stack's top); another lane's run of the existing suite is not one.
+  Before asking the human for device, biometric, or walk time on a feature,
+  find its end-to-end run on the closest surface a lane can drive (simulator,
+  emulator, local stack); review of the artifact is not one, and a build that
+  cannot run there gets a target that can.
 
 ## Themes
 
