@@ -334,8 +334,6 @@ limits go to the themes file, their decisions to the charter.
   launch on the control host labeled `owner=human attended=<topic>`, a
   confirmed first turn, and the attach command. Never relay into it or act on
   it until they say to fold it in; then their decisions go to the charter.
-- **One inbox.** When the human asks what waits on them, read every live
-  charter's waiting list through the fleet file.
 
 ## Red flags
 
