@@ -11,7 +11,7 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
 - REQ-PROFILE-001 — **Default discovery:** runtime instructions and skill
   guidance do not advertise retired reviewer or loop-authoring workflows.
   This repository does not uninstall binaries or erase session history.
-- REQ-PROFILE-002 — **Campaign ownership:** multi-lane and unattended work
+- REQ-PROFILE-002 — **Campaign ownership:** multi-lane and multi-session work
   runs under a coordinator's charter. `agent-workflows:coordinator` owns the
   workflow and its reference file shapes; fleet state and grants stay outside
   repositories. The profile ships no separate loop lifecycle or presence skill.
