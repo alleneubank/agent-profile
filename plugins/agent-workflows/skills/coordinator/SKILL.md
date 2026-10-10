@@ -195,12 +195,12 @@ Change a running agent's brief only by addendum and pointer.
    and flags, while the human can approve prompts.
 2. Brief with files, not conversation (shape in files.md): outcome,
    acceptance, gates, budget, boundaries, the lane root, the human's
-   decisions verbatim, the report path, and the Coordination section. A
-   brief touching UI states, as acceptance, what each touched control does on
-   production today and what the user does. The Verification law's run goes
+   decisions verbatim, the report path, and the Coordination section.
+   Acceptance is scenarios (`done`): for UI, what each touched control does
+   on production today and what the user does. The Verification law's run goes
    in the acceptance of the lane that owns the merging head, a stack's top,
-   by addendum when it is running, never a separate runtime lane; a bug bash
-   is its own fresh lane.
+   by addendum when it is running, never a separate runtime lane; that lane
+   invites its own guest and reviewers (`done`).
 3. The launcher comes from the fleet file's Launchers section, re-read at
    this launch: the table in its order, narrowed by the charter and by any
    tier window that has not lapsed; the brief names it. A quota failure
@@ -279,12 +279,11 @@ The watch changes hands only when the session has ended or the human asks
 - **Hold:** "hold <scope>" stops launching, landing, and relaying in that
   scope until the human lifts it; watching, verifying, and reporting
   continue. Record it in the charter like a grant.
-- Give each lane the narrowest grant its outcome needs. Before asking for a
-  merge grant on a user-facing change, give a behavior diff next to the risk
-  list: what a user does differently, per changed control.
-  Before asking the human for acceptance, a merge, or device time, find the
-  evidence the Verification law requires at that head; reviews of the
-  artifact and another lane's run of the existing suite are not it.
+- Give each lane the narrowest grant its outcome needs. You land and ask for
+  merges through `done`'s Land check. Before asking the human for acceptance
+  or device time, find the evidence the Verification law requires at that
+  head; reviews of the artifact and another lane's run of the existing suite
+  are not it.
 
 ## Themes
 
@@ -307,11 +306,10 @@ limits go to the themes file, their decisions to the charter.
 
 ## Lane quality
 
-- Adversarial review and its three-round cap follow `AGENTS.md`. Take the
-  blind reviewer's launcher from the fleet file, preferably another vendor's,
-  and have it compare with production (main) behavior for every changed
-  interaction; the browser proof walks each one on production and on the
-  branch.
+- Specialist review and its three-round cap follow `AGENTS.md` and `done`.
+  Each round gets one reviewer: the first launcher in the fleet file's order
+  that has found material problems in this workspace. A second runs only when
+  the human asks.
 - Land through the workspace's fail-closed landing path; without one, chain
   every step so a failure stops the push.
 - Once the human names what a release (a tip included) contains, freeze it:

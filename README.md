@@ -165,11 +165,11 @@ includes a Claude Code adapter; another coordinator harness needs its own
 decision interface and persistent wakeups. Fleet state and grants stay
 outside repositories. Bounded attended work needs no campaign machinery.
 
-Use `bugbash`, a fresh participant, or another independent review when the
-user or the agreement asks for one. The shared profile's high-risk classes
-still get a bounded specialist review unless the human waives it; run that
-review before any final bug bash so its fixes do not stale the bug-bash
-evidence.
+`done` defines done as merged with an evidence record, and holds the charters
+an author hands to a guest, a design reviewer, or a specialist, plus the
+landing check. The shared profile's high-risk classes still get a bounded
+specialist review unless the human waives it; run that review before the final
+guest so its fixes do not stale the guest's evidence.
 
 `AGENTS.md` is the universal instruction source. It keeps scope, authority,
 secrets, verification, and operational safety; action-specific procedures load

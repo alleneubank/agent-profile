@@ -163,10 +163,11 @@ the pane, and the dialog's default answer exits the agent.
   over SSH fails there: read refs with `gh api`, or fetch on the coordinator's
   side and say so in the brief.
 
-## Independent review
+## Specialist review
 
-A second model family reviews a lane's diff as a one-shot print-mode run of a
-launcher the fleet file lists: a read-only brief, run in a detached worktree
+The round's specialist reviews a lane's diff as a one-shot print-mode run of
+the launcher Lane quality picks: the `done` specialist charter as a read-only
+brief, run in a detached worktree
 of the lane's ref, writing a verdict file. Only the prompt keeps it
 read-only, so give it a checkout whose writes cannot land. Remove the
 checkout once its verdict is read.

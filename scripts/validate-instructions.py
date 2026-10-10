@@ -24,7 +24,7 @@ def main() -> int:
             errors.append(f"empty skill catalog: {skill_root.relative_to(ROOT)}")
         runtime_docs.extend(sorted(skill_root.rglob("*.md")))
 
-    for retired in ("loop-brief", "kickoff", "mission-command", "afk"):
+    for retired in ("loop-brief", "kickoff", "mission-command", "afk", "bugbash"):
         if (skill_roots[0] / retired).exists():
             errors.append(f"retired {retired} directory is still in the skill catalog")
 

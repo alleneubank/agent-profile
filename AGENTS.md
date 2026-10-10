@@ -35,8 +35,8 @@ passes; add a check only for a named risk it would expose.
   reviews and component tests do not substitute. Human, device, and production
   gates qualify only what agents cannot reach. A changed UI's record shows
   each changed interaction in production and after. New features and changed
-  flows get a `bugbash` with its visual pass. Copy-only changes, and logic
-  whose tests show what its callers get, need neither.
+  flows get a guest, and UI changes a design review, per `done`. Copy-only
+  changes, and logic whose tests show what its callers get, need neither.
 - High-risk changes — schema/data migrations, auth/security boundaries, public
   API compatibility or contract changes, infra/deploy configuration — require
   plan approval, a matching specialist review, and an author rehearsal of the
@@ -44,9 +44,8 @@ passes; add a check only for a named risk it would expose.
   head (a stack's top), recording environment, head, scenarios, and gaps;
   without one it stays a draft, saying why. Only the human may waive these.
   Other work gets an independent reviewer only when asked; claims published
-  to other people are fact-checked per `sitrep`. An adversarial reviewer gets
-  the goal, the diff, production behavior, and the code, not this profile,
-  and judges each waiver on its merits.
+  to other people are fact-checked per `sitrep`. Specialists review without
+  this profile, per `done`.
 - Security work states its threat model and hands it to the reviewer;
   `code-law` holds the default model and how findings outside it are answered.
 - Hold an invariant by construction before checking it, and never write
@@ -74,7 +73,7 @@ passes; add a check only for a named risk it would expose.
 
 Done claims name the check that ran and what was not checked. Claims of
 pre-existing failures cite evidence. `testing-best-practices` covers test
-design; `bugbash` covers exploratory runs.
+design; `done` covers evidence records, invited checks, and landing.
 
 ## Authority and decisions
 

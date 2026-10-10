@@ -28,8 +28,8 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
 - REQ-PROFILE-005 — **Preserved safety:** high-risk approval and specialist
   review, publish scope, secrets, fail-closed required checks, and direnv trust
   boundaries remain enforced. Other independent review runs only when
-  requested; bug bashes run when requested and on new features and changed
-  user flows (REQ-PROFILE-010).
+  requested; guests run when requested and on new features and changed user
+  flows, and design reviews on UI changes (REQ-PROFILE-010, REQ-PROFILE-012).
 - REQ-PROFILE-006 — **Measurable context:** universal `AGENTS.md` stays at or
   below 1,434 whitespace-delimited words, from a 2,325-word baseline. This is a
   size constraint, not proof of behavior; fresh scenarios judge decision quality.
@@ -47,9 +47,9 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   and reviews do not substitute, and human, device, and production gates
   qualify only what agents cannot reach. A changed UI's record compares each
   changed interaction in production and after the change. New features and
-  changed flows get a fresh-participant bug bash with a visual pass against
-  the repository's design standard; copy-only changes, and logic whose tests
-  show what its callers get, skip captures and the bug bash. Evidence: 28 interventions across 9 repositories, 2026-08-25 to
+  changed flows get a guest, and UI changes a design review against the
+  repository's design reference (REQ-PROFILE-012); copy-only changes, and
+  logic whose tests show what its callers get, skip captures and both. Evidence: 28 interventions across 9 repositories, 2026-08-25 to
   2026-10-09 (ai-wiki EXP-017). A flow that crosses a vendor is driven on
   the vendor's sandbox; a local stand-in of the vendor proves only itself
   (ai-wiki EXP-018).
@@ -58,6 +58,16 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   environment, a check that fails before the next run and names what is
   missing replaces the note and the retry; a third party's outage is
   attributed, not gated (ai-wiki EXP-020).
+- REQ-PROFILE-012 — **Done and invited checks:** `agent-workflows:done` owns
+  the definition of done (merged with an evidence record whose acceptance
+  scenarios bound verification), the record's format, when an author invites
+  a guest, design reviewer, or specialist, their charters, and the landing
+  check. Each role is defined by what it is given and denied and returns a
+  verdict file; a guest uses the author's running build and is denied the
+  diff and the author's reasoning. Each specialist round gets one reviewer
+  unless the human asks for a second, and a merge ask for a high-risk change
+  states its review status, so a yes without one is a recorded waiver (ai-wiki
+  EXP-023, EXP-024, EXP-025).
 - REQ-PROFILE-008 — **Completion boundary:** work stops when the selected
   check passes; another check needs a named risk it would expose. Done claims
   name the check that ran and what was not checked, not the author's assurance.
@@ -121,12 +131,19 @@ guidance is not counted as universally loaded context.
   the spec or check (EXP-019), tied the baseline in blind evals and
   over-triggered on a one-off instruction, so it is not adopted.
   **ratified (human)**
+- 2026-10-10 — From ai-wiki `loops-and-roles.md` and the specialist review
+  impact analysis: `done` replaces `bugbash`. The guest (a beta tester on the
+  author's running build), design reviewer, and specialist charters ship as
+  its references; the coordinator lands through its check. No role manifests
+  or launchers until a trial shows the need. One specialist per round
+  (EXP-023) and review status in high-risk merge asks (EXP-024) fold in.
+  **ratified (human)**
 
 ### Acceptance
 
 - [ ] `scripts/validate-instructions.py` checks the default catalog, retired
   references, local Markdown links, and universal word budget.
-- [ ] `tests/bugbash-routing-scenarios.md` compares baseline and candidate
+- [ ] `tests/gate-routing-scenarios.md` compares baseline and candidate
   decisions for bounded attended work, a tee-up agreement, absent-human continuation,
   unchanged evidence, high-risk work, and honest blocked terminals; no material
   or critical regression remains.
@@ -283,7 +300,7 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   `blocked`, or `budget-exhausted`; skipped tasks and unavailable environments
   cannot silently pass, and no loop runs "until approval."
 - REQ-BUGBASH-005 — **Workflow coherence:** loop, brief, E2E, eval, planning,
-  and plugin guidance route requested exploratory verification to `bugbash`
+  and plugin guidance route requested exploratory verification to `done`
   while retaining objective harnesses and required specialist review.
 - REQ-BUGBASH-006 — **Wiki deltas:** test planning maps risks and public
   contracts to evidence rather than tests per function; retry outcome does not
@@ -328,8 +345,9 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
 
 ### Acceptance
 
-1. `plugins/agent-workflows/skills/bugbash/SKILL.md` validates and produces a
-   task charter plus behavior-evidence findings rather than a static diff review.
+1. `plugins/agent-workflows/skills/done/SKILL.md` validates, and its guest
+   charter produces per-scenario results plus behavior-evidence findings
+   rather than a static diff review.
 2. No always-loaded instruction requires generic reviewer approval to finish an
    ordinary operable-surface change.
 3. Engineering-practice scenarios cover risk-driven QA, causal flake diagnosis,

@@ -18,7 +18,7 @@ alone leave acceptance ambiguous; do not invent numeric thresholds to fill slots
 
 Choose the verifier by the risk. Objective checks establish observable behavior;
 add independent task execution or judgment only when the user asks for it.
-Author dogfood is useful but never independent. Use `bugbash` for requested
+Author dogfood is useful but never independent. Use a `done` guest for requested
 exploratory tasks, and keep the shared high-risk review requirements.
 
 A passing check establishes only what it exercised. Do not weaken acceptance

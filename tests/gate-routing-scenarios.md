@@ -4,7 +4,7 @@ Read root `AGENTS.md` and the behavior-first section of root `SPEC.md`, plus
 these runtime skills and the references or execution skills that version routes
 to. Do not read implementation notes or the source diff:
 
-- `plugins/agent-workflows/skills/bugbash/SKILL.md`
+- `plugins/agent-workflows/skills/done/SKILL.md` and its `references/`
 - `plugins/agent-workflows/skills/tee-up/SKILL.md`
 - `plugins/agent-workflows/skills/writing-plans/SKILL.md`
 - `plugins/engineering-practices/skills/testing-best-practices/SKILL.md`
@@ -15,7 +15,7 @@ diff or invent implementation findings. Define a finding scale with at least
 map each material risk to its cheapest faithful evidence, order the gates, say
 whether a fresh participant or specialist reviewer is required, and name every
 applicable gate or campaign terminal. Report a finding when the instructions
-over-trigger generic review or bugbash, under-protect a high-risk change, permit
+over-trigger generic review or guests, under-protect a high-risk change, permit
 stale evidence, or leave no honest terminal. The run is green only when every
 scenario is answered and no finding is material or critical.
 

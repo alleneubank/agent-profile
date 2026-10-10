@@ -5,10 +5,11 @@ description: Use when running or repairing a scripted end-to-end test suite.
 
 # E2E Testing
 
-Scripted E2E encodes known contracts; a bug bash explores the assembled surface
+Scripted E2E encodes known contracts; a guest explores the assembled surface
 through real user or operator tasks. When the request is to dogfood, bug-bash,
-or make a behavior-first readiness call, load the `bugbash` skill. Use this skill
-to run and repair the scripted E2E floor that supports that work.
+or make a behavior-first readiness call, load the `done` skill and invite a
+guest. Use this skill to run and repair the scripted E2E floor that supports
+that work.
 
 ## Failure Taxonomy
 
