@@ -13,8 +13,8 @@ the author writes them for fixes.
 
 ## Evidence record
 
-Keep it in the pull request body, or the task record when there is no pull
-request:
+Keep it in the pull request body's Evidence section (`git-best-practices`),
+or the task record when there is no pull request:
 
 - **Head and build:** the commit and where it ran (localnet, testnet, vendor
   sandbox, simulator).

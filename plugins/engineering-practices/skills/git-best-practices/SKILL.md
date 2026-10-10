@@ -178,9 +178,28 @@ split an inherently atomic change into invalid intermediate states.
 ### PR Creation
 
 Use repo-native PR tooling (`gh pr create`, GitLab CLI, or web UI) with a short
-title, a summary that says what changed and why, and a test plan as a checklist.
-Dependent PRs form a native GitHub stack, never hand-chained `--base` PRs; see
-the `gh` skill.
+title. Dependent PRs form a native GitHub stack, never hand-chained `--base` PRs;
+see the `gh` skill.
+
+Write the body for the operator who ships the change and rolls it back. The
+repository's PR template wins; without one, use these sections, keeping What,
+Why and How short and spending the words on shipping it safely:
+
+- **What:** one or two sentences, the change as an operator or user sees it.
+- **Why:** the problem, with the issue link.
+- **How:** three to five bullets; name anything surprising.
+- **Rollout:** whether it ships dark behind a flag, live on merge, or with no
+  runtime effect; its order and dependencies (stack parents, migrations,
+  secrets, vendor configuration, flags and who flips them).
+- **Risk:** the blast radius if it is wrong, who notices, and how fast.
+- **Verify after deploy:** the exact check per environment: a command,
+  query, dashboard, or screen.
+- **Rollback:** the fastest safe undo (flag off, revert, forward fix), naming
+  anything one-way: migrations, on-chain, ledger, or vendor state.
+- **Evidence:** the evidence record (`done`): checks that ran, scenarios
+  observed, verdicts, and what was not checked.
+
+Write "None" with the reason rather than deleting a section.
 
 ### Merge Readiness and History
 

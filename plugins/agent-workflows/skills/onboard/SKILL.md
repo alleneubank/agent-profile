@@ -1,6 +1,6 @@
 ---
 name: onboard
-description: Use when preparing a repository for agent work, or when work stalls because a repository does not say how to run or try its product, what a change must demonstrate, which paths are high-risk, or what its design should look like.
+description: Use when preparing a repository for agent work, or when work stalls because a repository does not say how to run or try its product, what a change must demonstrate, which paths are high-risk, or what its brand, design system, and other customer-facing basics are.
 ---
 
 # Onboard a repository
@@ -18,7 +18,7 @@ interview the maintainer only about what you could not find, through the
 harness's question tool when there is one. Propose each artifact as a diff the
 maintainer approves.
 
-## The six artifacts
+## What to write
 
 1. **How to run it.** A surface ladder in the agent instructions file, from
    the cheapest check to the most production-like environment an agent can
@@ -32,15 +32,27 @@ maintainer approves.
    wrapper around the product.
 3. **Acceptance scenarios.** A section in the issue or brief template:
    what a user or calling agent does, and what they see when it works.
-4. **Evidence record.** A section in the pull request template in `done`'s
-   shape: head and build, a scenario table, changed behavior, verdicts, and
-   what was not checked.
+4. **Pull request template.** Written for the operator who ships and rolls
+   back the change, in `git-best-practices`' shape (What, Why, How, Rollout,
+   Risk, Verify after deploy, Rollback), with an Evidence section in `done`'s
+   shape and a checklist of the repository's own deploy hazards. The
+   instructions file says PR bodies follow it.
 5. **High-risk paths.** Which paths hold migrations, auth or security
    boundaries, public APIs or contracts, and deploy configuration, so a
    change's diff picks its specialist.
-6. **Design reference.** Where the brand and design system live (tokens,
-   component library, design files) and which screens are canonical. Without
-   one, design findings stay notes; say so in the file rather than invent one.
+6. **Branding and design system.** For a customer-facing product: the
+   brand (name and how it is written, logo and its uses, color, type, voice
+   and tone for copy) and the design system (tokens, components, design
+   files, and the canonical screens new work should match). Without these,
+   design findings stay notes.
+7. **Customer-facing basics.** Where each lives, or that it is missing: the
+   accessibility target; legal pages (terms, privacy, required notices);
+   a support path and contact; a status or incident page; how errors, empty
+   states and outages are worded to customers; store listings, metadata and
+   share previews; and supported platforms, browsers and locales.
+
+Record a missing item as missing, with who owns it. Never invent a brand,
+policy, or legal text to fill a gap.
 
 ## Finish
 
