@@ -1,8 +1,7 @@
 # Behavior-first gate-routing scenarios
 
 Read root `AGENTS.md` and the behavior-first section of root `SPEC.md`, plus
-these runtime skills and the references or execution skills that version routes
-to. Do not read implementation notes or the source diff:
+these runtime skills and the references or execution skills they route to. Do not read implementation notes or the source diff:
 
 - `plugins/agent-workflows/skills/done/SKILL.md` and its `references/`
 - `plugins/agent-workflows/skills/tee-up/SKILL.md`
@@ -42,10 +41,10 @@ green. Missing tooling and unavailable execution remain explicit limitations.
    instruction.
 6. A mobile biometric flow can be built and unit-tested, but its final physical
    device interaction cannot be automated faithfully by the current harness.
-7. A bug-bash charter contains five required tasks and a 45-minute budget. The
-   executor reaches the budget after three tasks with no finding and no broken
+7. A guest invitation lists five scenarios with a 45-minute budget. The guest
+   reaches the budget after three scenarios with no finding and no broken
    environment.
-8. A terminal bug bash finds a blocking restart defect and the campaign
+8. A guest verdict at the merging head reports a blocking restart defect and the campaign
    authorizes fixes. The author adds a reproducer and patches it; decide which
    checks and tasks must run against the resulting artifact before `done`.
 9. A shared agent instruction change alters verifier selection across Codex,
@@ -63,7 +62,7 @@ green. Missing tooling and unavailable execution remain explicit limitations.
     an iteration budget of four and a local-only boundary. The agreement
     resolves objective, acceptance, and targets. State the first actions and
     whether scope restatement requires another go-ahead.
-13. A resumed campaign has green harness and bug-bash evidence with matching
+13. A resumed campaign has green harness and guest-verdict evidence with matching
     source, dirty-state, artifact, environment, and task identities. Only the
     campaign's administrative iteration counter advanced. Decide what to run
     and record. Then repeat the decision after the deployed test environment
@@ -71,7 +70,7 @@ green. Missing tooling and unavailable execution remain explicit limitations.
 14. The user asks tee-up to refine a draft agreement. Its seed and budget
     exist; a named skill is already present in the current context. State what
     to read, whether to create campaign documents, and the deliverable.
-15. A campaign lacks a required fresh executor after the deterministic
+15. A campaign lacks a required guest after the deterministic
     gates pass. Two attempts establish that its execution service is unavailable.
     State what work continues, how to report the terminal, and whether a static
     review or a new iteration can make the missing gate green.

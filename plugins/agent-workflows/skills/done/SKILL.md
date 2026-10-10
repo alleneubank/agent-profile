@@ -9,7 +9,10 @@ Done means merged with an evidence record. Acceptance scenarios, written before
 the code as things a user or calling agent does and sees, set how much
 verification is enough: drive them, plus a high-risk change's own risk
 scenarios, and nothing beyond them. The human approves scenarios for features;
-the author writes them for fixes.
+the author writes them for fixes. Copy-only changes, and logic whose tests show
+what its callers get, need no scenarios beyond those tests. Work verified but
+not yet landed (local-only, or awaiting a grant) is reported as verified, not
+done.
 
 ## Evidence record
 
@@ -50,8 +53,11 @@ stops at the first gap:
 
 1. Every scenario has an observation at the head that would merge. Earlier
    evidence counts only while what it covered is unchanged.
-2. A new feature or changed flow has a guest verdict at that head with every
-   scenario passed.
+2. A new feature or changed flow has a guest verdict with every scenario
+   passed, current for that head: a fix after the verdict needs a new guest
+   run only for the scenarios it could change. A human-only step (a physical
+   device, biometrics) the guest marked blocked passes once the human records
+   its result.
 3. A UI change has a design verdict at that head with no open blocking
    finding.
 4. A high-risk change has a specialist verdict at that head with no open
@@ -66,7 +72,8 @@ recorded as the human's waiver.
 
 ## Red flags
 
-- "Done" with a scenario that has no observation, or with no scenarios
+- "Done" with a scenario that has no observation, or a behavior change with
+  no scenarios
 - A verdict from an earlier head presented as current after a change it covers
 - A guest given the diff or the author's reasoning
 - A merge ask for a high-risk change that does not state its review status

@@ -284,16 +284,14 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   Generic generative code review is not a default delivery gate. Specialized
   review is bounded to a named risk and severity floor; shared high-risk classes
   receive the matching review by default unless the human records a PLAN waiver.
-- REQ-BUGBASH-002 — **Real-use gate:** a bug bash, requested or required by
-  REQ-PROFILE-010, exercises the
-  operable application or system through real tasks. The charter names the
-  exact artifact and environment, roles, tasks, expected outcomes, evidence,
-  severity floor, budget, and boundaries.
-- REQ-BUGBASH-003 — **Independent terminal:** use a fresh, task-briefed
-  participant for an unrequested bash and when the request or agreement
-  requires independence. A UI change gets a visual pass against the
-  repository's design standard, defaulting to the platform's guidelines. Author
-  execution is never represented as independent. A required device, biometric,
+- REQ-BUGBASH-002 — **Real-use gate:** a guest run, requested or required by
+  REQ-PROFILE-010, exercises the operable application or system through its
+  acceptance scenarios on the author's running build. The invitation names the
+  intent, scenarios, where the build is, and a time budget.
+- REQ-BUGBASH-003 — **Independent terminal:** the guest is denied the diff
+  and the author's reasoning. A UI change gets a design review against the
+  repository's design reference, defaulting to the platform's guidelines.
+  Author execution is never represented as independent. A required device, biometric,
   live secret, or subjective human response remains a Boundary item.
 - REQ-BUGBASH-004 — **Findings and boundedness:** findings are observable and
   reproducible through the public surface. A run terminates `green`, `findings`,
@@ -352,7 +350,7 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
    ordinary operable-surface change.
 3. Engineering-practice scenarios cover risk-driven QA, causal flake diagnosis,
    legitimate test seams, property applicability, and prefactoring.
-4. Gate-routing scenarios distinguish harness-only, bug-bash, specialist-review,
+4. Gate-routing scenarios distinguish harness-only, guest, specialist-review,
    and human-boundary work, including exhausted task budgets.
 5. `npm run check` and `./scripts/validate.sh` pass after the final mutation.
 
