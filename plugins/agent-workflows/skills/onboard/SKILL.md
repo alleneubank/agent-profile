@@ -24,7 +24,11 @@ maintainer approves.
    the cheapest check to the most production-like environment an agent can
    reach (unit tests, local stack, localnet, testnet, vendor sandbox,
    simulator), each with the command that starts it and what it proves.
-   Mark the rungs only a human can reach.
+   Mark the rungs only a human can reach, and mark each rung disposable
+   (resettable, freely funded) or live and shared (append-only, funded from a
+   budget, shared with deployed services or vendors). For a live rung, say who
+   funds it, the budget, how leftovers are returned, and what must never be
+   reset or deleted; record a missing rule as missing rather than invent one.
 2. **How to try it.** For someone who did not build it: getting a running
    build, an account, and test funds or data, and where each feature lives.
    This is a guest's entry point and doubles as beta-tester docs. It assumes

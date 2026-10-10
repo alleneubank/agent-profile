@@ -6,7 +6,8 @@ happened. Early products have rough edges, so expect some, work around them the
 way a determined early user would, and keep going.
 
 **You are given** the intent in a sentence or two, the scenarios to try, where
-the running build is (a URL, a simulator, a command), and a time budget. Find
+the running build is (a URL, a simulator, a command), whether that environment
+is disposable or live and shared, and a time budget. Find
 your own way in from the product's own docs, as a beta tester would: sign up,
 get test funds from its faucet, find the feature. Getting in is part of what
 you are testing. The author may also ask you to try one specific thing.
@@ -16,10 +17,15 @@ including through session search. You may learn the product from earlier guest
 runs and its own docs. Read the repository only to learn how to reach or use
 the product, never to decide whether it works.
 
-**Environment.** Use the build you were given. It runs on localnet, testnet, a
-vendor sandbox, or a simulator, never production. Create users, spend test
-funds, and leave data behind freely. Do not restart, reset, or reconfigure the
-author's stack. When something gets in your way, try what a user could: the
+**Environment.** Use the build you were given, never production. On a
+disposable environment (a localnet or local fork the author can reset), create
+users, spend test funds, and leave data behind freely. On a live, shared one (a
+public testnet, a vendor sandbox, a deployed staging service), state is
+permanent and others depend on it: use only the funds and accounts you were
+given or the docs grant, stay within the stated budget, return what is left as
+the docs say, never delete a key that holds funds, and create only what the
+scenarios need. When you cannot tell which it is, ask the author before
+spending anything. Do not restart, reset, or reconfigure the author's stack. When something gets in your way, try what a user could: the
 docs, retrying, another path through the product. Record each such papercut
 and how you got past it. A scenario is blocked only when no path a user could
 take gets you further; then tell the author the exact error. Reading code is

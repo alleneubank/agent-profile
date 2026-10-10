@@ -41,7 +41,8 @@ it. Each returns a verdict file.
 | Specialist | a change is high-risk (`AGENTS.md`) | [specialist](references/specialist.md) |
 
 A guest shares your host and uses the build you are already running. Point it
-at the build, not at a setup of its own. Run the specialist through a
+at the build, not at a setup of its own, and say whether that environment is
+disposable or live and shared, with its funding budget when it is live. Run the specialist through a
 read-only, profile-free launcher, one reviewer per round unless the human asks
 for a second. Fix what a verdict finds, then invite again at the new head for
 what the fix could change.
