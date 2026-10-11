@@ -1,9 +1,9 @@
 # agent-profile
 
 My agent garden: the instructions and skills my coding agents work by, in
-Claude Code, Codex CLI and pi. I tend it as I go, pulling what stops paying
-its way and planting what a real task showed was missing, so it should get a
-little better each time I put work into it.
+Claude Code, Codex CLI, pi, and Cursor. I tend it as I go, pulling what stops
+paying its way and planting what a real task showed was missing, so it should
+get a little better each time I put work into it.
 
 ## What grows here
 
@@ -30,12 +30,29 @@ or `~/.claude/CLAUDE.local.md`.
 git clone https://github.com/alleneubank/agent-profile.git ~/.agent-profile
 cd ~/.agent-profile
 ./install.sh --check   # see what would change
-./install.sh --fix     # link AGENTS.md for Claude Code and Codex, register the plugins
+./install.sh --fix     # link what applies, then follow the Cursor lines
 ```
 
-The installer refuses to replace a real instruction file;
-`./install.sh --fix --replace-existing` backs it up first. To take only the
-plugins:
+`./install.sh --fix` links `AGENTS.md` for Claude Code and Codex. When `codex`
+or `claude` is installed it registers that marketplace; when the CLI is
+absent it prints `skipped:` with the CLI's name, does not run it, and still
+exits 0 once every applicable target is in place. `jq` is required only to
+read a marketplace listing for a CLI that is installed. The installer refuses
+to replace a real instruction file; `./install.sh --fix --replace-existing`
+backs one up first.
+
+Cursor does not load `~/.codex` or `~/.claude`. User Rules are Cursor Settings,
+not a file this installer can write, and Cursor reads `AGENTS.md` from the
+project, not from home. The installer does not copy `AGENTS.md` into a
+repository. It prints this checkout's `AGENTS.md` path and the two skill
+directories; read those and load a skill before the action its description
+names. On a local IDE (`~/.cursor` exists and `CURSOR_AGENT` is unset) it also
+symlinks the skill trees into `~/.cursor/skills` for later sessions. A Cursor
+agent (`CURSOR_AGENT` set) does not get those symlinks: Cloud Agents receive
+`~/.cursor/skills` only when Sync Skills for Cloud Agents copies them from
+the local machine.
+
+To take only the plugins:
 
 ```bash
 claude plugin marketplace add alleneubank/agent-profile
