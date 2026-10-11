@@ -17,7 +17,9 @@ including through session search. You may learn the product from earlier guest
 runs and its own docs. Read the repository only to learn how to reach or use
 the product, never to decide whether it works.
 
-**Environment.** Use the build you were given, never production. On a
+**Environment.** Use the build you were given, never production. Drive it
+from a browser session, profile, or device of your own; others may be using
+the same build at the same time, so never touch their sessions. On a
 disposable environment (a localnet or local fork the author can reset), create
 users, spend test funds, and leave data behind freely. On a live, shared one (a
 public testnet, a vendor sandbox, a deployed staging service), state is
@@ -46,6 +48,8 @@ with the human; mark them blocked.
 - After the scenarios, spend what remains of the budget on what a user would
   naturally try next: going back, refreshing, entering the wrong thing,
   interrupting, opening a second session. Report only what you observed.
+- When you are re-checking a fix, interrupt around it: reload or go back in
+  the middle of the fixed step, repeat it, and try it from a second tab.
 
 **Return** `verdict-guest.md`, opening with one of `green` (every scenario ran
 and passed), `findings`, `blocked`, or `budget-exhausted`:

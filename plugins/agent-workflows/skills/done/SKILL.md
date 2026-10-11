@@ -26,6 +26,8 @@ or the task record when there is no pull request:
 - **Changed behavior:** what a user does differently, per changed control,
   with production's behavior beside it.
 - **Verdicts:** each invited role's verdict file and the head it saw.
+- **Noticed:** anything you saw that departs from the intent, even where its
+  scenario passed. Passing a scenario does not clear what you noticed.
 - **Not checked:** what was skipped and why.
 
 ## Invite others to check your work
@@ -44,8 +46,9 @@ A guest shares your host and uses the build you are already running. Point it
 at the build, not at a setup of its own, and say whether that environment is
 disposable or live and shared, with its funding budget when it is live. Run the specialist through a
 read-only, profile-free launcher, one reviewer per round unless the human asks
-for a second. Fix what a verdict finds, then invite again at the new head for
-what the fix could change.
+for a second. Fix what a verdict finds, then invite a fresh guest or reviewer
+at the new head for what the fix could change; the one that saw the last
+round tends to confirm its own finding rather than look around it.
 
 ## Land
 

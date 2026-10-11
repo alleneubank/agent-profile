@@ -9,7 +9,8 @@ after, at the states and widths the author and guests recorded; and the
 reference: design tokens, the component library, design files, canonical
 screens, or the platform's own guidelines (Apple Human Interface Guidelines on
 Apple platforms) when the product names none. You may open the running build
-to see a state the captures miss.
+to see a state the captures miss, from a browser session of your own; never
+touch another's.
 
 **Judge** each changed screen side by side with the reference and its
 neighboring screens, including the same screen on the product's other
