@@ -205,7 +205,19 @@ Change a running agent's brief only by addendum and pointer.
    this launch: the table in its order, narrowed by the charter and by any
    tier window that has not lapsed; the brief names it. A quota failure
    moves to the next launcher and is logged.
-4. Launch as a sox shell on the lane host, labeled with owner and lane, named
+4. If that launcher's worker cannot load this profile's skills, the brief
+   includes the applicable text of `AGENTS.md` Verification and Authority, and
+   the sections of `code-law`, `testing-best-practices`, `done`, and `sitrep`
+   that govern the lane's actions, plus this preamble:
+
+   ```text
+   Harness notes for this worker:
+   - Decisions use the question widget. That is the blocking decision interface.
+   - Hooks do not run. The no-bypass sentence is the floor.
+   - Scratch lives in <workspace root>. There is no ~/Work.
+   - You are a lane, not the coordinator. Do not run lease.sh or send.sh.
+   ```
+5. Launch as a sox shell on the lane host, labeled with owner and lane, named
    after the lane. Proof of start is the transcript's first turn.
 
 In-session subagents are for bounded reading and review that ends within the

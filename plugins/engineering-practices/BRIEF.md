@@ -65,9 +65,14 @@ wiki mirror, a list of absolutes, or a harness-specific procedure.
   test contract. (2026-08-29, ratified)
 - `AGENTS.md` stays unchanged unless evidence shows a doctrine failure is
   unrecoverable when a skill does not load. (2026-08-29, ratified)
-- The user's behavior-first direction and session evidence satisfy that
-  exception: always-loaded verification routing moves to bug bash, and the
-  workflow plugin gains the `bugbash` skill. (2026-09-03, ratified)
+- Historical: the 2026-09-03 skill-not-loaded exception was judged met by
+  `bugbash`. The user's behavior-first direction and session evidence moved
+  always-loaded verification routing to bug bash, and the workflow plugin
+  gained that skill. `done` replaced `bugbash` on 2026-10-10. (2026-09-03,
+  ratified)
+- The skill-not-loaded exception is open again when a new skill-not-loaded
+  failure shows up. (2026-10-11, ratified (human); ai-wiki review
+  `2026-10-11-agent-profile`, EXP-030)
 - One fresh-context scenario run plus one fix-up rerun is the campaign's
   behavioral-verification budget; no open-ended approval loop. (2026-09-03,
   provisional)
