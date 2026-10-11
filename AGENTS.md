@@ -28,7 +28,7 @@ stub replaced stays unverified, and the change record says so. Stop when it
 passes; add a check only for a named risk it would expose.
 
 - A changed flow people or agents drive (screens, commands, service
-  calls) is done only once its author has driven it end to end, as its user
+  calls) is verified only once its author has driven it end to end, as its user
   would, on the closest-to-live surface an agent can reach (simulator,
   emulator, localnet, staging, or the vendor's sandbox when it crosses a
   vendor, whose local stand-in proves only itself), fixing what that found;
@@ -58,7 +58,7 @@ passes; add a check only for a named risk it would expose.
   Deliberation over one major finding ends by the third review round: if no
   redesign or existing check can hold it, add a code-law waiver and proceed,
   attended or not. A redesign larger than the task's scope becomes the
-  waiver's debt and a follow-up. Done claims list the waivers added. A waiver
+  waiver's debt and a follow-up. Completion claims list the waivers added. A waiver
   never covers a high-risk change's gates, a required check, or a weakened
   assertion; those stay with the human.
 - Reuse evidence while the inputs it covered are unchanged; a new commit id,
@@ -71,7 +71,7 @@ passes; add a check only for a named risk it would expose.
   `testing-best-practices` decides when a check becomes permanent, including a
   shipped bug's regression check.
 
-Done claims name the check that ran and what was not checked. Claims of
+Completion claims name the check that ran and what was not checked. Claims of
 pre-existing failures cite evidence. `testing-best-practices` covers test
 design; `done` covers evidence records, invited checks, and landing.
 
