@@ -9,7 +9,7 @@ little better each time I put work into it.
 
 - **[`AGENTS.md`](AGENTS.md)**: the one instruction file every agent reads,
   covering scope, verification, authority, secrets and operations. It is
-  short on purpose: a validator caps it at 1,434 words.
+  short on purpose: a validator caps it at 1,480 words.
 - **[`agent-workflows`](plugins/agent-workflows/skills/)**: how work moves.
   `done` defines finished as merged with an evidence record and hands a
   guest, a design reviewer or a specialist their charter; `onboard` sets a

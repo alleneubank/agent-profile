@@ -29,6 +29,10 @@ or the task record when there is no pull request:
 - **Noticed:** anything you saw that departs from the intent, even where its
   scenario passed. Passing a scenario does not clear what you noticed.
 - **Not checked:** what was skipped and why.
+- **Author run:** the surface, the head, and that the author drove each changed
+  flow. A guest's run is a separate row.
+- **High-risk:** the plan approval, and the rehearsal record (environment, head,
+  scenarios, gaps). If there is no rehearsal, the draft reason.
 
 ## Invite others to check your work
 
@@ -55,18 +59,25 @@ round tends to confirm its own finding rather than look around it.
 Whoever lands (you under a grant, or a coordinator) checks, in order, and
 stops at the first gap:
 
-1. Every scenario has an observation at the head that would merge. Earlier
-   evidence counts only while what it covered is unchanged.
-2. A new feature or changed flow has a guest verdict with every scenario
+1. Every scenario has an observation at the head that would merge, including
+   a high-risk change's own risk scenarios. Earlier evidence counts only
+   while what it covered is unchanged.
+2. The author drove each changed flow end to end on the closest-to-live
+   surface, and the evidence record's author-run row names that surface and
+   head. A guest's run does not fill this row.
+3. A new feature or changed flow has a guest verdict with every scenario
    passed, current for that head: a fix after the verdict needs a new guest
    run only for the scenarios it could change. A human-only step (a physical
    device, biometrics) the guest marked blocked passes once the human records
    its result.
-3. A UI change has a design verdict at that head with no open blocking
+4. A UI change has a design verdict at that head with no open blocking
    finding.
-4. A high-risk change has a specialist verdict at that head with no open
-   blocking finding, or the human's recorded waiver.
-5. Required checks are green, not skipped or missing.
+5. A high-risk change has a recorded plan approval, a specialist verdict at
+   that head with no open blocking finding (or the human's recorded waiver),
+   and an author rehearsal at that head in the closest real environment,
+   recording environment, head, scenarios, and gaps. Without the rehearsal
+   it stays a draft, saying why. A code-law waiver does not cover these gates.
+6. Required checks are green, not skipped or missing.
 
 A gap sends the work back, naming the missing item. When every item passes,
 land under a grant naming this repository and branch. Otherwise ask the human,

@@ -28,7 +28,7 @@ stub replaced stays unverified, and the change record says so. Stop when it
 passes; add a check only for a named risk it would expose.
 
 - A changed flow people or agents drive (screens, commands, service
-  calls) is done only once its author has driven it end to end, as its user
+  calls) is verified only once its author has driven it end to end, as its user
   would, on the closest-to-live surface an agent can reach (simulator,
   emulator, localnet, staging, or the vendor's sandbox when it crosses a
   vendor, whose local stand-in proves only itself), fixing what that found;
@@ -58,20 +58,21 @@ passes; add a check only for a named risk it would expose.
   Deliberation over one major finding ends by the third review round: if no
   redesign or existing check can hold it, add a code-law waiver and proceed,
   attended or not. A redesign larger than the task's scope becomes the
-  waiver's debt and a follow-up. Done claims list the waivers added. A waiver
+  waiver's debt and a follow-up. Completion claims list the waivers added. A waiver
   never covers a high-risk change's gates, a required check, or a weakened
   assertion; those stay with the human.
 - Reuse evidence while the inputs it covered are unchanged; a new commit id,
   message, or squash alone does not invalidate it. After a change, rerun only
   the checks it can affect.
 - Never bypass required checks with `--no-verify` or an equivalent shortcut; a
-  required check that is missing or broken is blocked, not green.
+  required check that is missing or broken is blocked, not green. Where no hook
+  runs, this sentence is the whole floor.
 - Tests assert outcomes, not implementation. Fix causes; never weaken assertions
   to pass. One-off verification is evidence for the change, not a new test;
   `testing-best-practices` decides when a check becomes permanent, including a
   shipped bug's regression check.
 
-Done claims name the check that ran and what was not checked. Claims of
+Completion claims name the check that ran and what was not checked. Claims of
 pre-existing failures cite evidence. `testing-best-practices` covers test
 design; `done` covers evidence records, invited checks, and landing.
 
@@ -83,9 +84,9 @@ make reversible interior calls. Consult independent expertise when it can resolv
 an evidenced uncertainty; advice informs, the driver decides. Record consequential
 provisional decisions with rationale in the existing contract or handoff. Escalate
 only unresolved scope, irreversible effects, or an actual human boundary. Ask
-for a decision through the harness's native question tool when one exists,
-with concrete options and the recommended one first, not as a question left in
-prose. Keep working independent items while a necessary decision is pending.
+through the harness's blocking decision interface (its question tool or question
+widget) when one exists, options and the recommended one first, not as prose.
+Keep working independent items while a necessary decision is pending.
 
 - Publish is per artifact and ref. Restate the concrete artifacts before
   publishing. A request naming that publish outcome is authorization; follow-up
@@ -114,10 +115,11 @@ prose. Keep working independent items while a necessary decision is pending.
   build output, scratch, logs, browser profiles) under `~/Work`, at the path
   the work would have under `~` (a worktree of `~/src/app.worktrees` goes in
   `~/Work/src/app.worktrees/<task>`); `~/Work` carries the same instruction
-  files. Point tools that write elsewhere by default into it (`TMPDIR`,
-  `CARGO_TARGET_DIR`, `-derivedDataPath`, `ANDROID_AVD_HOME`). Tear down the
-  shells and stacks you started and delete the task folder once its result
-  is in.
+  files. If `~/Work` does not exist, use the workspace root the prompt names
+  and say so in the record. Point tools that write elsewhere by default into
+  that directory (`TMPDIR`, `CARGO_TARGET_DIR`, `-derivedDataPath`,
+  `ANDROID_AVD_HOME`). Tear down the shells and stacks you started and
+  delete the task folder once its result is in.
 
 ## Operations
 
@@ -155,4 +157,6 @@ Load `code-law` before writing code and the matching language/tool guidance
 before acting in that domain. References load when their specific operation is
 needed. Reuse guidance already available in context; reread only after a relevant
 change or when missing context requires it. An explicitly requested skill stays
-in scope. Skills supply mechanics without repeating this universal law.
+in scope. Skills supply mechanics without repeating this universal law. A
+worker that cannot load skills receives the governed section in its prompt; a
+skill name is not the rule.

@@ -31,7 +31,7 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   requested; guests run when requested and on new features and changed user
   flows, and design reviews on UI changes (REQ-PROFILE-010, REQ-PROFILE-012).
 - REQ-PROFILE-006 — **Measurable context:** universal `AGENTS.md` stays at or
-  below 1,434 whitespace-delimited words, from a 2,325-word baseline. This is a
+  below 1,480 whitespace-delimited words, from a 2,325-word baseline. This is a
   size constraint, not proof of behavior; fresh scenarios judge decision quality.
 - REQ-PROFILE-007 — **Verification proportionality:** verification runs the
   cheapest check that can catch the likely failure of the requested behavior,
@@ -138,6 +138,15 @@ guidance is not counted as universally loaded context.
   or launchers until a trial shows the need. One specialist per round
   (EXP-023) and review status in high-risk merge asks (EXP-024) fold in.
   **ratified (human)**
+- 2026-10-11 — From ai-wiki EXP-029 and EXP-030 (review
+  `2026-10-11-agent-profile`, pull request alleneubank/ai-wiki#1): `done`'s
+  land check names the author run, the plan approval, and the high-risk
+  rehearsal record, and an unmerged run is reported as verified. A worker
+  that cannot load skills receives the governed section in its prompt. The
+  2026-09-03 skill-not-loaded exception was judged met by `bugbash`; `done`
+  replaced that skill on 2026-10-10; the exception is open again when a new
+  skill-not-loaded failure shows up. Raise the universal budget to 1,480
+  words. **ratified (human)**
 
 ### Acceptance
 
