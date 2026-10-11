@@ -386,19 +386,23 @@ check_manifest_parity
 check_pi_package
 check_destructive_examples
 python3 "$ROOT/scripts/validate-instructions.py"
-check_release_tags
+
+# A missing release tag fails this script. It must not skip the plugin and skill
+# checks below: those gates are independent, and an early exit hides them.
+status=0
+check_release_tags || status=1
 
 if command -v claude >/dev/null 2>&1; then
-  claude plugin validate --strict "$ROOT/.claude-plugin/marketplace.json"
-  claude plugin validate --strict "$ROOT/plugins/engineering-practices"
-  claude plugin validate --strict "$ROOT/plugins/agent-workflows"
+  claude plugin validate --strict "$ROOT/.claude-plugin/marketplace.json" || status=1
+  claude plugin validate --strict "$ROOT/plugins/engineering-practices" || status=1
+  claude plugin validate --strict "$ROOT/plugins/agent-workflows" || status=1
 else
   echo "skip: claude plugin validation (claude CLI not found)"
 fi
 
 if [ -n "${CODEX_VALIDATOR:-}" ] && [ -f "$CODEX_VALIDATOR" ]; then
-  run_python_with_yaml "$CODEX_VALIDATOR" "$ROOT/plugins/engineering-practices"
-  run_python_with_yaml "$CODEX_VALIDATOR" "$ROOT/plugins/agent-workflows"
+  run_python_with_yaml "$CODEX_VALIDATOR" "$ROOT/plugins/engineering-practices" || status=1
+  run_python_with_yaml "$CODEX_VALIDATOR" "$ROOT/plugins/agent-workflows" || status=1
 else
   # Skipping the external Codex schema validator is acceptable: it lives outside
   # this repo, and check_manifest_parity already asserts claude<->codex field
@@ -410,5 +414,7 @@ fi
 find "$ROOT/plugins" -mindepth 3 -maxdepth 3 -type d -path '*/skills/*' -print0 \
   | sort -z \
   | while IFS= read -r -d '' skill_dir; do
-      validate_skill "$skill_dir"
-    done
+      validate_skill "$skill_dir" || exit 1
+    done || status=1
+
+exit "$status"
