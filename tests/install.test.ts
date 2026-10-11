@@ -43,7 +43,7 @@ printf 'unexpected %s\\n' "$*" >&2
 exit 1
 `;
 
-function host() {
+function host(pathSuffix = "/usr/bin:/bin") {
   const home = mkdtempSync(join(tmpdir(), "install-sh-"));
   const bin = join(home, "bin");
   const state = join(home, "state");
@@ -52,7 +52,7 @@ function host() {
   const run = (mode: "--check" | "--fix", extra: Record<string, string> = {}) => {
     const result = spawnSync("/bin/bash", [SCRIPT, mode], {
       env: {
-        PATH: `${bin}:/usr/bin:/bin`,
+        PATH: `${bin}:${pathSuffix}`,
         HOME: home,
         INSTALL_STUB_LOG: log,
         INSTALL_STUB_STATE: state,
@@ -67,6 +67,21 @@ function host() {
   return { home, bin, run, cliLog };
 }
 
+function toolsWithoutJq() {
+  const tools = mkdtempSync(join(tmpdir(), "install-tools-"));
+  for (const name of ["dirname", "mkdir", "ln", "readlink", "mv", "date", "realpath", "git", "basename"]) {
+    const found = spawnSync("/bin/bash", ["-c", `command -v ${name}`], {
+      env: { PATH: "/usr/bin:/bin" },
+      encoding: "utf8",
+    });
+    if (found.status !== 0 || !found.stdout.trim()) {
+      throw new Error(`host is missing ${name}`);
+    }
+    symlinkSync(found.stdout.trim(), join(tools, name));
+  }
+  return tools;
+}
+
 function stubClis(bin: string) {
   const script = join(bin, "marketplace-stub");
   writeFileSync(script, STUB);
@@ -75,33 +90,62 @@ function stubClis(bin: string) {
   symlinkSync(script, join(bin, "claude"));
 }
 
+const WORKFLOW_SKILLS = join(ROOT, "plugins/agent-workflows/skills");
+const PRACTICE_SKILLS = join(ROOT, "plugins/engineering-practices/skills");
+const CURSOR_READ = `cursor: AGENTS.md is ${SOURCE}. Read it and follow it. Do not copy it into a repository.`;
+const CURSOR_SKILLS = `cursor: skills are in ${WORKFLOW_SKILLS} and ${PRACTICE_SKILLS}. Load the skill whose description matches the next action before that action.`;
+
 describe("install.sh", () => {
-  it("reports a missing CLI and does not call it registered", () => {
+  it("skips a missing harness CLI and exits 0 once instructions are linked", () => {
     const h = host();
 
     const check = h.run("--check");
     expect(check.status).toBe(1);
-    expect(check.stdout).toContain("missing-tool: cannot check codex marketplace; requires codex\n");
-    expect(check.stdout).toContain("missing-tool: cannot check claude marketplace; requires claude\n");
-    expect(check.stdout).not.toContain("marketplace registered");
-    expect(check.stdout).not.toContain("marketplace is not registered");
+    expect(check.stdout).toContain("skipped: codex CLI is not installed\n");
+    expect(check.stdout).toContain("skipped: claude CLI is not installed\n");
+    expect(check.stdout).not.toContain("registered");
+    expect(check.stdout).not.toContain("requires jq");
     expect(check.stderr).not.toContain("command not found");
     expect(existsSync(join(h.home, ".codex", "AGENTS.md"))).toBe(false);
     expect(existsSync(join(h.home, ".claude", "CLAUDE.md"))).toBe(false);
 
     const fix = h.run("--fix");
-    expect(fix.status).toBe(1);
+    expect(fix.status).toBe(0);
+    expect(fix.stdout).toContain("skipped: codex CLI is not installed\n");
+    expect(fix.stdout).toContain("skipped: claude CLI is not installed\n");
     expect(fix.stdout).not.toContain("registered");
-    expect(fix.stderr).toContain("blocked: cannot register codex marketplace; requires codex\n");
-    expect(fix.stderr).toContain("blocked: cannot register claude marketplace; requires claude\n");
     expect(fix.stderr).not.toContain("command not found");
     expect(readlinkSync(join(h.home, ".codex", "AGENTS.md"))).toBe(SOURCE);
     expect(readlinkSync(join(h.home, ".claude", "CLAUDE.md"))).toBe(SOURCE);
 
     const again = h.run("--fix");
-    expect(again.status).toBe(1);
+    expect(again.status).toBe(0);
+    expect(again.stdout).toContain("ok: Codex instructions");
+    expect(again.stdout).toContain("skipped: codex CLI is not installed\n");
     expect(again.stdout).not.toContain("registered");
-    expect(again.stderr).toContain("blocked: cannot register codex marketplace; requires codex\n");
+
+    const settled = h.run("--check");
+    expect(settled.status).toBe(0);
+    expect(settled.stdout).toContain("skipped: claude CLI is not installed\n");
+    expect(settled.stdout).not.toContain("registered");
+  });
+
+  it("requires jq only when a harness CLI is present and does not invoke that CLI", () => {
+    const isolated = host(toolsWithoutJq());
+    stubClis(isolated.bin);
+
+    const check = isolated.run("--check");
+    expect(check.status).toBe(1);
+    expect(check.stdout).toContain("missing-tool: cannot check codex marketplace; requires jq\n");
+    expect(check.stdout).toContain("missing-tool: cannot check claude marketplace; requires jq\n");
+    expect(isolated.cliLog()).toBe("");
+
+    const fix = isolated.run("--fix");
+    expect(fix.status).toBe(1);
+    expect(fix.stderr).toContain("blocked: cannot register codex marketplace; requires jq\n");
+    expect(fix.stderr).toContain("blocked: cannot register claude marketplace; requires jq\n");
+    expect(fix.stdout).not.toContain("registered");
+    expect(isolated.cliLog()).toBe("");
   });
 
   it("does not report a failed marketplace add as registered", () => {
@@ -163,5 +207,44 @@ describe("install.sh", () => {
     expect(fix.stdout).not.toContain("registered codex");
     expect(h.cliLog()).not.toContain("codex ");
     expect(h.cliLog()).toContain("claude plugin marketplace add ");
+  });
+
+  it("tells a Cursor agent where the profile is and does not install skills on the VM", () => {
+    const h = host();
+    mkdirSync(join(h.home, ".cursor"));
+    mkdirSync(join(h.home, "repo"));
+
+    const fix = h.run("--fix", { CURSOR_AGENT: "1" });
+    expect(fix.status).toBe(0);
+    expect(fix.stdout).toContain(`${CURSOR_READ}\n`);
+    expect(fix.stdout).toContain(`${CURSOR_SKILLS}\n`);
+    expect(fix.stdout).toContain("cursor: User Rules live in Cursor Settings, not in a file this installer can write.\n");
+    expect(fix.stdout).toContain("cursor: Cloud Agents do not load skills written on this VM.");
+    expect(fix.stdout).toContain("skipped: codex CLI is not installed\n");
+    expect(fix.stdout).not.toContain("registered");
+    expect(existsSync(join(h.home, ".cursor", "skills"))).toBe(false);
+    expect(existsSync(join(h.home, "repo", "AGENTS.md"))).toBe(false);
+    expect(existsSync(join(h.home, "AGENTS.md"))).toBe(false);
+    expect(readlinkSync(join(h.home, ".codex", "AGENTS.md"))).toBe(SOURCE);
+  });
+
+  it("links Cursor IDE skills into ~/.cursor/skills without copying AGENTS.md", () => {
+    const h = host();
+    mkdirSync(join(h.home, ".cursor"));
+
+    const fix = h.run("--fix");
+    expect(fix.status).toBe(0);
+    expect(fix.stdout).toContain(`${CURSOR_READ}\n`);
+    expect(fix.stdout).toContain(`${CURSOR_SKILLS}\n`);
+    expect(fix.stdout).not.toContain("Cloud Agents do not load skills");
+    expect(readlinkSync(join(h.home, ".cursor", "skills", "agent-workflows"))).toBe(WORKFLOW_SKILLS);
+    expect(readlinkSync(join(h.home, ".cursor", "skills", "engineering-practices"))).toBe(PRACTICE_SKILLS);
+    expect(existsSync(join(h.home, ".cursor", "skills", "agent-workflows", "done", "SKILL.md"))).toBe(true);
+    expect(existsSync(join(h.home, "AGENTS.md"))).toBe(false);
+
+    const again = h.run("--fix");
+    expect(again.status).toBe(0);
+    expect(again.stdout).toContain("ok: Cursor skills agent-workflows ->");
+    expect(again.stdout).toContain("ok: Cursor skills engineering-practices ->");
   });
 });

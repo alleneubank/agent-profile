@@ -10,11 +10,13 @@ usage() {
 Usage: ./install.sh [--check|--fix] [--replace-existing]
 
   --check             Report instruction and marketplace state. Default.
-  --fix               Create safe symlinks and register local marketplaces.
+  --fix               Link instruction files and register marketplaces for installed CLIs.
   --replace-existing  Backup and replace non-symlink instruction files.
 
-Exit 0 only when every instruction target and both marketplaces are in the
-desired state. A missing codex, claude, or jq is reported and fails the run.
+Exit 0 when every applicable target is in place. A missing codex or claude
+CLI is skipped. jq is required only to inspect a CLI that is installed.
+A failed link, a failed marketplace add, or a Codex config in another git
+worktree still fails the run.
 EOF
 }
 
@@ -101,8 +103,9 @@ fix_target() {
   echo "fixed: $label -> $SOURCE"
 }
 
+# jq only parses marketplace JSON. Skip a missing CLI before asking for it.
 codex_marketplace_ok() {
-  command -v codex >/dev/null 2>&1 || return 2
+  command -v codex >/dev/null 2>&1 || return 5
   command -v jq >/dev/null 2>&1 || return 2
   if codex_config_is_external_git_worktree; then
     return 3
@@ -122,30 +125,11 @@ codex_config_is_external_git_worktree() {
 }
 
 claude_marketplace_ok() {
-  command -v claude >/dev/null 2>&1 || return 2
+  command -v claude >/dev/null 2>&1 || return 5
   command -v jq >/dev/null 2>&1 || return 2
   claude plugin marketplace list --json \
     | jq -e --arg name "$MARKETPLACE_NAME" --arg root "$ROOT" \
         '.[]? | select(.name == $name and ((.path? == $root) or (.installLocation? == $root)))' >/dev/null
-}
-
-# Names the marketplace dependencies that are actually absent. Both checks
-# collapse to status 2, so the report has to look again to say which one.
-marketplace_requirements() {
-  local label="$1"
-  local missing=""
-  command -v "$label" >/dev/null 2>&1 || missing="$label"
-  if ! command -v jq >/dev/null 2>&1; then
-    if [ -n "$missing" ]; then
-      missing="$missing and jq"
-    else
-      missing="jq"
-    fi
-  fi
-  if [ -z "$missing" ]; then
-    missing="$label and jq"
-  fi
-  printf '%s\n' "$missing"
 }
 
 check_marketplace() {
@@ -160,9 +144,15 @@ check_marketplace() {
     echo "ok: $label marketplace registered"
     return 0
   fi
+  if [ "$rc" -eq 5 ]; then
+    echo "skipped: $label CLI is not installed"
+    return 0
+  fi
   if [ "$rc" -eq 2 ]; then
-    echo "missing-tool: cannot check $label marketplace; requires $(marketplace_requirements "$label")"
-  elif [ "$rc" -eq 3 ]; then
+    echo "missing-tool: cannot check $label marketplace; requires jq"
+    return 1
+  fi
+  if [ "$rc" -eq 3 ]; then
     echo "blocked: $label marketplace config resolves inside another git worktree: $(realpath "$CODEX_CONFIG")"
   else
     echo "missing: $label marketplace is not registered"
@@ -182,8 +172,12 @@ fix_marketplace() {
     echo "ok: $label marketplace registered"
     return 0
   fi
+  if [ "$rc" -eq 5 ]; then
+    echo "skipped: $label CLI is not installed"
+    return 0
+  fi
   if [ "$rc" -eq 2 ]; then
-    echo "blocked: cannot register $label marketplace; requires $(marketplace_requirements "$label")" >&2
+    echo "blocked: cannot register $label marketplace; requires jq" >&2
     return 1
   fi
   if [ "$rc" -eq 3 ]; then
@@ -199,11 +193,78 @@ fix_marketplace() {
   return 1
 }
 
+cursor_present() {
+  [ -n "${CURSOR_AGENT:-}" ] || [ -d "$HOME/.cursor" ]
+}
+
+link_one_cursor_skills() {
+  local name="$1"
+  local source="$2"
+  local target="$HOME/.cursor/skills/$name"
+
+  if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+    echo "ok: Cursor skills $name -> $source"
+    return 0
+  fi
+  if [ -e "$target" ] && [ ! -L "$target" ]; then
+    echo "blocked: Cursor skills $name exists and is not a symlink: $target" >&2
+    return 1
+  fi
+  if [ "$MODE" = "check" ]; then
+    if [ -L "$target" ]; then
+      echo "drift: Cursor skills $name is symlink to $(readlink "$target")"
+    else
+      echo "missing: Cursor skills $name"
+    fi
+    return 1
+  fi
+  if ! ln -sfn "$source" "$target"; then
+    echo "failed: could not link Cursor skills $name -> $source" >&2
+    return 1
+  fi
+  echo "fixed: Cursor skills $name -> $source"
+}
+
+link_cursor_skills() {
+  local dest="$HOME/.cursor/skills"
+  local rc=0
+  if [ "$MODE" = "fix" ]; then
+    if ! mkdir -p "$dest"; then
+      echo "failed: could not create $dest" >&2
+      return 1
+    fi
+  fi
+  link_one_cursor_skills "agent-workflows" "$ROOT/plugins/agent-workflows/skills" || rc=1
+  link_one_cursor_skills "engineering-practices" "$ROOT/plugins/engineering-practices/skills" || rc=1
+  return "$rc"
+}
+
+report_cursor() {
+  if ! cursor_present; then
+    echo "skipped: Cursor not detected"
+    return 0
+  fi
+
+  echo "cursor: AGENTS.md is $SOURCE. Read it and follow it. Do not copy it into a repository."
+  echo "cursor: skills are in $ROOT/plugins/agent-workflows/skills and $ROOT/plugins/engineering-practices/skills. Load the skill whose description matches the next action before that action."
+  echo "cursor: User Rules live in Cursor Settings, not in a file this installer can write."
+
+  # Cloud agents already started with their skill index. Sync copies
+  # ~/.cursor/skills from the local machine; a directory written here is not that.
+  if [ -n "${CURSOR_AGENT:-}" ]; then
+    echo "cursor: Cloud Agents do not load skills written on this VM. Sync Skills for Cloud Agents copies ~/.cursor/skills from the local machine. Follow the paths above in this session."
+    return 0
+  fi
+
+  link_cursor_skills
+}
+
 if [ "$MODE" = "check" ]; then
   check_target "Codex instructions" "$CODEX_TARGET" || status=1
   check_target "Claude instructions" "$CLAUDE_TARGET" || status=1
   check_marketplace "codex" codex_marketplace_ok || status=1
   check_marketplace "claude" claude_marketplace_ok || status=1
+  report_cursor || status=1
   exit "$status"
 fi
 
@@ -211,4 +272,5 @@ fix_target "Codex instructions" "$CODEX_TARGET" || status=1
 fix_target "Claude instructions" "$CLAUDE_TARGET" || status=1
 fix_marketplace "codex" codex_marketplace_ok codex plugin marketplace add "$ROOT" || status=1
 fix_marketplace "claude" claude_marketplace_ok claude plugin marketplace add "$ROOT" || status=1
+report_cursor || status=1
 exit "$status"
