@@ -12,6 +12,9 @@ Usage: ./install.sh [--check|--fix] [--replace-existing]
   --check             Report instruction and marketplace state. Default.
   --fix               Create safe symlinks and register local marketplaces.
   --replace-existing  Backup and replace non-symlink instruction files.
+
+Exit 0 only when every instruction target and both marketplaces are in the
+desired state. A missing codex, claude, or jq is reported and fails the run.
 EOF
 }
 
@@ -62,7 +65,12 @@ fix_target() {
   local target="$2"
   local parent
   parent="$(dirname "$target")"
-  mkdir -p "$parent"
+  # Callers invoke this as `cmd || status=1`, which turns off -e for the whole
+  # function, so a failed command must return before any success line.
+  if ! mkdir -p "$parent"; then
+    echo "failed: could not create $parent" >&2
+    return 1
+  fi
 
   if [ -L "$target" ] && [ "$(readlink "$target")" = "$SOURCE" ]; then
     echo "ok: $label -> $SOURCE"
@@ -79,11 +87,17 @@ fix_target() {
       return 1
     fi
     local backup="$target.backup.$(date +%Y%m%d-%H%M%S)"
-    mv "$target" "$backup"
+    if ! mv "$target" "$backup"; then
+      echo "failed: could not back up $target" >&2
+      return 1
+    fi
     echo "backup: moved $target to $backup"
   fi
 
-  ln -sfn "$SOURCE" "$target"
+  if ! ln -sfn "$SOURCE" "$target"; then
+    echo "failed: could not link $label -> $SOURCE" >&2
+    return 1
+  fi
   echo "fixed: $label -> $SOURCE"
 }
 
@@ -115,37 +129,61 @@ claude_marketplace_ok() {
         '.[]? | select(.name == $name and ((.path? == $root) or (.installLocation? == $root)))' >/dev/null
 }
 
+# Names the marketplace dependencies that are actually absent. Both checks
+# collapse to status 2, so the report has to look again to say which one.
+marketplace_requirements() {
+  local label="$1"
+  local missing=""
+  command -v "$label" >/dev/null 2>&1 || missing="$label"
+  if ! command -v jq >/dev/null 2>&1; then
+    if [ -n "$missing" ]; then
+      missing="$missing and jq"
+    else
+      missing="jq"
+    fi
+  fi
+  if [ -z "$missing" ]; then
+    missing="$label and jq"
+  fi
+  printf '%s\n' "$missing"
+}
+
 check_marketplace() {
   local label="$1"
   local fn="$2"
-  if "$fn"; then
+  local rc=0
+
+  # An if whose condition is false and whose body does not run reports 0,
+  # so the checker status has to be saved on this line.
+  "$fn" || rc=$?
+  if [ "$rc" -eq 0 ]; then
     echo "ok: $label marketplace registered"
-  else
-    local rc=$?
-    if [ "$rc" -eq 2 ]; then
-      echo "missing-tool: cannot check $label marketplace; requires $label and jq"
-    elif [ "$rc" -eq 3 ]; then
-      echo "blocked: $label marketplace config resolves inside another git worktree: $(realpath "$CODEX_CONFIG")"
-    else
-      echo "missing: $label marketplace is not registered"
-    fi
-    return 1
+    return 0
   fi
+  if [ "$rc" -eq 2 ]; then
+    echo "missing-tool: cannot check $label marketplace; requires $(marketplace_requirements "$label")"
+  elif [ "$rc" -eq 3 ]; then
+    echo "blocked: $label marketplace config resolves inside another git worktree: $(realpath "$CODEX_CONFIG")"
+  else
+    echo "missing: $label marketplace is not registered"
+  fi
+  return 1
 }
 
 fix_marketplace() {
   local label="$1"
   local check_fn="$2"
+  local rc=0
   shift 2
 
-  if "$check_fn"; then
+  # Same status capture as check_marketplace: $? after a skipped if is 0.
+  "$check_fn" || rc=$?
+  if [ "$rc" -eq 0 ]; then
     echo "ok: $label marketplace registered"
     return 0
   fi
-
-  local rc=$?
   if [ "$rc" -eq 2 ]; then
-    echo "blocked: cannot register $label marketplace; requires $label and jq" >&2
+    echo "blocked: cannot register $label marketplace; requires $(marketplace_requirements "$label")" >&2
     return 1
   fi
   if [ "$rc" -eq 3 ]; then
@@ -153,8 +191,12 @@ fix_marketplace() {
     return 1
   fi
 
-  "$@"
-  echo "fixed: registered $label marketplace"
+  if "$@"; then
+    echo "fixed: registered $label marketplace"
+    return 0
+  fi
+  echo "failed: could not register $label marketplace" >&2
+  return 1
 }
 
 if [ "$MODE" = "check" ]; then
