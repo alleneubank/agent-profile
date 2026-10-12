@@ -2,7 +2,7 @@
 
 The coordinator's tools, what each proves, and the traps already hit. The
 fleet file names hosts, launchers, and accounts; this file stays host-free.
-Checked against sox v0.3.29 and recall 0.35.0 on 2026-09-25; when the
+Checked against sox v0.3.30 and recall 0.35.0 on 2026-10-12; when the
 installed version differs, check `sox help <command>` before trusting a row.
 
 ## Claude Code adapter
@@ -61,9 +61,9 @@ refused by name.
 | Roster | `sox ls [host] [--json]` | Each answering daemon's rows now, with labels. A silent host still exits 0: check `complete` in `--json`. `no-reply`, `unknown`, and `cold` do not mean dead. `cmd` shows a wrapper shell (`zsh`, `bash`) or a version string for a running agent: confirm the agent with `ps` on its host. |
 | Attention | `sox watch <sN.gM> --until done\|blocked --timeout 3` | Last observed state (exit 3 on timeout). An agent waiting on its own question, or one held at a [startup dialog](#startup-dialogs), can still read `working`: read its latest turn. |
 | Message | `send.sh --charter <c> --role <r> --to <host/sN.gM> --kind <k> < message` | Delivery only; stderr names the shell, command, and cwd it reached. Without `--enter` the text sits unsubmitted, and a send into a finished row still reports sent. Confirm a new user turn in the agent's transcript. A sent line looks like the human's typing to the target, which is why `send.sh` adds the header. |
-| Launch | `sox up <host>:<abs path> --detach --no-forward-agent --no-chrome --no-ext --exec -- <run.sh>` | The last output line is the new `sN.gM`: a minted shell, not a running agent. Local work uses `localhost:<path>`; a bare path is read as a host. Forward the agent only when the brief needs the human's keys on that host. |
+| Launch | `sox new <host> --no-attach --exec -- <run.sh>` | Stdout is exactly `<host>/<backing-id>` for a remote host, a bare id locally: a minted shell, not a running agent. There is no path argument, so `run.sh` owns `cd`. Observed 2026-10-12: the shell started in `$HOME`. |
 | Label | `sox label <sN.gM> owner=<charter> lane=<l>` | Labels belong to that generation only. If it fails, `ssh <host> '<host SOX_HOME> ~/.sox/bin/soxd label <sN.gM> k=v'` has worked. Your own shell is `$ZMX_SESSION`; label it `role=coordinator charter=<name>`. |
-| Wait | `sox wait <sN.gM> --timeout S` | Exit code of a `--detach --exec` task (3 timeout, 42 gone); not task success. |
+| Wait | `sox wait <target> --timeout S` | Exit code of a `--no-attach --exec` task (3 timeout, 42 gone); not task success. |
 | Retire | `sox kill <host>/<sN.gM>` | Only shells you can attribute; `--prove-gone` when the process already died outside sox. Never a bare `sox down`. |
 | Shell of a process | `sox which <pid>` | Local host only. |
 
@@ -78,7 +78,7 @@ a relaunch. pi may not submit on `--enter`; confirm the turn landed, and try
 ## Launching a lane agent
 
 Put the launch in a `run.sh` in the lane's brief directory and pass it to
-`sox up ... --exec -- <run.sh>`. Everything after `--` is argv with no shell,
+`sox new <host> --no-attach --exec -- <run.sh>`. Everything after `--` is argv with no shell,
 so the script owns `cd`, `direnv exec`, redirections, and writing the exit
 file. It points scratch into the lane root under `~/Work` (`TMPDIR=<lane root>/tmp`),
 and build output there when a tool writes it elsewhere by default
@@ -159,9 +159,10 @@ the pane, and the dialog's default answer exits the agent.
 - Stack work that edits the same files, one PR per layer.
 - Never bypass hooks; land through the workspace's scripted path; push with
   explicit refspecs and lease-guarded force.
-- A lane launched with `--no-forward-agent` has no SSH agent, so `git fetch`
-  over SSH fails there: read refs with `gh api`, or fetch on the coordinator's
-  side and say so in the brief.
+- Observed 2026-10-12 (sox v0.3.30): a `sox new ae-dev --no-attach` shell had
+  `SSH_AUTH_SOCK` set, yet `git ls-remote` to GitHub over SSH failed with
+  "Permission denied (publickey)". Read refs with `gh api`, or fetch on the
+  coordinator's side and say so in the brief.
 
 ## Specialist review
 
@@ -174,8 +175,8 @@ checkout once its verdict is read.
 
 ## Credentials
 
-- Probe the way the work will run: `sox up` on the lane's host and worktree
-  with its forwarding flags, `--exec` a script that calls the consumer's own
+- Probe the way the work will run: `sox new <host> --no-attach --exec --`
+  a script that `cd`s to the lane's worktree and calls the consumer's own
   resolver.
 - fnox runs one daemon per exact flag set: warm through the consumer's own
   resolver and check with `fnox daemon status` under the same flags. `fnox
