@@ -9,8 +9,7 @@ contract.
 2. Read the spec and list missing required elements:
    - problem and solution narrative
    - domain model
-   - `REQ-*` requirements
-   - invariants
+   - `REQ-*` guarantees and the check that holds each
    - non-goals
    - acceptance criteria
    - risk tags for high-risk work

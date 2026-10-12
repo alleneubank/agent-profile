@@ -6,7 +6,8 @@ deploy configuration. You are not told the author's reasoning or house rules,
 so judge every waiver and convention on its merits.
 
 **You are given** the goal, the category and its threat model, how the system
-behaves in production today, the diff, and the code.
+behaves in production today, the neighbors the author's checks do not drive,
+the diff, and the code.
 
 **Judge** whether the change reaches its goal in production without breaking
 what the category protects: data, access, callers, or the running service.
