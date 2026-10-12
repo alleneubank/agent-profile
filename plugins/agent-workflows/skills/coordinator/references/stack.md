@@ -19,7 +19,7 @@ The coordinator runs on Claude Code (SKILL.md); these are its tools.
 
 ## Scripts
 
-`lease.sh` and `send.sh` live in `scripts/` beside the skill's `SKILL.md`
+`lease.sh`, `send.sh`, and `retire.sh` live in `scripts/` beside the skill's `SKILL.md`
 (the harness shows the skill's base directory when it loads). Each script's
 header is its reference. The caller is `CLAUDE_CODE_SESSION_ID` in the shell
 `sox which` names; the target's foreground comes from `sox ls <host>`, and
@@ -27,7 +27,17 @@ header is its reference. The caller is `CLAUDE_CODE_SESSION_ID` in the shell
 to `~/.handoffs/<charter>/sent.log` on the sending host. On a lane host, find
 the installed `send.sh` before writing it into a brief:
 `ls ~/.claude/plugins/cache/agent-profile/agent-workflows/*/skills/coordinator/scripts/send.sh ~/.codex/plugins/cache/agent-profile/agent-workflows/*/skills/coordinator/scripts/send.sh 2>/dev/null | tail -1`.
-Both need only bash 3.2 or later and coreutils.
+They need bash 3.2 or later and coreutils; remote State writes also use ssh.
+`lease.sh state <c> --state <word> --fleet <absolute path> [--fleet-host <host>]`
+writes only that registry row's State, under a fleet-wide lock (exit 5 busy).
+Its stdout is `<charter>\t<state>\tchanged|unchanged`.
+After stopping a lane's writers and resources, run on its host:
+`retire.sh --root <lane root> --delete --to <new archive directory> --keep <relative path>`.
+Repeat `--keep` for separate paths, or use `--keep .` for the whole root;
+omit `--to` and `--keep` when nothing is kept. The destination's parent must
+exist. Copy or verification failure leaves the root and any partial archive;
+retry with a new destination. Transfer the archive separately and confirm
+the destination before removing the local copy.
 
 ## Who sent a turn
 
