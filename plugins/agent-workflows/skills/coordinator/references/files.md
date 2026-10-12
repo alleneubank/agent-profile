@@ -19,7 +19,7 @@ Read by every coordinator at start. Machine facts only; project facts live in
 each charter.
 
 ## Hosts
-| Host | Reach (ssh alias, sox name) | OS, cores, memory | Capabilities (toolchains, SDKs, containers, attached devices) | Lane budget | Disk floor | Never touch (the human's own) | Verified |
+| Host | Reach (ssh alias, sox name) | OS, cores, memory | Capabilities (toolchains, SDKs, containers, attached devices) | What limits lanes (the cap is in the caps file) | Disk floor | Never touch (the human's own) | Verified |
 |---|---|---|---|---|---|---|---|
 
 ## Devices
@@ -31,7 +31,6 @@ each charter.
 Fallback when a quota runs out: <order>
 Tier windows: <tier> allowed until <date or reset> (the human's; a lapsed
 window means the tier is not used)
-Capacity windows: <UTC time, the human's words, hosts, limit, expiry>
 
 ## Reservations
 | Resource (device, host, account) | Owner charter | Until | Notes |
@@ -51,9 +50,22 @@ a fresh coordinator resumes from the handoff). Who holds a watch, in which
 shell and session, is the lease's to answer (`lease.sh show` or `list` on the
 charter's host), never a column here. An archived charter leaves the
 registry; its charter and log keep its history. A reservation past its Until
-is free. Capacity windows, like tier windows, are the human's dated lines
-and lapse at their expiry. Read lane counts live with `sox ls` and
-`lease.sh list` on each charter's host; never store them here.
+is free. Lane counts are read live (`lane.sh slots`), never stored here.
+
+## Caps file: `~/.handoffs/fleet.json` on the control host
+
+Each lane host's cap, set only by `lane.sh cap` on the human's word (or a
+provisional call they granted), with the reason. A host with no entry takes
+no lanes; a cap of 0 closes it. A temporary cap carries `--until` and the cap
+it falls back to (`--after`), so a capacity window lapses on its own. Pass
+`--fleet ~/.handoffs/fleet.json` (absolute) to every `lane.sh` call, and
+`--fleet-host <control host>` from any other host.
+
+```json
+{"version":1,"hosts":{
+  "onyx":{"cap":4,"why":"32 cores, shared with echo-metis k3s","set_at":"2026-10-12T02:20:00Z"},
+  "aem5":{"cap":6,"why":"capacity window, the human 02:2xZ","set_at":"2026-10-12T02:20:00Z","until":"2026-10-12T16:00:00Z","after":2}}}
+```
 
 ## Charter: `~/.handoffs/<charter>/charter.md`
 
@@ -76,7 +88,7 @@ Hosts: <fleet hosts this charter's lanes use, with its lane directory on each
 - <UTC time> hold <scope> (<the human's words>); lifted <UTC time | not yet>.
 
 ## Budgets and cadence
-- Lanes per host; heartbeat schedule; event watcher script.
+- Lanes per host, within each host's cap; heartbeat schedule; event watcher script.
 
 ## Decisions (newest last)
 - <UTC time> <the human's words where they matter> -> <what it changes>
