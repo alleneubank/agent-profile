@@ -31,6 +31,7 @@ each charter.
 Fallback when a quota runs out: <order>
 Tier windows: <tier> allowed until <date or reset> (the human's; a lapsed
 window means the tier is not used)
+Capacity windows: <UTC time, the human's words, hosts, limit, expiry>
 
 ## Reservations
 | Resource (device, host, account) | Owner charter | Until | Notes |
@@ -41,14 +42,18 @@ window means the tier is not used)
 |---|---|---|
 ```
 
-Verified is the date a fact was last checked on the host. State is `live`,
+Verified is the date a fact was last checked on the host. Only `lease.sh state`
+writes State; add a registry row with an empty State, then use the command.
+State is `live`,
 `blocked-on-human` (heartbeat stopped, lease kept; the human's next turn
 resumes it), or `parked` (the human stood it down and the lease is released;
 a fresh coordinator resumes from the handoff). Who holds a watch, in which
 shell and session, is the lease's to answer (`lease.sh show` or `list` on the
 charter's host), never a column here. An archived charter leaves the
 registry; its charter and log keep its history. A reservation past its Until
-is free.
+is free. Capacity windows, like tier windows, are the human's dated lines
+and lapse at their expiry. Read lane counts live with `sox ls` and
+`lease.sh list` on each charter's host; never store them here.
 
 ## Charter: `~/.handoffs/<charter>/charter.md`
 
@@ -93,6 +98,15 @@ Written only by `scripts/lease.sh` (take, release); read with `show` and
 this watch), and once released `released_at` and `handoff`. Exit codes: 0 ok,
 2 usage, 3 no lease, 4 caller does not hold the watch, 5 another write is in
 progress (retry).
+
+Registry writes: `lease.sh state <charter> --state <word> --fleet <absolute path>`.
+If the fleet is on another control host, add `--fleet-host <ssh alias>`;
+the path is on that host. The caller must hold the watch for `live` or
+`blocked-on-human`; write `parked` after release, from that same session and
+shell. A successor's take revokes the prior caller. State writes lock the
+lease and the fleet file (across charters), replacing the latter atomically.
+Other fleet edits must respect `<fleet path>.lock`; on exit 5, retry after
+the writer finishes. Never remove a lock without attributing its writer.
 
 ## Log: `~/.handoffs/<charter>/log.md`
 

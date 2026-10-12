@@ -16,7 +16,8 @@ model; other models work as lanes and reviewers. In any other session,
 prepare the charter and hand it to such a coordinator. Commands and traps: [stack.md](references/stack.md).
 File shapes: [files.md](references/files.md). The lease and agent mail go
 through [scripts/lease.sh](scripts/lease.sh)
-(`lease.sh show|take|check|release <charter>`, `lease.sh list`) and
+(`lease.sh show|take|check|release <charter>`, `lease.sh list`,
+`lease.sh state <charter> --state <word> --fleet <path> [--fleet-host <host>]`) and
 [scripts/send.sh](scripts/send.sh)
 (`send.sh --charter <c> --role coordinator --to <host/sN.gM> --kind <k> < line`).
 Both identify your session and shell themselves; `send.sh` checks the lease
@@ -98,9 +99,9 @@ read. Anything you cannot attribute to the charter belongs to another owner
 3. `lease.sh show <charter>`. If another session holds it, record what sox
    and recall say about it; reachable or not, the human's turn decides.
 4. `lease.sh take <charter> --reason "<the human's words and time>"`.
-5. Label your shell as the coordinator, set your registry row's State to
-   `live`, start the heartbeat, and run a pass. Its report is your
-   opening sitrep. A workspace without a themes file gets a portfolio review
+5. Label your shell as the coordinator, use `lease.sh state` to write
+   `live` in the registry, start the heartbeat, and run a pass. Its report is
+   your opening sitrep. A workspace without a themes file gets a portfolio review
    before any lane starts in a new item.
 
 ### Run a pass
@@ -127,7 +128,7 @@ read. Anything you cannot attribute to the charter belongs to another owner
 
 When three consecutive passes change nothing and every queued item is done or
 parked at a human gate (no lane, landing, rollout, or watcher in flight), stop
-the heartbeat, set your registry row to `blocked-on-human`, keep the lease,
+the heartbeat, write `blocked-on-human` with `lease.sh state`, keep the lease,
 and end with a sitrep that opens with the scorecard (End of shift) and leads with
 their items. Their next turn restarts the heartbeat.
 
@@ -137,10 +138,14 @@ their items. Their next turn restarts the heartbeat.
    a launched agent is "launching" until its transcript holds a first turn.
 2. Then exactly one of: land, send back with an addendum quoting the finding
    verbatim, relaunch, or retire. Retiring tears the lane down in the pass
-   that processes it: kill its shell, run each `resources` teardown, and
-   delete its lane root. Keep only what could lose work: a root with
+   that processes it: kill its shell, run each `resources` teardown, then
+   use [retire.sh](scripts/retire.sh) on the lane host. It copies kept paths
+   to a new directory outside the root, verifies them, and only then deletes
+   the root; a failure keeps the root. Stop every writer first. Keep only what
+   could lose work: a root with
    uncommitted changes or commits on no remote, or a resource holding data.
-   Each kept item gets a waiting-list line naming what it holds.
+   Each kept item gets a waiting-list line naming its location and what it holds.
+   Confirm any later transfer before deleting the local kept copy.
 3. A quiet agent: look in sox first. Nudge a live interactive agent once with
    a one-line pointer (`send.sh --kind request`) and confirm a new turn
    landed; if the next pass shows no change, relaunch what you launched. An
@@ -189,7 +194,8 @@ Change a running agent's brief only by addendum and pointer.
    than two parks and no pending design that rewrites this code; the problem
    reproduces on the current base; no hold covers it. Pick the host from the
    charter's hosts by the capabilities the lane needs (fleet file) and load
-   across all owners; keep work on the same files on one stack;
+   across all owners, read live with `sox ls` and `lease.sh list`, never
+   stored in the fleet file; keep work on the same files on one stack;
    reserve shared identifiers in the charter. If proof needs managed secrets,
    run the repo's secrets preflight in that worktree, with the lane's shell
    and flags, while the human can approve prompts.
@@ -267,7 +273,8 @@ The watch changes hands only when the session has ended or the human asks
   human started it.
 - **Park or retire** (the human asks): tear down finished lanes, write the
   handoff, stop the heartbeat and any watchers,
-  `lease.sh release <charter> --handoff <path>`, log it, and end with
+  `lease.sh release <charter> --handoff <path>`, then write `parked` with
+  `lease.sh state`, log it, and end with
   `SHIFT ENDED <handoff path>`. When that would orphan work in flight, end
   with `SHIFT CONTINUES` and the reason.
 - **A session that ended** without a handoff: the human's next turn appoints

@@ -1,5 +1,5 @@
-import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { spawn, spawnSync } from "node:child_process";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -11,6 +11,12 @@ import { describe, expect, it } from "vitest";
 const SCRIPTS = resolve(__dirname, "../plugins/agent-workflows/skills/coordinator/scripts");
 const LEASE = join(SCRIPTS, "lease.sh");
 const SEND = join(SCRIPTS, "send.sh");
+const RETIRE = join(SCRIPTS, "retire.sh");
+
+const FLEET = "# Fleet\n\n## Reservations\n| demo | unrelated | note |\n\n## Charters\n" +
+  "| Charter | Charter file (host:path) | State |\n|---|---|---|\n" +
+  "| demo | elsewhere:/handoffs/demo/charter.md | live (old prose) |\n" +
+  "| other | other:/charter.md | parked |\n\n## Notes\nLeave these bytes alone.";
 
 type Caller = { session: string; shell: string };
 const ONE: Caller = { session: "s-one", shell: "s1.g1" };
@@ -44,7 +50,7 @@ esac
       rows.map((r) => JSON.stringify({ kind: "shell", backing_id: r.backing, host: r.host, status: r.status ?? "live", command: r.command, attention: r.attention })).join("\n") + "\n",
     );
   }
-  function run(script: string, args: string[], who: Caller | null, input = "", now = "2026-10-04T20:00:00Z") {
+  function environment(who: Caller | null, now = "2026-10-04T20:00:00Z") {
     const env: Record<string, string> = {
       PATH: process.env.PATH ?? "/usr/bin:/bin",
       HOME: home,
@@ -56,14 +62,17 @@ esac
       env.CLAUDE_CODE_SESSION_ID = who.session;
       env.SOX_STUB_SHELL = who.shell;
     }
-    const result = spawnSync("/bin/bash", [script, ...args], { input, env, encoding: "utf8" });
+    return env;
+  }
+  function run(script: string, args: string[], who: Caller | null, input = "", now = "2026-10-04T20:00:00Z") {
+    const result = spawnSync("/bin/bash", [script, ...args], { input, env: environment(who, now), encoding: "utf8" });
     return { status: result.status, stdout: result.stdout, stderr: result.stderr };
   }
   const lease = join(coordination, "demo", "lease");
   const take = (who: Caller, reason = "Allen: become the coordinator (2026-10-04T20:00Z)") =>
     run(LEASE, ["take", "demo", "--reason", reason], who);
   const read = (name: string) => readFileSync(join(home, name), "utf8");
-  return { home, coordination, lease, shells, run, take, read, typed: () => existsSync(join(home, "typed")) };
+  return { home, coordination, lease, shells, environment, run, take, read, typed: () => existsSync(join(home, "typed")) };
 }
 
 describe("lease.sh", () => {
@@ -153,6 +162,133 @@ describe("lease.sh", () => {
     const f = fleet();
     expect(f.run(LEASE, ["show", "demo"], ONE).status).toBe(3);
     expect(f.run(LEASE, ["check", "demo"], ONE).status).toBe(3);
+  });
+
+  it("writes only the registry State, accepts three words, and refuses prose", () => {
+    const f = fleet();
+    const file = join(f.home, "fleet.md");
+    f.take(ONE);
+    for (const original of [FLEET, FLEET + "\n", (FLEET + "\n").replaceAll("\n", "\r\n")]) {
+      writeFileSync(file, original);
+      for (const state of ["live", "blocked-on-human", "parked"]) {
+        if (state === "parked") f.run(LEASE, ["release", "demo", "--handoff", "/kept/handoff.md"], ONE);
+        const args = ["state", "demo", "--state", state, "--fleet", file];
+        expect(f.run(LEASE, args, ONE).status).toBe(0);
+        expect(readFileSync(file, "utf8")).toBe(original.replace("live (old prose)", state));
+        expect(f.run(LEASE, args, ONE).stdout).toBe(`demo\t${state}\tunchanged\n`);
+      }
+      f.take(ONE);
+    }
+    const before = readFileSync(file);
+    expect(f.run(LEASE, ["state", "demo", "--state", "live (watch 2)", "--fleet", file], ONE).status).toBe(2);
+    expect(readFileSync(file)).toEqual(before);
+  });
+
+  it("requires the current holder and a released watch for parked", () => {
+    const f = fleet();
+    const file = join(f.home, "fleet.md");
+    writeFileSync(file, FLEET);
+    f.take(ONE);
+    const args = (state: string) => ["state", "demo", "--state", state, "--fleet", file];
+    expect(f.run(LEASE, args("live"), TWO).status).toBe(4);
+    expect(f.run(LEASE, args("parked"), ONE).status).toBe(4);
+    f.run(LEASE, ["release", "demo", "--handoff", "/kept/handoff.md"], ONE);
+    expect(f.run(LEASE, args("live"), ONE).status).toBe(4);
+    f.take(TWO);
+    expect(f.run(LEASE, args("parked"), ONE).status).toBe(4);
+    expect(readFileSync(file, "utf8")).toBe(FLEET);
+  });
+
+  it("leaves the file intact when another charter writes or the row is ambiguous", () => {
+    const f = fleet();
+    const file = join(f.home, "fleet.md");
+    f.take(ONE);
+    const args = ["state", "demo", "--state", "live", "--fleet", file];
+    writeFileSync(file, FLEET);
+    mkdirSync(`${file}.lock`);
+    expect(f.run(LEASE, args, ONE).status).toBe(5);
+    expect(readFileSync(file, "utf8")).toBe(FLEET);
+    const otherFile = join(f.home, "ambiguous.md");
+    for (const text of [FLEET.replace("| demo | elsewhere:", "| absent | elsewhere:"), FLEET + "\n## Charters\n| demo | duplicate | parked |\n"]) {
+      writeFileSync(otherFile, text);
+      expect(f.run(LEASE, ["state", "demo", "--state", "live", "--fleet", otherFile], ONE).status).toBe(2);
+      expect(readFileSync(otherFile, "utf8")).toBe(text);
+      expect(existsSync(`${otherFile}.lock`)).toBe(false);
+    }
+  });
+
+  it("rejects a concurrent State writer with exit 5 and commits the first intact", async () => {
+    const f = fleet();
+    const file = join(f.home, "fleet.md");
+    writeFileSync(file, FLEET);
+    f.take(ONE);
+    mkdirSync(join(f.home, "bin"));
+    const fifo = join(f.home, "continue");
+    expect(spawnSync("mkfifo", [fifo]).status).toBe(0);
+    const awk = join(f.home, "bin", "awk");
+    // Pause scheduling after the locks; the parser itself remains the real awk.
+    writeFileSync(awk, '#!/bin/bash\nprintf "lock held\\n" >&2\nread -r proceed < "$HOME/continue"\nexec /usr/bin/awk "$@"\n');
+    chmodSync(awk, 0o755);
+    const args = ["state", "demo", "--state", "blocked-on-human", "--fleet", file];
+    const env = f.environment(ONE);
+    const first = spawn("/bin/bash", [LEASE, ...args], { env: { ...env, PATH: `${join(f.home, "bin")}:${env.PATH}` } });
+    const completed = new Promise<number | null>((resolve, reject) => {
+      first.once("error", reject);
+      first.once("close", resolve);
+    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error("State writer did not reach its lock")), 2000);
+        first.stderr.once("data", () => { clearTimeout(timer); resolve(); });
+      });
+      expect(f.run(LEASE, ["state", "demo", "--state", "live", "--fleet", file], ONE).status).toBe(5);
+      expect(readFileSync(file, "utf8")).toBe(FLEET);
+      writeFileSync(fifo, "continue\n");
+      expect(await completed).toBe(0);
+      expect(readFileSync(file, "utf8")).toBe(FLEET.replace("live (old prose)", "blocked-on-human"));
+      expect(existsSync(`${file}.lock`)).toBe(false);
+      expect(existsSync(`${f.lease}.lock`)).toBe(false);
+    } finally {
+      if (first.exitCode === null) first.kill();
+      await completed;
+    }
+  });
+});
+
+describe("retire.sh", () => {
+  it("keeps the root and readable files when copying a kept file fails", () => {
+    const f = fleet();
+    const root = join(f.home, "lane");
+    const archive = join(f.home, "archive");
+    mkdirSync(root);
+    writeFileSync(join(root, "kept.txt"), "kept work\n");
+    expect(f.run(RETIRE, ["--root", root, "--delete", "--to", archive, "--keep", "missing.txt"], null).status).toBe(3);
+    expect(readFileSync(join(root, "kept.txt"), "utf8")).toBe("kept work\n");
+  });
+
+  it("copies a directory including hidden files and symlinks before deleting the root", () => {
+    const f = fleet();
+    const root = join(f.home, "lane");
+    const archive = join(f.home, "archive");
+    mkdirSync(join(root, "empty"), { recursive: true });
+    writeFileSync(join(root, ".kept.txt"), "kept work\n");
+    symlinkSync(".kept.txt", join(root, "link"));
+    expect(f.run(RETIRE, ["--root", root, "--delete", "--to", archive, "--keep", "."], null).status).toBe(0);
+    expect(readFileSync(join(archive, "link"), "utf8")).toBe("kept work\n");
+    expect(existsSync(join(archive, "empty"))).toBe(true);
+    expect(existsSync(root)).toBe(false);
+  });
+
+  it("rejects deleting without opt-in and archiving inside the root or through a symlink", () => {
+    const f = fleet();
+    const root = join(f.home, "lane");
+    mkdirSync(root);
+    writeFileSync(join(root, "kept.txt"), "kept work\n");
+    symlinkSync(f.home, join(root, "outside"));
+    expect(f.run(RETIRE, ["--root", root], null).status).toBe(2);
+    expect(f.run(RETIRE, ["--root", root, "--delete", "--to", join(root, "archive"), "--keep", "kept.txt"], null).status).toBe(2);
+    expect(f.run(RETIRE, ["--root", root, "--delete", "--to", join(f.home, "archive"), "--keep", "outside/sox"], null).status).toBe(2);
+    expect(readFileSync(join(root, "kept.txt"), "utf8")).toBe("kept work\n");
   });
 });
 
