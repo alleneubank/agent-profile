@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, symlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, realpathSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -44,7 +44,8 @@ exit 1
 `;
 
 function host(pathSuffix = "/usr/bin:/bin") {
-  const home = mkdtempSync(join(tmpdir(), "install-sh-"));
+  // install.sh prints canonical paths; macOS TMPDIR is a symlink into /private.
+  const home = realpathSync(mkdtempSync(join(tmpdir(), "install-sh-")));
   const bin = join(home, "bin");
   const state = join(home, "state");
   const log = join(home, "cli.log");

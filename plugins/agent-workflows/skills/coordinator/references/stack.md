@@ -51,10 +51,12 @@ directory whose `.envrc` does not re-point it, such as `/tmp` (the sox
 repo's `.envrc` does). A wrong home answers "shell handle not found" for
 shells that exist.
 
-Ids: `send` and `kill` take `<host>/<sN.gM>`; `watch`, `wait`, and `label`
+Ids: `send` and `kill` take `<host>/<sN.gM>`; `watch` and `wait`
 take the bare `sN.gM` (their host-qualified forms read `unknown` or time
-out today). A bare handle (`s5`) is refused, and a retired generation is
-refused by name.
+out today). Observed 2026-10-12 with sox v0.3.30: `label` takes the bare
+`sN.gM` for a local shell and requires `<host>/<sN.gM>` for a shell on
+another host. A bare handle (`s5`) is refused, and a retired generation
+is refused by name.
 
 | Need | Command | Proves / does not prove |
 |---|---|---|
@@ -62,7 +64,7 @@ refused by name.
 | Attention | `sox watch <sN.gM> --until done\|blocked --timeout 3` | Last observed state (exit 3 on timeout). An agent waiting on its own question, or one held at a [startup dialog](#startup-dialogs), can still read `working`: read its latest turn. |
 | Message | `send.sh --charter <c> --role <r> --to <host/sN.gM> --kind <k> < message` | Delivery only; stderr names the shell, command, and cwd it reached. Without `--enter` the text sits unsubmitted, and a send into a finished row still reports sent. Confirm a new user turn in the agent's transcript. A sent line looks like the human's typing to the target, which is why `send.sh` adds the header. |
 | Launch | `sox new <host> --no-attach --exec -- <run.sh>` | Stdout is exactly `<host>/<backing-id>` for a remote host, a bare id locally: a minted shell, not a running agent. There is no path argument, so `run.sh` owns `cd`. Observed 2026-10-12: the shell started in `$HOME`. |
-| Label | `sox label <sN.gM> owner=<charter> lane=<l>` | Labels belong to that generation only. If it fails, `ssh <host> '<host SOX_HOME> ~/.sox/bin/soxd label <sN.gM> k=v'` has worked. Your own shell is `$ZMX_SESSION`; label it `role=coordinator charter=<name>`. |
+| Label | `sox label <host>/<sN.gM> owner=<charter> lane=<l>` (local: `sox label <sN.gM> ...`) | Observed 2026-10-12 with sox v0.3.30: from aem5, `sox label s10.g1506 k=v` failed for an ae-dev shell; `sox label ae-dev/s10.g1506 k=v` worked. Labels belong to that generation only. If it fails, `ssh <host> '<host SOX_HOME> ~/.sox/bin/soxd label <sN.gM> k=v'` has worked. Your own shell is `$ZMX_SESSION`; label it `role=coordinator charter=<name>`. |
 | Wait | `sox wait <target> --timeout S` | Exit code of a `--no-attach --exec` task (3 timeout, 42 gone); not task success. |
 | Retire | `sox kill <host>/<sN.gM>` | Only shells you can attribute; `--prove-gone` when the process already died outside sox. Never a bare `sox down`. |
 | Shell of a process | `sox which <pid>` | Local host only. |

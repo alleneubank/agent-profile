@@ -1,5 +1,12 @@
 import { execFileSync } from "node:child_process";
-import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,6 +38,7 @@ function runValidate(cwd: string): ValidateResult {
   try {
     const stdout = execFileSync("bash", ["scripts/validate.sh"], {
       cwd,
+      env: { ...process.env, PATH: join(cwd, ".validate-bin"), CODEX_VALIDATOR: "" },
       encoding: "utf8",
       timeout: 60_000,
       stdio: ["ignore", "pipe", "pipe"],
@@ -73,6 +81,17 @@ function cloneFixture(): string {
       stdio: "ignore",
     });
     cpSync(join(ROOT, "scripts/validate.sh"), join(dir, "scripts/validate.sh"));
+    // Expose only the gate's dependencies, so optional host validators cannot run.
+    const bin = join(dir, ".validate-bin");
+    mkdirSync(bin);
+    for (const command of ["bash", "dirname", "find", "git", "python3", "sort"]) {
+      const executable = execFileSync(
+        "bash",
+        ["-c", 'command -v "$1"', "_", command],
+        { encoding: "utf8" },
+      ).trim();
+      symlinkSync(executable, join(bin, command));
+    }
     return dir;
   } catch (error) {
     rmSync(dir, { recursive: true, force: true });
@@ -80,7 +99,10 @@ function cloneFixture(): string {
   }
 }
 
-describe("validate.sh release-tag gate", () => {
+// Each test clones the repo and runs the full gate: ~4.5 s alone, longer under parallel load.
+const FIXTURE_TIMEOUT_MS = 30_000;
+
+describe("validate.sh release-tag gate", { timeout: FIXTURE_TIMEOUT_MS }, () => {
   it("still checks skills when a required release tag is missing, and exits 1", () => {
     const dir = cloneFixture();
     try {
