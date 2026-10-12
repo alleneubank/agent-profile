@@ -99,7 +99,10 @@ function cloneFixture(): string {
   }
 }
 
-describe("validate.sh release-tag gate", () => {
+// Each test clones the repo and runs the full gate: ~4.5 s alone, longer under parallel load.
+const FIXTURE_TIMEOUT_MS = 30_000;
+
+describe("validate.sh release-tag gate", { timeout: FIXTURE_TIMEOUT_MS }, () => {
   it("still checks skills when a required release tag is missing, and exits 1", () => {
     const dir = cloneFixture();
     try {
