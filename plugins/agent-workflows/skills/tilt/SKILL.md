@@ -163,9 +163,9 @@ SHELL_ID="$(sox ls --json | jq -r --arg root "$ROOT" \
 if [ -n "$SHELL_ID" ]; then
   echo "Tilt shell already exists: $SHELL_ID"
 else
-  # sh receives the log path as $0 and the boot command as "$@".
-  SHELL_ID="$(sox up "localhost:$ROOT" --detach --no-chrome --no-ext \
-    --exec -- sh -c 'exec "$@" >"$0" 2>&1' "$LOG" "${START_CMD[@]}" | tail -1)"
+  # sh receives the log path as $0, the root as $1, and the boot command after.
+  SHELL_ID="$(sox new localhost --no-attach \
+    --exec -- sh -c 'cd "$1" || exit; shift; exec "$@" >"$0" 2>&1' "$LOG" "$ROOT" "${START_CMD[@]}" | tail -1)"
   sox label "$SHELL_ID" role=tilt root="$ROOT" >/dev/null
   # A boot command that dies at once has exited within 5s; exit 3 means it is
   # still running, which is the healthy case.
