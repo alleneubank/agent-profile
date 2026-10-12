@@ -5,6 +5,8 @@ Git only after the same check. Exit: 0 clear/success, 2 usage, 3 owners,
 4 discovery unknown; otherwise Git's exit code. Requires Python 3.9+, lsof,
 and zmx. SOX_BIN can name a sox CLI outside PATH; SOX_HOME and ZMX_DIR select
 their namespaces. The default sox home is also checked through zmx.
+WORKTREE_QUERY_TIMEOUT_SECONDS selects a positive per-query discovery limit
+in seconds (default 15, maximum 300); Git mutations retain their 15-second limit.
 """
 
 import argparse
@@ -20,6 +22,7 @@ from urllib.parse import unquote, urlsplit
 
 
 TIMEOUT_SECONDS = 15
+QUERY_TIMEOUT_SECONDS_MAX = 300
 OUTPUT_BYTES_MAX = 16 * 1024 * 1024
 PATHS_MAX = 1024
 
@@ -28,9 +31,22 @@ class DiscoveryError(Exception):
     """The owner snapshot cannot establish whether deletion is safe."""
 
 
-def query(argv, env=None):
+def query_timeout_seconds():
+    message = ("WORKTREE_QUERY_TIMEOUT_SECONDS must be greater than zero "
+               f"and at most {QUERY_TIMEOUT_SECONDS_MAX} seconds")
     try:
-        result = subprocess.run(argv, env=env, capture_output=True, timeout=TIMEOUT_SECONDS)
+        value = float(os.environ.get("WORKTREE_QUERY_TIMEOUT_SECONDS", TIMEOUT_SECONDS))
+    except ValueError as error:
+        raise DiscoveryError(message) from error
+    if not 0 < value <= QUERY_TIMEOUT_SECONDS_MAX:
+        raise DiscoveryError(message)
+    return value
+
+
+def query(argv, env=None):
+    timeout_seconds = query_timeout_seconds()
+    try:
+        result = subprocess.run(argv, env=env, capture_output=True, timeout=timeout_seconds)
     except (OSError, subprocess.TimeoutExpired) as error:
         raise DiscoveryError(f"{argv[0]}: {error}") from error
     if result.returncode != 0:
