@@ -17,23 +17,18 @@ any repository.
 
 ## Hard Rules
 
-- Verified-merged branches (merged PR + head == tip, step 3a) and clean
-  worktrees are recoverable interior work: delete them without asking, and
-  report what was removed.
-- At-risk branches and dirty worktrees hold potentially unshipped work: batch
-  them into the single confirmation in step 5. Never force-delete a dirty
-  worktree without explicit approval.
+- Verified-merged branches (step 3a) and clean, owner-free worktrees are
+  recoverable interior work: delete them and report what was removed.
+- Dirty or owned worktrees, unverifiable owners, and at-risk branches go into
+  the single confirmation in step 5. Force never bypasses the owner guard.
 - Every stash is at risk: nothing proves its content landed, so each one goes
   into the step 5 confirmation. Keep a stash the user wants by committing it
   to a `wip/<topic>` branch, not by leaving it stashed.
 - Use `--ff-only` when updating branches. If ff-only fails, stop and ask.
 - Operate from the `.bare` directory (or repo root) for branch/worktree
   management commands.
-- Never infer "merged/shipped" from `git rev-list origin/main..<branch>` or
-  `git merge-base --is-ancestor` alone. Squash- and rebase-merges land the
-  work under a new SHA, so a fully-shipped branch still shows commits "not in
-  main" and a non-ancestor tip. Verify ship status against the forge's PR
-  merge state (step 3a) before classifying a gone branch as unmerged.
+- Never infer ship status from ancestry alone; verify the forge's PR state
+  and head at merge (step 3a).
 - A clean checkout whose branch is verified merged is stale. Switch the
   primary (non-bare) working tree back to the default branch; remove any other
   such worktree (step 9). Never switch a dirty checkout, or one whose branch is
@@ -73,11 +68,8 @@ Step 3a classifies them all.
 
 ### 3a) Verify ship status (gone upstream ≠ merged)
 
-A deleted upstream ("gone") does NOT prove the work shipped, and git ancestry
-is unreliable here: squash- and rebase-merges land the work under a new SHA, so
-a fully-shipped branch still shows commits "not in main" and a non-ancestor tip.
-Verify against the forge before deleting — gone-but-unmerged branches are the
-only ones that lose real work.
+A deleted upstream does not prove shipping. Squash- and rebase-merges change
+SHAs, so ancestry cannot prove it either. Verify against the forge.
 
 For each collected branch (GitHub example; substitute your forge CLI):
 
@@ -109,18 +101,31 @@ git worktree list
 git worktree prune --dry-run
 ```
 
-Cross-reference worktrees against the classified branches. Check each
-candidate worktree for dirty state:
+Cross-reference branches and check each candidate for dirty state:
 
 ```bash
 cd <worktree-path> && git status --short
 ```
 
+From the management directory, run the mandatory owner guard, including paths
+whose directories are already gone:
+
+```bash
+bash <skill-dir>/scripts/worktree.sh check <worktree-path> ...
+```
+
+It emits schema-1 JSONL: path, status, session/PID owners and discovery errors.
+Exit 0 means owner-free, 3 means owned, 4 means unknown (2 is usage).
+It requires Python 3.9+, lsof and zmx; `SOX_BIN` selects a sox CLI outside
+PATH. It checks process cwds, sox's current cwd and zmx's initial cwd,
+including descendants, deleted cwds and the sox backing namespace. Set
+`SOX_HOME`/`ZMX_DIR` for the host's actual namespaces; repeat for other homes.
+Run on the worktree's host. OS-inaccessible processes remain unverified.
+
 Categorize:
-- **Clean + merged**: safe to remove (the primary working tree is switched
-  instead, step 9)
-- **Dirty, or branch at risk**: flag for user review
-- **Prunable metadata**: orphaned worktree entries (directory already gone)
+- **Clean + merged + owner-free**: safe to remove (primary: step 9)
+- **Dirty, branch at risk, owned or unknown**: flag with each owner/error
+- **Prunable metadata**: directory gone; the same owner gate applies
 
 ### 4a) Review stashes
 
@@ -144,33 +149,37 @@ Present a summary table:
 ```
 Stale worktrees to remove:
   <path> (<branch>) [clean]
-  <path> (<branch>) [dirty — N uncommitted changes]
+  <path> (<branch>) [AT RISK — dirty / session tool:id / PID command / unknown: error]
 
 Stale branches:
   <branch>  [merged — PR #N, safe to delete]
   <branch>  [AT RISK — no merged PR / commits after merge; review first]
 
 Prunable worktree metadata:
-  <entry>
+  <entry> [owner-free / AT RISK — owners or errors]
 
 Stashes:
   stash@{N}  <age> on <base>  <files>  [likely landed | superseded | unshipped — evidence]
 ```
 
-Proceed with the verified-merged branches and clean worktrees immediately —
-they are recoverable interior deletions. Batch the **at risk** branches and
-**dirty** worktrees with the stashes into one confirmation, with the
-ship-status evidence in front of the user; only that class waits.
+Proceed with verified-merged branches and clean, owner-free worktrees.
+Batch all **at-risk** items and stashes into one confirmation with ship status
+and the exact owners and teardown proposed. An owned worktree is never interior.
 
 ### 6) Remove stale worktrees
 
-For each removable worktree:
+For an approved owned worktree, stop owners through their own tools first (the project's
+stack-down command, `sox kill <backing-id>`, or `zmx kill <name>` in the reported
+namespace). Signal only individually attributed PIDs; never a process-table
+selector. Approval does not turn a discovery error into an empty inventory:
+resolve it or skip. Recheck until owner-free, then remove through the guard:
 
 ```bash
-git worktree remove <name>
+bash <skill-dir>/scripts/worktree.sh remove <worktree-path>
 ```
 
-If removal fails (dirty), report and skip unless user approved force.
+The guard rechecks immediately before Git. A hit or error refuses removal;
+report and skip. Add `--force` only for approved dirty state.
 
 ### 7) Delete stale branches
 
@@ -190,8 +199,12 @@ commit it to a `wip/<topic>` branch in a clean worktree, then drop the stash.
 ### 8) Prune worktree metadata
 
 ```bash
-git worktree prune -v
+bash <skill-dir>/scripts/worktree.sh prune
 ```
+
+This guards every prunable entry, including deleted directories. If any is
+owned or unknown, no prune runs: report it, obtain approval for teardown, and
+retry after owners are gone. Never substitute a destructive Git remove/prune.
 
 ### 9) Restore and update important branches
 
