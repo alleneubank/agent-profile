@@ -92,7 +92,7 @@ def sox_sessions(sox_home):
             binary = str(installed)
     if not binary:
         return []
-    raw = query([binary, "ls", "--json", "--deadline-ms", "1000"],
+    raw = query([binary, "ls", "localhost", "--json", "--deadline-ms", "1000"],
                 {**os.environ, "SOX_HOME": sox_home}).stdout
     try:
         rows = [json.loads(line) for line in raw.splitlines() if line.strip()]

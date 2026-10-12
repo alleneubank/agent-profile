@@ -73,6 +73,31 @@ async function processIn(cwd: string) {
 }
 
 describe("worktree owner guard", () => {
+  it("checks local owners even when the fleet inventory is incomplete", () => {
+    const f = fixture();
+    writeFileSync(join(f.bin, "sox"), `#!/bin/bash
+if [ "$1" = ls ] && [ "$2" = localhost ]; then
+  cat "$HOME/sox.jsonl"
+else
+  echo '{"kind":"unreachable","host":"remote"}'
+  echo '{"kind":"summary","complete":false,"has_more":false,"hosts_answered":1}'
+fi
+`);
+    expect(f.report().row.status).toBe("clear");
+    f.sox([{ kind: "shell", host: "localhost", backing_id: "s3.g7", cwd: f.worktree, status: "live" }]);
+    const owned = f.report();
+    expect(owned.status).toBe(3);
+    expect(owned.row.owners).toContainEqual({
+      kind: "session", tool: "sox", target: "s3.g7", home: f.env.SOX_HOME,
+      state: "live", labels: null, directory: f.worktree,
+    });
+    expect(f.run("remove", f.worktree, "--force").status).toBe(3);
+    expect(existsSync(f.worktree)).toBe(true);
+    f.sox();
+    expect(f.run("remove", f.worktree).status).toBe(0);
+    expect(existsSync(f.worktree)).toBe(false);
+  });
+
   it("refuses removal, including force, with a process in a descendant; removes after it stops", async () => {
     const f = fixture();
     const nested = join(f.worktree, "nested");
