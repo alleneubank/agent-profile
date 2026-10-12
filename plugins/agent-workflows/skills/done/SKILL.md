@@ -28,7 +28,10 @@ or the task record when there is no pull request:
 - **Verdicts:** each invited role's verdict file and the head it saw.
 - **Noticed:** anything you saw that departs from the intent, even where its
   scenario passed. Passing a scenario does not clear what you noticed.
-- **Not checked:** what was skipped and why.
+- **Not checked:** what was skipped and why. Before calling a guarantee
+  held, list the input classes it covers and the check that drives each; a
+  class no check drives reads "not checked". A red negative control shows
+  only that the check catches the break it names.
 - **Author run:** the surface, the head, and that the author drove each changed
   flow. A guest's run is a separate row.
 - **High-risk:** the plan approval, and the rehearsal record (environment, head,
@@ -38,7 +41,8 @@ or the task record when there is no pull request:
 
 Give each role its charter by path, plus the inputs its charter lists, and
 nothing else: not your reasoning, not your diff unless the charter asks for
-it. Each returns a verdict file.
+it. Every review brief also names the neighbors your checks do not drive: nearby
+input classes, callers, and paths. Each returns a verdict file.
 
 | Role | Invite when | Charter |
 | --- | --- | --- |
