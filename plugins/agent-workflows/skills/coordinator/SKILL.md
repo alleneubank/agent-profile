@@ -21,7 +21,9 @@ through [scripts/lease.sh](scripts/lease.sh)
 [scripts/send.sh](scripts/send.sh)
 (`send.sh --charter <c> --role coordinator --to <host/sN.gM> --kind <k> < line`).
 Both identify your session and shell themselves; `send.sh` checks the lease
-and refuses a target that is not running an agent.
+and refuses a target that is not running an agent. Lanes start through
+[scripts/lane.sh](scripts/lane.sh) (`lane.sh slots|launch|cap|drift --fleet
+<caps file>`), which holds each host to its cap.
 
 ## Laws
 
@@ -114,7 +116,7 @@ read. Anything you cannot attribute to the charter belongs to another owner
    or parked since the last pass; file claims live state contradicts;
    anomalies; free disk on each lane host.
 3. Handle each change as a lane event (below).
-4. Fill each free lane slot with the next queued item that can move: it runs
+4. Fill each free lane slot (`lane.sh slots`) with the next queued item that can move: it runs
    to its first human gate (a publish go, a credential, device, or biometric
    step, a budget, a high-risk plan approval), parks there with the gate on
    the waiting list, and the slot takes the next item. A host below its disk
@@ -193,9 +195,8 @@ Change a running agent's brief only by addendum and pointer.
 1. Check: the theme is one the human chose, under its lane limit, with fewer
    than two parks and no pending design that rewrites this code; the problem
    reproduces on the current base; no hold covers it. Pick the host from the
-   charter's hosts by the capabilities the lane needs (fleet file) and load
-   across all owners, read live with `sox ls` and `lease.sh list`, never
-   stored in the fleet file; keep work on the same files on one stack;
+   charter's hosts by the capabilities the lane needs (fleet file) and the
+   free slots `lane.sh slots` reads live; keep work on the same files on one stack;
    reserve shared identifiers in the charter. If proof needs managed secrets,
    run the repo's secrets preflight in that worktree, with the lane's shell
    and flags, while the human can approve prompts.
@@ -221,10 +222,13 @@ Change a running agent's brief only by addendum and pointer.
    - Decisions use the question widget. That is the blocking decision interface.
    - Hooks do not run. The no-bypass sentence is the floor.
    - Scratch lives in <workspace root>. There is no ~/Work.
-   - You are a lane, not the coordinator. Do not run lease.sh or send.sh.
+   - You are a lane, not the coordinator. Do not run lease.sh, send.sh, or lane.sh.
    ```
-5. Launch as a sox shell on the lane host, labeled with owner and lane, named
-   after the lane. Proof of start is the transcript's first turn.
+5. Launch with `lane.sh launch --fleet <caps file> --host <h> --charter <c>
+   --lane <l> --launcher <name> -- <run.sh>`, the only way a lane starts. It
+   labels the shell; a host at its cap refuses (exit 7), and the lane waits in
+   the queue for a later pass. Name the agent after the lane. Proof of start
+   is the transcript's first turn.
 
 In-session subagents are for bounded reading and review that ends within the
 pass; anything that must outlive it is a sox shell.
@@ -358,6 +362,7 @@ limits go to the themes file, their decisions to the charter.
 
 Breaking a law, plus:
 
+- A lane started with a bare `sox new`, or on a host `lane.sh` refused
 - Sending the human to a lane's pane, or staying out of a lane they are
   talking to
 - "Landing now" with no log line proving it started

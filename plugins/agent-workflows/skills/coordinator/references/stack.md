@@ -19,7 +19,7 @@ The coordinator runs on Claude Code (SKILL.md); these are its tools.
 
 ## Scripts
 
-`lease.sh`, `send.sh`, and `retire.sh` live in `scripts/` beside the skill's `SKILL.md`
+`lease.sh`, `send.sh`, `lane.sh`, and `retire.sh` live in `scripts/` beside the skill's `SKILL.md`
 (the harness shows the skill's base directory when it loads). Each script's
 header is its reference. The caller is `CLAUDE_CODE_SESSION_ID` in the shell
 `sox which` names; the target's foreground comes from `sox ls <host>`, and
@@ -27,7 +27,12 @@ header is its reference. The caller is `CLAUDE_CODE_SESSION_ID` in the shell
 to `~/.handoffs/<charter>/sent.log` on the sending host. On a lane host, find
 the installed `send.sh` before writing it into a brief:
 `ls ~/.claude/plugins/cache/agent-profile/agent-workflows/*/skills/coordinator/scripts/send.sh ~/.codex/plugins/cache/agent-profile/agent-workflows/*/skills/coordinator/scripts/send.sh 2>/dev/null | tail -1`.
-They need bash 3.2 or later and coreutils; remote State writes also use ssh.
+They need bash 3.2 or later and coreutils; remote State writes also use ssh,
+and `lane.sh` needs jq. While many coordinators run at once, whoever starts
+them also starts `lane.sh drift --fleet <caps file> --every 300 --stop-at <end>`
+in a sox shell on the control host labeled `role=fleet-check`, and kills it at
+the end. It costs no agent turns; its findings are in
+`~/.handoffs/fleet-drift.txt`.
 `lease.sh state <c> --state <word> --fleet <absolute path> [--fleet-host <host>]`
 writes only that registry row's State, under a fleet-wide lock (exit 5 busy).
 Its stdout is `<charter>\t<state>\tchanged|unchanged`.
@@ -73,7 +78,7 @@ is refused by name.
 | Roster | `sox ls [host] [--json]` | Each answering daemon's rows now, with labels. A silent host still exits 0: check `complete` in `--json`. `no-reply`, `unknown`, and `cold` do not mean dead. `cmd` shows a wrapper shell (`zsh`, `bash`) or a version string for a running agent: confirm the agent with `ps` on its host. |
 | Attention | `sox watch <sN.gM> --until done\|blocked --timeout 3` | Last observed state (exit 3 on timeout). An agent waiting on its own question, or one held at a [startup dialog](#startup-dialogs), can still read `working`: read its latest turn. |
 | Message | `send.sh --charter <c> --role <r> --to <host/sN.gM> --kind <k> < message` | Delivery only; stderr names the shell, command, and cwd it reached. Without `--enter` the text sits unsubmitted, and a send into a finished row still reports sent. Confirm a new user turn in the agent's transcript. A sent line looks like the human's typing to the target, which is why `send.sh` adds the header. |
-| Launch | `sox new <host> --no-attach --exec -- <run.sh>` | Stdout is exactly `<host>/<backing-id>` for a remote host, a bare id locally: a minted shell, not a running agent. There is no path argument, so `run.sh` owns `cd`. Observed 2026-10-12: the shell started in `$HOME`. |
+| Launch | `lane.sh launch ... -- <run.sh>` (wraps `sox new <host> --no-attach --exec -- <run.sh>`) | Prints host, backing id, lanes, cap: a minted shell, not a running agent. There is no path argument, so `run.sh` owns `cd`. Observed 2026-10-12: the shell started in `$HOME`. |
 | Label | `sox label <host>/<sN.gM> owner=<charter> lane=<l>` (local: `sox label <sN.gM> ...`) | Observed 2026-10-12 with sox v0.3.30: from aem5, `sox label s10.g1506 k=v` failed for an ae-dev shell; `sox label ae-dev/s10.g1506 k=v` worked. Labels belong to that generation only. If it fails, `ssh <host> '<host SOX_HOME> ~/.sox/bin/soxd label <sN.gM> k=v'` has worked. Your own shell is `$ZMX_SESSION`; label it `role=coordinator charter=<name>`. |
 | Wait | `sox wait <target> --timeout S` | Exit code of a `--no-attach --exec` task (3 timeout, 42 gone); not task success. |
 | Retire | `sox kill <host>/<sN.gM>` | Only shells you can attribute; `--prove-gone` when the process already died outside sox. Never a bare `sox down`. |
