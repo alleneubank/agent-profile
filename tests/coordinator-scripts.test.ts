@@ -394,11 +394,10 @@ const LANE = join(SCRIPTS, "lane.sh");
 // the fixture's PATH leads with the first jq that is not a shim.
 const JQ_DIR = spawnSync("sh", ["-c", "which -a jq | grep -v /shims/ | head -n 1"], { encoding: "utf8" }).stdout.trim().replace(/\/jq$/, "");
 
-// Each lane.sh run makes many jq calls, so these tests get a longer timeout.
 // A stub sox that keeps its shells in rows.jsonl: `new` adds an unlabeled row,
 // `label` sets its labels, `kill` removes it, and `ls` answers for one host
 // with a summary row, incomplete for a host listed in unreachable.
-function lanes() {
+async function lanes() {
   const home = mkdtempSync(join(tmpdir(), "coordinator-lanes-"));
   const coordination = join(home, "handoffs");
   mkdirSync(join(coordination, "demo"), { recursive: true });
@@ -462,12 +461,23 @@ esac
     return e;
   };
   function run(script: string, args: string[], who: Caller | null = ONE, now = "2026-10-12T02:00:00Z") {
-    const result = spawnSync("/bin/bash", [script, ...args], { env: env(who, now), encoding: "utf8" });
-    return { status: result.status, stdout: result.stdout, stderr: result.stderr };
+    // Keep the worker responsive to runner messages while a shell is working.
+    return new Promise<{ status: number; stdout: string; stderr: string }>((resolve, reject) => {
+      execFile("/bin/bash", [script, ...args], {
+        env: env(who, now), encoding: "utf8", timeout: PROCESS_TIMEOUT_MS,
+      }, (error, stdout, stderr) => {
+        const status = error ? error.code : 0;
+        if (typeof status === "number") {
+          resolve({ status, stdout, stderr });
+        } else {
+          reject(error);
+        }
+      });
+    });
   }
   function start(args: string[]): Promise<{ status: number | null; stdout: string }> {
     return new Promise((done) => {
-      const child = spawn("/bin/bash", [LANE, ...args], { env: env(ONE, "2026-10-12T02:00:00Z") });
+      const child = spawn("/bin/bash", [LANE, ...args], { env: env(ONE, "2026-10-12T02:00:00Z"), timeout: PROCESS_TIMEOUT_MS });
       let stdout = "";
       child.stdout.on("data", (chunk) => (stdout += chunk));
       child.on("close", (status) => done({ status, stdout }));
@@ -484,29 +494,29 @@ esac
   const typed = () => (existsSync(join(home, "typed")) ? readFileSync(join(home, "typed"), "utf8").split("\n").filter(Boolean) : []);
   const shells = () => readFileSync(rows, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line));
   const launched = () => (existsSync(join(home, "launched")) ? readFileSync(join(home, "launched"), "utf8").split("\n").filter(Boolean) : []);
-  run(LEASE, ["take", "demo", "--reason", "the human: become the coordinator"]);
+  await run(LEASE, ["take", "demo", "--reason", "the human: become the coordinator"]);
   return { home, caps, run, start, launch, cap, slots, shells, launched, add, drift, typed };
 }
 
-describe("lane.sh", { timeout: 60_000 }, () => {
-  it("launches a labeled lane while the host is under its cap, then refuses at the cap", () => {
-    const f = lanes();
-    expect(f.cap("onyx", 1).status).toBe(0);
-    const first = f.run(LANE, f.launch("onyx", "glyphs"));
+describe("lane.sh", () => {
+  it("launches a labeled lane while the host is under its cap, then refuses at the cap", async () => {
+    const f = await lanes();
+    expect((await f.cap("onyx", 1)).status).toBe(0);
+    const first = await f.run(LANE, f.launch("onyx", "glyphs"));
     expect(first.status).toBe(0);
     expect(first.stdout).toMatch(/^onyx\ts\d+\.g1\t1\t1\n$/);
     expect(f.shells()[0].labels).toEqual({ owner: "demo", charter: "demo", lane: "glyphs", launcher: "yolosonnet" });
     expect(f.launched()).toEqual(["new onyx --no-attach --exec -- /lanes/run.sh"]);
 
-    const second = f.run(LANE, f.launch("onyx", "fonts"));
+    const second = await f.run(LANE, f.launch("onyx", "fonts"));
     expect(second.status).toBe(7);
     expect(second.stderr).toContain("onyx 1/1 full");
     expect(f.launched()).toHaveLength(1);
   });
 
   it("gives two simultaneous launches for one slot to exactly one of them", async () => {
-    const f = lanes();
-    f.cap("onyx", 1);
+    const f = await lanes();
+    await f.cap("onyx", 1);
     const results = await Promise.all([f.start(f.launch("onyx", "a")), f.start(f.launch("onyx", "b"))]);
     // The loser is refused at the cap, or as busy when the winner holds the
     // lock past the fixture's short wait; either way it launches nothing.
@@ -516,90 +526,90 @@ describe("lane.sh", { timeout: 60_000 }, () => {
     expect(f.shells()).toHaveLength(1);
   });
 
-  it("refuses a host with no cap, and one sox cannot count", () => {
-    const f = lanes();
-    const uncapped = f.run(LANE, f.launch("onyx", "glyphs"));
+  it("refuses a host with no cap, and one sox cannot count", async () => {
+    const f = await lanes();
+    const uncapped = await f.run(LANE, f.launch("onyx", "glyphs"));
     expect(uncapped.status).toBe(6);
     expect(uncapped.stderr).toContain("onyx has no cap");
-    f.cap("ae-dev", 4);
+    await f.cap("ae-dev", 4);
     writeFileSync(join(f.home, "unreachable"), "ae-dev\n");
-    expect(f.run(LANE, f.launch("ae-dev", "glyphs")).status).toBe(6);
+    expect((await f.run(LANE, f.launch("ae-dev", "glyphs"))).status).toBe(6);
     expect(f.launched()).toEqual([]);
   });
 
-  it("refuses a second shell for a lane that already has one", () => {
-    const f = lanes();
-    f.cap("onyx", 4);
-    f.run(LANE, f.launch("onyx", "glyphs"));
-    const again = f.run(LANE, f.launch("onyx", "glyphs"));
+  it("refuses a second shell for a lane that already has one", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 4);
+    await f.run(LANE, f.launch("onyx", "glyphs"));
+    const again = await f.run(LANE, f.launch("onyx", "glyphs"));
     expect(again.status).toBe(8);
     expect(f.shells()).toHaveLength(1);
   });
 
-  it("kills a shell it could not label, so no uncounted lane runs", () => {
-    const f = lanes();
-    f.cap("onyx", 4);
+  it("kills a shell it could not label, so no uncounted lane runs", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 4);
     writeFileSync(join(f.home, "label-fails"), "");
-    const result = f.run(LANE, f.launch("onyx", "glyphs"));
+    const result = await f.run(LANE, f.launch("onyx", "glyphs"));
     expect(result.status).toBe(9);
     expect(f.shells()).toEqual([]);
   });
 
-  it("launches only for the holder of the charter's watch", () => {
-    const f = lanes();
-    f.cap("onyx", 4);
-    expect(f.run(LANE, f.launch("onyx", "glyphs"), TWO).status).toBe(4);
+  it("launches only for the holder of the charter's watch", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 4);
+    expect((await f.run(LANE, f.launch("onyx", "glyphs"), TWO)).status).toBe(4);
     expect(f.launched()).toEqual([]);
   });
 
-  it("waits a bounded time for a held fleet lock, then reports its holder", () => {
-    const f = lanes();
-    f.cap("onyx", 4);
+  it("waits a bounded time for a held fleet lock, then reports its holder", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 4);
     mkdirSync(`${f.caps}.lock`);
     writeFileSync(`${f.caps}.lock/holder`, "elsewhere pid 1");
-    const result = f.run(LANE, f.launch("onyx", "glyphs"));
+    const result = await f.run(LANE, f.launch("onyx", "glyphs"));
     expect(result.status).toBe(5);
     expect(result.stderr).toContain("elsewhere pid 1");
     expect(f.launched()).toEqual([]);
   });
 
-  it("counts the caller's own host as localhost", () => {
-    const f = lanes();
-    f.cap("control", 1);
-    expect(f.run(LANE, f.launch("control", "glyphs")).status).toBe(0);
+  it("counts the caller's own host as localhost", async () => {
+    const f = await lanes();
+    await f.cap("control", 1);
+    expect((await f.run(LANE, f.launch("control", "glyphs"))).status).toBe(0);
     expect(f.launched()).toEqual(["new localhost --no-attach --exec -- /lanes/run.sh"]);
-    expect(f.slots().stdout).toBe("control\t1\t1\tfull\n");
+    expect((await f.slots()).stdout).toBe("control\t1\t1\tfull\n");
   });
 
-  it("reports each host's slots, and a temporary cap lapses to its after value", () => {
-    const f = lanes();
-    f.cap("onyx", 2);
-    f.cap("pixelproton", 0);
-    f.cap("ae-dev", 6, "--until", "2026-10-12T16:00:00Z", "--after", "1");
-    f.run(LANE, f.launch("ae-dev", "a"));
-    f.run(LANE, f.launch("ae-dev", "b"));
+  it("reports each host's slots, and a temporary cap lapses to its after value", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 2);
+    await f.cap("pixelproton", 0);
+    await f.cap("ae-dev", 6, "--until", "2026-10-12T16:00:00Z", "--after", "1");
+    await f.run(LANE, f.launch("ae-dev", "a"));
+    await f.run(LANE, f.launch("ae-dev", "b"));
     writeFileSync(join(f.home, "unreachable"), "onyx\n");
-    expect(f.slots().stdout).toBe("ae-dev\t2\t6\tfree\nonyx\t-\t2\tunknown\npixelproton\t0\t0\tclosed\n");
-    expect(f.slots("2026-10-12T16:00:00Z").stdout).toContain("ae-dev\t2\t1\tover\n");
+    expect((await f.slots()).stdout).toBe("ae-dev\t2\t6\tfree\nonyx\t-\t2\tunknown\npixelproton\t0\t0\tclosed\n");
+    expect((await f.slots("2026-10-12T16:00:00Z")).stdout).toContain("ae-dev\t2\t1\tover\n");
   });
 
-  it("rejects caps it cannot hold", () => {
-    const f = lanes();
-    expect(f.cap("onyx", 65).status).toBe(2);
-    expect(f.cap("onyx", 2, "--until", "tonight", "--after", "1").status).toBe(2);
-    expect(f.cap("onyx", 2, "--until", "2026-10-12T16:00:00Z").status).toBe(2);
-    expect(f.run(LANE, ["cap", "--fleet", f.caps, "--host", "onyx", "--cap", "2", "--why", "a\nb"]).status).toBe(2);
+  it("rejects caps it cannot hold", async () => {
+    const f = await lanes();
+    expect((await f.cap("onyx", 65)).status).toBe(2);
+    expect((await f.cap("onyx", 2, "--until", "tonight", "--after", "1")).status).toBe(2);
+    expect((await f.cap("onyx", 2, "--until", "2026-10-12T16:00:00Z")).status).toBe(2);
+    expect((await f.run(LANE, ["cap", "--fleet", f.caps, "--host", "onyx", "--cap", "2", "--why", "a\nb"])).status).toBe(2);
     expect(existsSync(f.caps)).toBe(false);
   });
 });
 
-describe("lane.sh drift", { timeout: 60_000 }, () => {
+describe("lane.sh drift", () => {
   const coordinator = { host: "localhost", backing_id: "s9.g1", attention: "done", labels: { role: "coordinator", charter: "demo", state: "live" } };
   const lane = (backing: string, charter = "demo") => ({ host: "onyx", backing_id: backing, labels: { lane: backing, charter } });
 
-  it("reports an over-cap host once, as evidence to each live coordinator with a lane there, and its clearing", () => {
-    const f = lanes();
-    f.cap("onyx", 1);
+  it("reports an over-cap host once, as evidence to each live coordinator with a lane there, and its clearing", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 1);
     writeFileSync(join(f.home, "probe-onyx"), "16 3.0 40\n");
     f.add(coordinator);
     f.add({ ...coordinator, backing_id: "s8.g1", labels: { role: "coordinator", charter: "other", state: "live" } });
@@ -607,7 +617,7 @@ describe("lane.sh drift", { timeout: 60_000 }, () => {
     f.add(lane("a"));
     f.add(lane("b", "other"));
 
-    const first = f.drift();
+    const first = await f.drift();
     expect(first.status).toBe(0);
     expect(first.stdout).toBe("new\tover\tonyx\t2/1 lanes\n");
     expect(f.typed().sort()).toEqual([
@@ -615,27 +625,27 @@ describe("lane.sh drift", { timeout: 60_000 }, () => {
       "[other fleet-check → s8.g1; evidence] Fleet drift: over onyx, 2/1 lanes. lane.sh slots shows every host.",
     ]);
 
-    expect(f.drift().stdout).toBe("");
+    expect((await f.drift()).stdout).toBe("");
     expect(f.typed()).toHaveLength(2);
 
-    f.cap("onyx", 2);
-    expect(f.drift().stdout).toBe("cleared\tover\tonyx\n");
+    await f.cap("onyx", 2);
+    expect((await f.drift()).stdout).toBe("cleared\tover\tonyx\n");
   });
 
-  it("reports load only on its second consecutive check", () => {
-    const f = lanes();
-    f.cap("onyx", 4);
+  it("reports load only on its second consecutive check", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 4);
     writeFileSync(join(f.home, "probe-onyx"), "16 880.0 3\n");
-    expect(f.drift().stdout).toBe("");
-    expect(f.drift().stdout).toBe("new\tload\tonyx\t55.0 per core\nnew\tmemory\tonyx\t3% free\n");
+    expect((await f.drift()).stdout).toBe("");
+    expect((await f.drift()).stdout).toBe("new\tload\tonyx\t55.0 per core\nnew\tmemory\tonyx\t3% free\n");
     const recorded = readFileSync(join(f.home, "handoffs", "fleet-drift.txt"), "utf8");
     expect(recorded).toContain("load\tonyx\t55.0 per core\t2026-10-12T02:00:00Z\treported\n");
   });
 
-  it("lists a blocked coordinator without sending it anything, an unlabeled agent under ~/Work as a bypass, and an unreachable host as unknown", () => {
-    const f = lanes();
-    f.cap("onyx", 4);
-    f.cap("ae-dev", 4);
+  it("lists a blocked coordinator without sending it anything, an unlabeled agent under ~/Work as a bypass, and an unreachable host as unknown", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 4);
+    await f.cap("ae-dev", 4);
     writeFileSync(join(f.home, "probe-onyx"), "16 3.0 40\n");
     writeFileSync(join(f.home, "unreachable"), "ae-dev\n");
     f.add({ ...coordinator, labels: { role: "coordinator", charter: "demo", state: "blocked-on-human" } });
@@ -645,7 +655,7 @@ describe("lane.sh drift", { timeout: 60_000 }, () => {
     f.add({ host: "onyx", backing_id: "s6.g1", cwd: "/home/ae/alleneubank/x" });
     f.add({ host: "onyx", backing_id: "s4.g1", cwd: "/home/ae/Work/y", attention: null });
 
-    const lines = f.drift().stdout.split("\n").filter(Boolean).sort();
+    const lines = (await f.drift()).stdout.split("\n").filter(Boolean).sort();
     expect(lines).toEqual([
       "new\tblocked\tdemo\tcontrol/s9.g1",
       "new\tbypass\tonyx\ts5.g1 /home/ae/Work/alleneubank/x",
@@ -655,11 +665,11 @@ describe("lane.sh drift", { timeout: 60_000 }, () => {
     expect(f.typed()).toEqual([]);
   });
 
-  it("repeats only with a bounded interval and a stop time", () => {
-    const f = lanes();
-    f.cap("onyx", 4);
-    expect(f.drift("--every", "300").status).toBe(2);
-    expect(f.drift("--every", "5", "--stop-at", "2026-10-12T16:00:00Z").status).toBe(2);
-    expect(f.drift("--every", "300", "--stop-at", "2026-10-12T01:00:00Z").status).toBe(0);
+  it("repeats only with a bounded interval and a stop time", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 4);
+    expect((await f.drift("--every", "300")).status).toBe(2);
+    expect((await f.drift("--every", "5", "--stop-at", "2026-10-12T16:00:00Z")).status).toBe(2);
+    expect((await f.drift("--every", "300", "--stop-at", "2026-10-12T01:00:00Z")).status).toBe(0);
   });
 });
