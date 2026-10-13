@@ -121,6 +121,10 @@ PATH. It checks process cwds, sox's current cwd and zmx's initial cwd,
 including descendants, deleted cwds and the sox backing namespace. Set
 `SOX_HOME`/`ZMX_DIR` for the host's actual namespaces; repeat for other homes.
 Run on the worktree's host. OS-inaccessible processes remain unverified.
+Each discovery query has a 15-second timeout. On a loaded host, set
+`WORKTREE_QUERY_TIMEOUT_SECONDS` to a positive number of seconds, at most 300;
+timeouts still refuse removal and prune. This limit applies to each query,
+so a caller's overall deadline must also allow the remaining discovery queries.
 
 Categorize:
 - **Clean + merged + owner-free**: safe to remove (primary: step 9)

@@ -6,6 +6,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { PROCESS_TIMEOUT_MS } from "./process-timeout";
 
 const SCRIPT = resolve(__dirname, "../plugins/agent-workflows/skills/git-worktree-tidy/scripts/worktree.sh");
+// Owner scenarios issue several commands, each with its own process deadline.
+const OWNER_TEST_TIMEOUT_MS = 2 * PROCESS_TIMEOUT_MS;
 const scratch: string[] = [];
 afterEach(() => { for (const path of scratch.splice(0)) rmSync(path, { recursive: true, force: true }); });
 
@@ -20,6 +22,7 @@ async function fixture() {
     PATH: `${bin}:${process.env.PATH ?? "/usr/bin:/bin"}`, HOME: home,
     SOX_HOME: join(home, "sox-home"), SOX_BIN: join(bin, "sox"),
     ZMX_DIR: join(home, "zmx-home"), TMPDIR: home,
+    WORKTREE_QUERY_TIMEOUT_SECONDS: String(PROCESS_TIMEOUT_MS / 1000),
   };
   function execute(command: string, args: string[]) {
     return new Promise<{ status: number; stdout: string; stderr: string }>((resolve, reject) => {
@@ -68,7 +71,7 @@ async function fixture() {
 }
 
 async function processIn(cwd: string) {
-  const child = spawn("/bin/sh", ["-c", `printf ready; exec sleep ${PROCESS_TIMEOUT_MS / 1000}`], { cwd });
+  const child = spawn("/bin/sh", ["-c", `printf ready; exec sleep ${OWNER_TEST_TIMEOUT_MS / 1000}`], { cwd });
   const closed = new Promise<void>((resolve, reject) => {
     child.once("error", reject);
     child.once("close", () => resolve());
@@ -81,7 +84,34 @@ async function processIn(cwd: string) {
   return { pid: child.pid, stop: async () => { child.kill("SIGTERM"); await closed; } };
 }
 
-describe("worktree owner guard", () => {
+describe("worktree owner guard", { timeout: OWNER_TEST_TIMEOUT_MS }, () => {
+  it("refuses removal when discovery times out and completes with a longer caller limit", async () => {
+    const f = await fixture();
+    writeFileSync(join(f.bin, "zmx"), `#!/bin/bash
+exec python3 -c 'import os, time; time.sleep(0.2); print("no sessions found in " + os.environ["ZMX_DIR"])'
+`);
+    f.env.WORKTREE_QUERY_TIMEOUT_SECONDS = "0.05";
+    const refused = await f.report();
+    expect(refused.status).toBe(4);
+    expect(refused.row.status).toBe("unknown");
+    expect(refused.row.errors.join(" ")).toMatch(/zmx.*timed out/);
+    expect((await f.run("remove", f.worktree, "--force")).status).toBe(4);
+    expect(existsSync(f.worktree)).toBe(true);
+    f.env.WORKTREE_QUERY_TIMEOUT_SECONDS = String(PROCESS_TIMEOUT_MS / 1000);
+    expect((await f.report()).row.status).toBe("clear");
+    expect((await f.run("remove", f.worktree)).status).toBe(0);
+    expect(existsSync(f.worktree)).toBe(false);
+  });
+
+  it.each(["0", "-1", "nan", "inf", "301", "1e308", "invalid"])("refuses an invalid discovery timeout %s", async (timeout) => {
+    const f = await fixture();
+    f.env.WORKTREE_QUERY_TIMEOUT_SECONDS = timeout;
+    const refused = await f.run("remove", f.worktree, "--force");
+    expect(refused.status).toBe(4);
+    expect(refused.stderr).toContain("WORKTREE_QUERY_TIMEOUT_SECONDS must be greater than zero and at most 300 seconds");
+    expect(existsSync(f.worktree)).toBe(true);
+  });
+
   it("checks local owners even when the fleet inventory is incomplete", async () => {
     const f = await fixture();
     writeFileSync(join(f.bin, "sox"), `#!/bin/bash
