@@ -29,8 +29,14 @@ express it: the compiler, then rules an existing linter already ships, turned
 on and configured, then a behavior test. Craft rules a mainstream linter or
 compiler already checks (function length, complexity, warnings as errors,
 unchecked results, unused values) are enforced through that tool's
-configuration. A project never writes its own source checks: no analyzer
-scripts, linter plugins, or custom rule files. A check that only confirms a
+configuration. A project never writes its own checks over its repository,
+whether they read source or artifacts such as schemas, manifests, plans, and
+docs: no analyzer scripts, linter plugins, custom rule files, or checkers
+that re-judge an artifact. Data that crosses a boundary has one typed
+definition that each reader parses at its boundary; its test feeds vectors
+written from the spec through the product's own parser. A second hand-written
+interpreter of the same data is a duplicate, not independence. A finding that
+something is not typed is answered with a type. A check that only confirms a
 file or string changed prevents no defect and is not added. When no rung can
 hold an invariant, because the defect is rare, hard to enforce, or impossible
 to catch, a waiver comment at the site says it is unchecked; it does not

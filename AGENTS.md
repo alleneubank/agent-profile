@@ -49,7 +49,8 @@ passes; add a check only for a named risk it would expose.
 - Security work states its threat model and hands it to the reviewer;
   `code-law` holds the default model and how findings outside it are answered.
 - Hold an invariant by construction before checking it, and never write
-  project-specific source checks; `code-law` has the ladder and the waiver form.
+  project-specific source or artifact checks; `code-law` has the ladder and
+  the waiver form.
 - When runs keep stopping on missing settings, secrets, or seeds in your own
   environment, add a check that fails before the next run starts and names
   what is missing; a third party's outage gets attribution, not a gate.
