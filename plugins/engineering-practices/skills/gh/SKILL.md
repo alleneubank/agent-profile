@@ -210,8 +210,9 @@ approximate one by chaining `gh pr create --base <parent-branch>`.
   all-or-nothing. `gh pr merge` cannot merge a stack. Merge and `submit`
   publish per the usual publish rules.
 - A request to merge a stack "as one" or "all at once" means that single
-  `gh stack merge` of the top PR, landing one commit per layer once every
-  layer is ready with required checks green. It never means retargeting the
+  `gh stack merge <top-pr> --yes` with the repository's merge method passed
+  explicitly (`--squash` lands one commit per layer; without a flag it reuses
+  the last-used method), once every layer is ready with required checks green. It never means retargeting the
   top PR to the trunk and squashing the stack into one commit; do that only
   when the human asks for one commit or one PR.
 - `gh stack link <branch|pr>...` (bottom to top) stacks PRs whose branches
