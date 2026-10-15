@@ -183,10 +183,11 @@ and ask, or route it to a design session.
 2. Send the pointer with `send.sh --kind relay` in the form the lane's brief (as amended by its addenda) names; today's form
    is `Human decision (<UTC time>, via coordinator, addendum-N): <exact
    action>`, and older briefs may name "Relayed decision".
-3. Confirm a new turn landed. A headless lane is relaunched with the
-   addendum instead. A lane that refuses a well-formed relay gets the
-   Coordination section as an addendum, then a relaunch with the decision in
-   its brief.
+3. Confirm a new turn landed. Relay only through `send.sh`; never answer a
+   lane's question or dialog with keys or `sox send --answer`. A headless
+   lane is relaunched with the addendum instead. A lane that refuses a
+   well-formed relay gets the Coordination section as an addendum, then a
+   relaunch with the decision in its brief.
 
 Change a running agent's brief only by addendum and pointer.
 
@@ -228,10 +229,16 @@ Change a running agent's brief only by addendum and pointer.
    - You are a lane, not the coordinator. Do not run lease.sh, send.sh, or lane.sh.
    ```
 5. Launch with `lane.sh launch --fleet <caps file> --host <h> --charter <c>
-   --lane <l> --launcher <name> -- <run.sh>`, the only way a lane starts. It
-   labels the shell; a host at its cap refuses (exit 7), and the lane waits in
-   the queue for a later pass. Name the agent after the lane. Proof of start
-   is the transcript's first turn.
+   --lane <l> --launcher <name> --pretrust <config dir>|none [--workdir <dir>]
+   -- <run.sh>`, the only way a lane starts. For a Claude agent it first
+   answers the startup dialogs ([stack.md](references/stack.md#startup-dialogs)
+   names each launcher's config dir); a directory the grant leaves to the
+   human refuses (exit 10) and goes on the waiting list. It labels the shell;
+   a host at its cap refuses (exit 7), and the lane waits in the queue for a
+   later pass. Name the agent after the lane. Proof of start is the
+   transcript's first turn. A Claude with no first turn after 90 seconds is
+   at a startup dialog: never send it keys or `sox send --answer`; put it on
+   the waiting list with its `sox attach` command.
 
 In-session subagents are for bounded reading and review that ends within the
 pass; anything that must outlive it is a sox shell.
@@ -273,7 +280,8 @@ The watch changes hands only when the session has ended or the human asks
 - **Rotate** (the human asks): write the handoff (scorecard, handover table,
   waiting list, grants in force, footprint left on each host and why), then
   launch a successor in a sox shell on the control host with the coordinator
-  skill, the handoff, and your session id for `/recall continue`. It takes
+  skill, the handoff, and your session id for `/recall continue`, after
+  `claude-pretrust` for its directory (stack.md, Startup dialogs). It takes
   the watch with `lease.sh take <charter> --reason` quoting the request. Once
   your `lease.sh check <charter>` fails, stop the heartbeat and end with the
   handoff path; the successor retires your shell unless the
@@ -356,16 +364,18 @@ limits go to the themes file, their decisions to the charter.
   the fleet file with an owner charter and an expiry; another charter waits
   and puts the conflict on the human's waiting list. A checkout belongs to
   one lane at a time.
-- **Attended sessions** the human asks for: a short brief, an interactive
-  launch on the control host labeled `owner=human attended=<topic>`, a
-  confirmed first turn, and the attach command. Never relay into it or act on
-  it until they say to fold it in; then their decisions go to the charter.
+- **Attended sessions** the human asks for: a short brief, `claude-pretrust`
+  for its directory, an interactive launch on the control host labeled
+  `owner=human attended=<topic>`, a confirmed first turn, and the attach
+  command. Never relay into it or act on it until they say to fold it in;
+  then their decisions go to the charter.
 
 ## Red flags
 
 Breaking a law, plus:
 
 - A lane started with a bare `sox new`, or on a host `lane.sh` refused
+- Keys or `sox send --answer` typed into an agent's dialog or question
 - Sending the human to a lane's pane, or staying out of a lane they are
   talking to
 - "Landing now" with no log line proving it started

@@ -75,10 +75,10 @@ is refused by name.
 
 | Need | Command | Proves / does not prove |
 |---|---|---|
-| Roster | `sox ls [host] [--json]` | Each answering daemon's rows now, with labels. A silent host still exits 0: check `complete` in `--json`. `no-reply`, `unknown`, and `cold` do not mean dead. `cmd` shows a wrapper shell (`zsh`, `bash`) or a version string for a running agent: confirm the agent with `ps` on its host. |
+| Roster | `sox ls [host] [--json]` | Each answering daemon's rows now, with labels. `--json` is NDJSON, one object per line (`kind` `shell`, `summary`, ...): parse it line by line or with `jq -s`, never as one JSON document. A row's `target` can be a bare handle (`ae-dev/s1`) that `send` refuses: address the row as `<host>/<backing_id>`. A silent host still exits 0: check `complete` in `--json`. `no-reply`, `unknown`, and `cold` do not mean dead. `cmd` shows a wrapper shell (`zsh`, `bash`) or a version string for a running agent: confirm the agent with `ps` on its host. |
 | Attention | `sox watch <sN.gM> --until done\|blocked --timeout 3` | Last observed state (exit 3 on timeout). An agent waiting on its own question, or one held at a [startup dialog](#startup-dialogs), can still read `working`: read its latest turn. |
 | Message | `send.sh --charter <c> --role <r> --to <host/sN.gM> --kind <k> < message` | Delivery only; stderr names the shell, command, and cwd it reached. Without `--enter` the text sits unsubmitted, and a send into a finished row still reports sent. Confirm a new user turn in the agent's transcript. A sent line looks like the human's typing to the target, which is why `send.sh` adds the header. |
-| Launch | `lane.sh launch ... -- <run.sh>` (wraps `sox new <host> --no-attach --exec -- <run.sh>`) | Prints host, backing id, lanes, cap: a minted shell, not a running agent. There is no path argument, so `run.sh` owns `cd`. Observed 2026-10-12: the shell started in `$HOME`. |
+| Launch | `lane.sh launch ... --pretrust <config dir>\|none [--workdir <dir>] -- <run.sh>` (runs `claude-pretrust` for a Claude agent, then `sox new <host> --no-attach --exec -- <run.sh>`) | Prints host, backing id, lanes, cap: a minted shell, not a running agent. Exit 10: the [startup dialogs](#startup-dialogs) are the human's. `--workdir` only names the directory for pretrust: `run.sh` still owns `cd`. Observed 2026-10-12: the shell started in `$HOME`. |
 | Label | `sox label <host>/<sN.gM> owner=<charter> lane=<l>` (local: `sox label <sN.gM> ...`) | Observed 2026-10-12 with sox v0.3.30: from aem5, `sox label s10.g1506 k=v` failed for an ae-dev shell; `sox label ae-dev/s10.g1506 k=v` worked. Labels belong to that generation only. If it fails, `ssh <host> '<host SOX_HOME> ~/.sox/bin/soxd label <sN.gM> k=v'` has worked. Your own shell is `$ZMX_SESSION`; label it `role=coordinator charter=<name>`. |
 | Wait | `sox wait <target> --timeout S` | Exit code of a `--no-attach --exec` task (3 timeout, 42 gone); not task success. |
 | Retire | `sox kill <host>/<sN.gM>` | Only shells you can attribute; `--prove-gone` when the process already died outside sox. Never a bare `sox down`. |
@@ -143,14 +143,23 @@ always asks; a worktree of an ordinary checkout shares the main checkout's
 answers. Each account keeps its own answers: `~/.claude.json` for the
 `yolo*` launchers, `~/.claude-send/.claude.json` for `syolo*`.
 
-Before launching Claude in a worktree you created, answer them under the
-human's standing grant:
-`claude-pretrust --fix [--config-dir ~/.claude-send] <worktree>` (on the lane
-host). It writes only what the grant covers: trust when another checkout of
-the repository is already trusted, imports when every external one lands in
+Before Claude starts in a directory, answer them under the human's standing
+grant with `claude-pretrust --fix --config-dir <config dir> <dir>` on that
+host. `lane.sh launch` does this for every lane from `--pretrust <config dir>`
+and `--workdir <dir>`, both on the lane host, absolute or relative to its
+home: the config dir is `.` for the personal Claude launchers, `.claude-send`
+for the Send ones (`s*`), and `.local/share/claudex/personal/claude` or
+`.local/share/claudex/send/claude` for the claudex ones (`*x`); another
+harness passes `--pretrust none`. Every other Claude launch, a coordinator's
+successor or an attended session included, runs the command itself first.
+It writes only what the grant covers: trust when another checkout of the
+repository is already trusted, imports when every external one lands in
 dotfiles `profiles/instructions`, and the servers `.mcp.json` names. Exit 3
-means the grant does not cover this worktree and nothing was written: the
-human answers it. Never answer a dialog by keystroke.
+(lane.sh exit 10) means the grant does not cover this directory and nothing
+was written: a main checkout and a plain directory, such as a coordinator or
+cross-repo workspace, always land here. Launch nothing there: put it on the
+waiting list, and launch once the human has answered it. Never answer a
+dialog by keystroke, and never `sox send --answer` into one.
 
 Proof of start is the agent's transcript with its first turn:
 `~/.claude/projects/<cwd with / and . as ->/<id>.jsonl` holding an
