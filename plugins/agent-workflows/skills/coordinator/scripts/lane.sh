@@ -21,8 +21,9 @@
 # count to the label, so two launches never take the same slot; it checks the
 # charter's lease first (lease.sh check).
 #
-# slots prints one tab-separated line per host: host, lanes, cap, state, where
-# state is free, full, over, closed (cap 0), or unknown (sox could not count).
+# slots prints one tab-separated line per host: host, lanes, cap, state, load
+# per core, and free memory percent. State is free, full, over, closed (cap 0),
+# or unknown (sox could not count); load and memory are - when the probe fails.
 # launch prints host, backing id, lanes after the launch, and cap.
 #
 # drift checks the fleet with no agent: every capped host plus this one,
@@ -313,10 +314,16 @@ case "$command" in
       limit=$(cap_now "$caps" "$each")
       if rows=$(lane_rows "$each" 2>/dev/null); then
         lanes=$(printf '%s' "$rows" | grep -c . || true)
-        printf '%s\t%s\t%s\t%s\n' "$each" "$lanes" "$limit" "$(state "$lanes" "$limit")"
+        counted="$lanes\t$limit\t$(state "$lanes" "$limit")"
       else
-        printf '%s\t-\t%s\tunknown\n' "$each" "$limit"
+        counted="-\t$limit\tunknown"
       fi
+      if measured=$(probe "$each" 2>/dev/null) && [ "$(echo "$measured" | wc -w)" -eq 3 ]; then
+        headroom=$(echo "$measured" | awk '{ printf "%.1f\t%d", $2 / $1, $3 }')
+      else
+        headroom="-\t-"
+      fi
+      printf '%s\t%b\t%b\n' "$each" "$counted" "$headroom"
     done
     ;;
 

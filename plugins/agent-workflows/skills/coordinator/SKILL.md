@@ -195,8 +195,11 @@ Change a running agent's brief only by addendum and pointer.
 1. Check: the theme is one the human chose, under its lane limit, with fewer
    than two parks and no pending design that rewrites this code; the problem
    reproduces on the current base; no hold covers it. Pick the host from the
-   charter's hosts by the capabilities the lane needs (fleet file) and the
-   free slots `lane.sh slots` reads live; keep work on the same files on one stack;
+   charter's hosts: of those with a free slot and the capabilities the lane
+   needs (fleet file: an iOS or macOS build needs Xcode, a localnet needs
+   its stack), the one with the lowest load per core in `lane.sh slots`.
+   A lane that needs no scarce capability goes to a host without it, so
+   Mac and device hosts stay free for the work only they can do; keep work on the same files on one stack;
    reserve shared identifiers in the charter. If proof needs managed secrets,
    run the repo's secrets preflight in that worktree, with the lane's shell
    and flags, while the human can approve prompts.

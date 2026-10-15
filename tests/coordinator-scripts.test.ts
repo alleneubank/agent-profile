@@ -578,7 +578,7 @@ describe("lane.sh", () => {
     await f.cap("control", 1);
     expect((await f.run(LANE, f.launch("control", "glyphs"))).status).toBe(0);
     expect(f.launched()).toEqual(["new localhost --no-attach --exec -- /lanes/run.sh"]);
-    expect((await f.slots()).stdout).toBe("control\t1\t1\tfull\n");
+    expect((await f.slots()).stdout).toMatch(/^control\t1\t1\tfull\t\d+\.\d\t\d+\n$/);
   });
 
   it("reports each host's slots, and a temporary cap lapses to its after value", async () => {
@@ -589,8 +589,12 @@ describe("lane.sh", () => {
     await f.run(LANE, f.launch("ae-dev", "a"));
     await f.run(LANE, f.launch("ae-dev", "b"));
     writeFileSync(join(f.home, "unreachable"), "onyx\n");
-    expect((await f.slots()).stdout).toBe("ae-dev\t2\t6\tfree\nonyx\t-\t2\tunknown\npixelproton\t0\t0\tclosed\n");
-    expect((await f.slots("2026-10-12T16:00:00Z")).stdout).toContain("ae-dev\t2\t1\tover\n");
+    writeFileSync(join(f.home, "probe-ae-dev"), "32 8.0 60\n");
+    writeFileSync(join(f.home, "probe-pixelproton"), "16 12.0 25\n");
+    expect((await f.slots()).stdout).toBe(
+      "ae-dev\t2\t6\tfree\t0.2\t60\nonyx\t-\t2\tunknown\t-\t-\npixelproton\t0\t0\tclosed\t0.8\t25\n",
+    );
+    expect((await f.slots("2026-10-12T16:00:00Z")).stdout).toContain("ae-dev\t2\t1\tover\t0.2\t60\n");
   });
 
   it("rejects caps it cannot hold", async () => {
