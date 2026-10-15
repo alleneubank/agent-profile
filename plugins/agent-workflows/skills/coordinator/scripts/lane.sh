@@ -3,7 +3,8 @@
 # grants it.
 #
 #   lane.sh slots  --fleet PATH [--fleet-host HOST]
-#   lane.sh launch --fleet PATH [--fleet-host HOST] --host H --charter C --lane L --launcher NAME -- ARGV...
+#   lane.sh launch --fleet PATH [--fleet-host HOST] --host H --charter C --lane L --launcher NAME
+#                  --pretrust none|CONFIG_DIR [--workdir DIR] -- ARGV...
 #   lane.sh cap    --fleet PATH [--fleet-host HOST] --host H --cap N --why TEXT [--until UTC --after N]
 #   lane.sh drift  --fleet PATH [--fleet-host HOST] [--every SECONDS --stop-at UTC]
 #
@@ -26,6 +27,16 @@
 # or unknown (sox could not count); load and memory are - when the probe fails.
 # launch prints host, backing id, lanes after the launch, and cap.
 #
+# Before it takes a slot, launch answers a Claude Code agent's startup dialogs
+# on the lane host: `claude-pretrust --fix --config-dir CONFIG_DIR DIR`, where
+# DIR is where ARGV starts the agent and CONFIG_DIR the launcher account's
+# Claude config directory (. for ~/.claude.json, .claude-send for the Send
+# account). Both are paths on the lane host, absolute or relative to its home,
+# so a ~ the caller's shell expands never names the wrong host's home. Every
+# launch must state --pretrust (none for another harness, which needs no
+# --workdir), so no launch skips it silently. A directory pretrust refuses
+# (exit 10) is the human's to answer.
+#
 # drift checks the fleet with no agent: every capped host plus this one,
 # through sox and an ssh probe (a host key is also its ssh alias). It writes
 # ~/.handoffs/fleet-drift.txt, one line per finding (kind, subject, detail,
@@ -44,9 +55,11 @@
 #
 # Exit: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the watch, 5 fleet
 # lock busy, 6 host has no cap or could not be counted, 7 host at cap,
-# 8 the lane already has a shell, 9 sox failed to launch or label.
+# 8 the lane already has a shell, 9 sox failed to launch or label,
+# 10 claude-pretrust refused the directory (the human answers its dialogs),
+# 11 claude-pretrust failed or could not run.
 # Tests override COORDINATION_HOME, SOX_BIN, LANE_NOW, LANE_HOSTNAME and
-# LANE_LOCK_WAIT_SECONDS, and LANE_SSH for the probe.
+# LANE_LOCK_WAIT_SECONDS, and LANE_SSH for the probe and pretrust.
 set -eu
 
 CAP_MAX=64
@@ -58,7 +71,7 @@ EVERY_SECONDS_MIN=60
 EVERY_SECONDS_MAX=3600
 
 usage() {
-  sed -n '5,8p' "$0" | sed 's/^# \{0,1\}//' >&2
+  sed -n '5,9p' "$0" | sed 's/^# \{0,1\}//' >&2
   exit 2
 }
 
@@ -169,11 +182,31 @@ else
   free=$(memory_pressure | sed -n -E "s/.*free percentage: *([0-9]+)%.*/\1/p")
 fi
 echo "$cores $load $free"'
+  on_lane_host "$1" "$snippet"
+}
+
+# on_lane_host <host> <command>: run a shell command from the host's home.
+on_lane_host() {
   if [ "$(sox_name "$1")" = localhost ]; then
-    bash -c "$snippet"
+    (cd "$HOME" && bash -c "$2")
   else
-    "${LANE_SSH:-ssh}" -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 "$1" "$snippet"
+    "${LANE_SSH:-ssh}" -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 "$1" "$2"
   fi
+}
+
+# answer_dialogs <host>: answer the agent's startup dialogs for $workdir under
+# $pretrust's account, or exit 10 when the grant leaves them to the human.
+answer_dialogs() {
+  [ "$pretrust" != none ] || return 0
+  # Both paths passed the plain-path check, so the command needs no quoting.
+  pretrust_exit=0
+  answer=$(on_lane_host "$1" "claude-pretrust --fix --config-dir $pretrust $workdir" 2>&1) || pretrust_exit=$?
+  [ -z "$answer" ] || printf '%s\n' "$answer" >&2
+  case "$pretrust_exit" in
+    0) ;;
+    3) fail "claude-pretrust refused $workdir on $1: the human answers its startup dialogs, then launch again" 10 ;;
+    *) fail "claude-pretrust on $1 exited $pretrust_exit" 11 ;;
+  esac
 }
 
 # findings: this check's raw findings, kind<TAB>subject<TAB>detail, and the
@@ -277,7 +310,7 @@ command -v jq >/dev/null || fail "jq is required" 2
 command=$1
 shift
 here=$(cd "$(dirname "$0")" && pwd)
-fleet="" fleet_host="" host="" charter="" lane="" launcher="" cap="" why="" until="" after="" every="" stop_at=""
+fleet="" fleet_host="" host="" charter="" lane="" launcher="" workdir="" pretrust="" cap="" why="" until="" after="" every="" stop_at=""
 while [ $# -gt 0 ]; do
   [ "$1" = -- ] && { shift; break; }
   [ $# -ge 2 ] || usage
@@ -288,6 +321,8 @@ while [ $# -gt 0 ]; do
     --charter) charter=$2 ;;
     --lane) lane=$2 ;;
     --launcher) launcher=$2 ;;
+    --workdir) workdir=$2 ;;
+    --pretrust) pretrust=$2 ;;
     --cap) cap=$2 ;;
     --why) why=$2 ;;
     --until) until=$2 ;;
@@ -302,6 +337,9 @@ case "$fleet" in /*) ;; *) fail "--fleet must be an absolute path on the fleet h
 case "$fleet_host" in *[!A-Za-z0-9._-]*|-*) fail "--fleet-host must be an ssh host alias" 2 ;; esac
 for name in "$host" "$charter" "$lane" "$launcher"; do
   case "$name" in *[!A-Za-z0-9._-]*|-*) fail "host, charter, lane and launcher must be plain names like onyx" 2 ;; esac
+done
+for path in "$workdir" "$pretrust"; do
+  case "$path" in *[!A-Za-z0-9._/-]*|-*) fail "--workdir and --pretrust must be plain paths like Work/repo.worktrees/lane" 2 ;; esac
 done
 set_at=$(now)
 holder="$(hostname -s) pid $$ $set_at"
@@ -328,8 +366,13 @@ case "$command" in
     ;;
 
   launch)
-    [ -n "$host" ] && [ -n "$charter" ] && [ -n "$lane" ] && [ -n "$launcher" ] && [ $# -ge 1 ] || usage
+    [ -n "$host" ] && [ -n "$charter" ] && [ -n "$lane" ] && [ -n "$launcher" ] && [ -n "$pretrust" ] &&
+      [ $# -ge 1 ] || usage
+    [ "$pretrust" = none ] || [ -n "$workdir" ] || fail "--pretrust $pretrust needs --workdir, where the agent starts" 2
     "$here/lease.sh" check "$charter"
+    # Before the lock: its answers are idempotent and harmless if the host
+    # then refuses, and a slow ssh must not hold every other launch.
+    answer_dialogs "$host"
     on_fleet_host fleet_lock
     trap 'on_fleet_host fleet_unlock' EXIT
     limit=$(cap_now "$(on_fleet_host fleet_read)" "$host")

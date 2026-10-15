@@ -437,14 +437,38 @@ esac
 `,
   );
   chmodSync(sox, 0o755);
-  // The probe's ssh answers "cores load free-percent" from probe-<host>.
+  // The probe's ssh answers "cores load free-percent" from probe-<host>, and
+  // runs a claude-pretrust command line as that host would, from its home.
   const ssh = join(home, "ssh");
-  writeFileSync(ssh, `#!/bin/bash\nhost=\${@: -2:1}\ncat "${home}/probe-$host" 2>/dev/null || exit 255\n`);
+  writeFileSync(
+    ssh,
+    `#!/bin/bash
+host=\${@: -2:1}
+case "\${@: -1}" in
+  claude-pretrust*) cd "${home}" && PRETRUST_HOST=$host exec bash -c "\${@: -1}" ;;
+esac
+cat "${home}/probe-$host" 2>/dev/null || exit 255
+`,
+  );
   chmodSync(ssh, 0o755);
+  // claude-pretrust records where it ran and with what, and exits with
+  // pretrust-exit-<host> (0 when absent).
+  const bin = join(home, "bin");
+  mkdirSync(bin);
+  writeFileSync(
+    join(bin, "claude-pretrust"),
+    `#!/bin/bash
+where=\${PRETRUST_HOST:-localhost}
+printf '%s %s %s\\n' "$where" "$PWD" "$*" >> "${home}/pretrusted"
+echo "[REFUSED] stub refusal for $where"
+exit "$(cat "${home}/pretrust-exit-$where" 2>/dev/null || echo 0)"
+`,
+  );
+  chmodSync(join(bin, "claude-pretrust"), 0o755);
   const caps = join(home, "fleet.json");
   const env = (who: Caller | null, now: string) => {
     const e: Record<string, string> = {
-      PATH: `${JQ_DIR}:${process.env.PATH ?? "/usr/bin:/bin"}`,
+      PATH: `${bin}:${JQ_DIR}:${process.env.PATH ?? "/usr/bin:/bin"}`,
       HOME: home,
       COORDINATION_HOME: coordination,
       SOX_BIN: sox,
@@ -483,8 +507,12 @@ esac
       child.on("close", (status) => done({ status, stdout }));
     });
   }
-  const launch = (host: string, lane: string) =>
-    ["launch", "--fleet", caps, "--host", host, "--charter", "demo", "--lane", lane, "--launcher", "yolosonnet", "--", "/lanes/run.sh"];
+  const launch = (host: string, lane: string, ...pretrust: string[]) => [
+    "launch", "--fleet", caps, "--host", host, "--charter", "demo", "--lane", lane, "--launcher", "yolosonnet",
+    ...(pretrust.length ? pretrust : ["--pretrust", ".", "--workdir", `Work/repo.worktrees/demo-${lane}`]),
+    "--", "/lanes/run.sh",
+  ];
+  const pretrusted = () => (existsSync(join(home, "pretrusted")) ? readFileSync(join(home, "pretrusted"), "utf8").split("\n").filter(Boolean) : []);
   const cap = (host: string, n: number, ...more: string[]) =>
     run(LANE, ["cap", "--fleet", caps, "--host", host, "--cap", String(n), "--why", "provisional", ...more]);
   const slots = (now?: string) => run(LANE, ["slots", "--fleet", caps], null, now);
@@ -495,7 +523,7 @@ esac
   const shells = () => readFileSync(rows, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line));
   const launched = () => (existsSync(join(home, "launched")) ? readFileSync(join(home, "launched"), "utf8").split("\n").filter(Boolean) : []);
   await run(LEASE, ["take", "demo", "--reason", "the human: become the coordinator"]);
-  return { home, caps, run, start, launch, cap, slots, shells, launched, add, drift, typed };
+  return { home, caps, run, start, launch, cap, slots, shells, launched, pretrusted, add, drift, typed };
 }
 
 describe("lane.sh", () => {
@@ -595,6 +623,47 @@ describe("lane.sh", () => {
       "ae-dev\t2\t6\tfree\t0.2\t60\nonyx\t-\t2\tunknown\t-\t-\npixelproton\t0\t0\tclosed\t0.8\t25\n",
     );
     expect((await f.slots("2026-10-12T16:00:00Z")).stdout).toContain("ae-dev\t2\t1\tover\t0.2\t60\n");
+  });
+
+  it("answers a Claude agent's startup dialogs on the lane host, from its home, before launching", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 4);
+    await f.cap("control", 4);
+    const send = ["--pretrust", ".claude-send", "--workdir", "Work/repo.worktrees/demo-glyphs"];
+    expect((await f.run(LANE, f.launch("onyx", "glyphs", ...send))).status).toBe(0);
+    expect((await f.run(LANE, f.launch("control", "fonts"))).status).toBe(0);
+    expect(f.pretrusted()).toEqual([
+      `onyx ${f.home} --fix --config-dir .claude-send Work/repo.worktrees/demo-glyphs`,
+      `localhost ${f.home} --fix --config-dir . Work/repo.worktrees/demo-fonts`,
+    ]);
+    expect(f.launched()).toHaveLength(2);
+  });
+
+  it("launches nothing when claude-pretrust refuses the directory or fails", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 4);
+    writeFileSync(join(f.home, "pretrust-exit-onyx"), "3");
+    const refused = await f.run(LANE, f.launch("onyx", "glyphs"));
+    expect(refused.status).toBe(10);
+    expect(refused.stderr).toContain("stub refusal for onyx");
+    expect(refused.stderr).toContain("the human answers its startup dialogs");
+    writeFileSync(join(f.home, "pretrust-exit-onyx"), "1");
+    expect((await f.run(LANE, f.launch("onyx", "glyphs"))).status).toBe(11);
+    expect(f.launched()).toEqual([]);
+    expect(f.shells()).toEqual([]);
+  });
+
+  it("requires every launch to state --pretrust, and a Claude one its --workdir", async () => {
+    const f = await lanes();
+    await f.cap("onyx", 4);
+    const bare = ["launch", "--fleet", f.caps, "--host", "onyx", "--charter", "demo", "--lane", "glyphs", "--launcher", "pigrok", "--", "/lanes/run.sh"];
+    expect((await f.run(LANE, bare)).status).toBe(2);
+    expect((await f.run(LANE, f.launch("onyx", "glyphs", "--pretrust", ".claude-send"))).status).toBe(2);
+    expect((await f.run(LANE, f.launch("onyx", "glyphs", "--pretrust", "~/.claude-send", "--workdir", "Work/x"))).status).toBe(2);
+    expect(f.launched()).toEqual([]);
+    expect((await f.run(LANE, f.launch("onyx", "glyphs", "--pretrust", "none"))).status).toBe(0);
+    expect(f.pretrusted()).toEqual([]);
+    expect(f.launched()).toHaveLength(1);
   });
 
   it("rejects caps it cannot hold", async () => {
