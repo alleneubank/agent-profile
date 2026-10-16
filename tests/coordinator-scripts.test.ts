@@ -419,7 +419,7 @@ describe("send.sh", () => {
     expect((await f.run(SEND, args("glyphs", "event", ONE.shell), null, "hello")).status).toBe(0);
   });
 
-  it("keeps a shell reachable while any charter it coordinates is live, and matches leases only on this host", async () => {
+  it("keeps a shell reachable for other senders while any charter it coordinates is live, and matches leases only on this host", async () => {
     const f = fleet();
     mkdirSync(join(f.coordination, "other"));
     f.shells([
@@ -431,7 +431,28 @@ describe("send.sh", () => {
     expect((await f.run(SEND, args("glyphs", "event", `onyx/${ONE.shell}`), null, "hello")).status).toBe(0);
     expect((await f.run(SEND, args("glyphs", "event", ONE.shell), null, "hello")).status).toBe(5);
     await f.run(LEASE, ["take", "other", "--reason", "Allen: coordinate other too"], ONE);
-    expect((await f.run(SEND, args("glyphs", "event", ONE.shell), null, "hello")).status).toBe(0);
+    const fromFleet = ["--charter", "fleet", "--role", "fleet-desk", "--to", ONE.shell, "--kind", "evidence"];
+    expect((await f.run(SEND, fromFleet, null, "hello")).status).toBe(0);
+  });
+
+  it("judges a shared shell by the sender's own charter, fails closed on an unknown State, and records refusals", async () => {
+    const f = fleet();
+    const file = join(f.home, "fleet.md");
+    writeFileSync(file, FLEET);
+    mkdirSync(join(f.coordination, "other"));
+    f.shells([{ host: "localhost", backing: ONE.shell, command: "claude", attention: "done" }]);
+    await f.take(ONE);
+    await f.run(LEASE, ["take", "other", "--reason", "Allen: coordinate other too"], ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE);
+    const from = (charter: string) => f.run(SEND, ["--charter", charter, "--role", "glyphs", "--to", ONE.shell, "--kind", "event"], null, "hello");
+    expect((await from("demo")).status).toBe(5);
+    expect((await from("other")).status).toBe(0);
+    expect((await from("fleet")).status).toBe(0);
+    expect(readFileSync(join(f.coordination, "demo", "sent.log"), "utf8")).toMatch(/ refused event from demo glyphs to s1\.g1 sha=[0-9a-f]{12} stood-down\n$/);
+
+    writeFileSync(join(f.coordination, "other", "lease"), readFileSync(join(f.coordination, "other", "lease"), "utf8") + "state=Paused\n");
+    expect((await from("other")).status).toBe(5);
+    expect((await from("fleet")).status).toBe(5);
   });
 
   it("leaves the lease's State unchanged when the registry write fails", async () => {

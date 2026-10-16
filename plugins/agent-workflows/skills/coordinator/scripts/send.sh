@@ -13,13 +13,16 @@
 # relays. The target must be a live shell where an agent has reported an
 # attention state; a bare shell would run the line as a command. sox refuses
 # the write if the target's foreground changes after the check. The receipt
-# goes to ~/.handoffs/<charter>/sent.log on this host.
+# goes to $COORDINATION_HOME/<charter>/sent.log (~/.handoffs by default) on
+# this host.
 #
-# A target on this host that some charter's lease names as its coordinator's
-# shell is refused while that coordinator is stood down: its watch released,
-# or its lease State blocked-on-human or parked. A typed line would start a
-# turn the human did not ask for. --wake-stood-down sends anyway, on the
-# human's word only, and the receipt says so.
+# A target on this host that a lease names as its coordinator's shell is
+# refused while that coordinator is stood down: its watch released, or a
+# lease State other than live. A typed line would start a turn the human did
+# not ask for. The sender's own charter's lease decides when it names the
+# target; otherwise one live lease naming the shell keeps it reachable, since
+# a session may coordinate several charters. --wake-stood-down sends anyway,
+# on the human's word only, and the receipt says so. A refusal is recorded.
 #
 # Exit: 0 sent, 2 usage, 3 no lease, 4 sender does not hold the watch,
 # 5 target is a stood-down coordinator, 6 target not found or not running an
@@ -99,27 +102,34 @@ stood_down() {
   state=$(sed -n 's/^state=//p' "$1" | head -n 1)
   if [ -n "$released" ]; then
     printf 'watch released at %s' "$released"
-  elif [ "$state" = blocked-on-human ] || [ "$state" = parked ]; then
+  elif [ -n "$state" ] && [ "$state" != live ]; then
     printf '%s' "$state"
   fi
 }
 
+# refusal_for <lease>: the refusal for a stood-down lease, or nothing.
+refusal_for() {
+  why=$(stood_down "$1")
+  [ -n "$why" ] || return 0
+  owner=$(sed -n 's/^charter=//p' "$1" | head -n 1)
+  printf "%s is the %s coordinator, stood down (%s): leave it in %s's charter or log for its next start; --wake-stood-down only on the human's word" \
+    "$to" "$owner" "$why" "$owner"
+}
+
 # Leases record shells on this host only, so only a target here can match.
-# One session may coordinate several charters: any live one keeps it reachable.
 refusal=""
 if [ "$host" = localhost ] || [ "$host" = "${SEND_HOSTNAME:-$(hostname -s)}" ]; then
-  for lease in "$coordination"/*/lease; do
-    [ -f "$lease" ] && grep -qxF "shell=$backing" "$lease" || continue
-    why=$(stood_down "$lease")
-    if [ -z "$why" ]; then
-      refusal=""
-      break
-    fi
-    owner=$(sed -n 's/^charter=//p' "$lease" | head -n 1)
-    refusal="$to is the $owner coordinator, stood down ($why): leave it in $owner's charter or log for its next start; --wake-stood-down only on the human's word"
-  done
+  own="$coordination/$charter/lease"
+  if [ -f "$own" ] && grep -qxF "shell=$backing" "$own"; then
+    refusal=$(refusal_for "$own")
+  else
+    for lease in "$coordination"/*/lease; do
+      [ -f "$lease" ] && grep -qxF "shell=$backing" "$lease" || continue
+      refusal=$(refusal_for "$lease")
+      [ -n "$refusal" ] || break
+    done
+  fi
 fi
-[ -z "$refusal" ] || [ -n "$wake" ] || fail "$refusal" 5
 row=$(sox_pinned ls "$host" --json 2>/dev/null | grep -F "\"backing_id\":\"$backing\"" |
   grep -F '"status":"live"' | head -n 1) || true
 [ -n "$row" ] || fail "no live shell $to: check sox ls $host" 6
@@ -141,6 +151,10 @@ log="$coordination/$charter/sent.log"
 woke=""
 [ -z "$wake" ] || woke=" wake-stood-down"
 mkdir -p "$(dirname "$log")"
+if [ -n "$refusal" ] && [ -z "$wake" ]; then
+  printf '%s refused %s from %s %s%s to %s sha=%s stood-down\n' "$stamp" "$kind" "$charter" "$role" "$watch" "$to" "$sha" >> "$log"
+  fail "$refusal" 5
+fi
 
 status=0
 printf '%s' "$line" | sox_pinned send "$to" --expect-fg "$foreground" --enter || status=$?
