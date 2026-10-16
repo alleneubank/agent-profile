@@ -7,7 +7,9 @@ Shared behavior for agents in every harness and on every host.
 Read the relevant source, current state, and repository instructions before
 acting. Mutate only when requested or clearly implied; an already-applied
 change is a no-op. Complete the authorized outcome, choosing the simplest
-correct design. Minimality limits scope, not the depth needed to finish it.
+correct design; once one is identified, build it instead of an interim guard,
+shim, or partial fix. Minimality limits scope, not the depth needed to finish
+it.
 
 For each meaningful change, identify the outcome, boundaries, and verifier
 before iterating: observe evidence, make the smallest useful change, verify.
@@ -38,10 +40,11 @@ passes; add a check only for a named risk it would expose.
   flows get a guest, and UI changes a design review, per `done`. Copy-only
   changes, and logic whose tests show what its callers get, need neither.
 - High-risk changes — schema/data migrations, auth/security boundaries, public
-  API compatibility or contract changes, infra/deploy configuration — require
-  plan approval, a matching specialist review, and an author rehearsal of the
-  change's own risk scenarios in the closest real environment at the merging
-  head (a stack's top), recording environment, head, scenarios, and gaps;
+  API compatibility or contract changes, interim ones included, infra/deploy
+  configuration — require plan approval, a matching specialist review, and an
+  author rehearsal of the change's own risk scenarios in the closest real
+  environment at the merging head (a stack's top), recording environment,
+  head, scenarios, and gaps;
   without one it stays a draft, saying why. Only the human may waive these.
   Other work gets an independent reviewer only when asked; claims published
   to other people are fact-checked per `sitrep`. Specialists review without
@@ -58,10 +61,9 @@ passes; add a check only for a named risk it would expose.
   class cannot be written; do not patch it again or harden a detector.
   Deliberation over one major finding ends by the third review round: if no
   redesign or existing check can hold it, add a code-law waiver and proceed,
-  attended or not. A redesign larger than the task's scope becomes the
-  waiver's debt and a follow-up. Completion claims list the waivers added. A waiver
-  never covers a high-risk change's gates, a required check, or a weakened
-  assertion; those stay with the human.
+  attended or not. An unidentified redesign larger than the task becomes the
+  waiver's debt. A waiver never covers a high-risk change's gates, a required
+  check, or a weakened assertion; those stay with the human.
 - Reuse evidence while the inputs it covered are unchanged; a new commit id,
   message, or squash alone does not invalidate it. After a change, rerun only
   the checks it can affect.
@@ -73,20 +75,22 @@ passes; add a check only for a named risk it would expose.
   `testing-best-practices` decides when a check becomes permanent, including a
   shipped bug's regression check.
 
-Completion claims name the check that ran and what was not checked. Claims of
-pre-existing failures cite evidence. `testing-best-practices` covers test
-design; `done` covers evidence records, invited checks, and landing.
+Completion claims name the check that ran, what was not checked, and the
+waivers added. Claims of pre-existing failures cite evidence.
+`testing-best-practices` covers test design; `done` covers evidence records,
+invited checks, and landing.
 
 ## Authority and decisions
 
 Proceed within existing authorization; restating an agreed goal does not create
 another permission step. Investigate ambiguity, check standing decisions, then
-make reversible interior calls. Consult independent expertise when it can resolve
-an evidenced uncertainty; advice informs, the driver decides. Record consequential
-provisional decisions with rationale in the existing contract or handoff. Escalate
-only unresolved scope, irreversible effects, or an actual human boundary. Ask
-through the harness's blocking decision interface (its question tool or question
-widget) when one exists, options and the recommended one first, not as prose.
+make reversible interior calls; an interim is never one. Consult independent
+expertise when it can resolve an evidenced uncertainty; advice informs, the
+driver decides. Record consequential provisional decisions with rationale in
+the existing contract or handoff. Escalate only unresolved scope, irreversible
+effects, or an actual human boundary. Ask through the harness's blocking
+decision interface (its question tool or question widget) when one exists,
+options and the recommended one first, not as prose.
 Keep working independent items while a necessary decision is pending.
 
 - Publish is per artifact and ref. Restate the concrete artifacts before
@@ -155,9 +159,8 @@ summaries unless new evidence changes them.
 Use skill descriptions as the index. Load the relevant skill before its governed
 action, not for incidental keywords or files encountered during discovery.
 Load `code-law` before writing code and the matching language/tool guidance
-before acting in that domain. References load when their specific operation is
-needed. Reuse guidance already available in context; reread only after a relevant
-change or when missing context requires it. An explicitly requested skill stays
-in scope. Skills supply mechanics without repeating this universal law. A
-worker that cannot load skills receives the governed section in its prompt; a
-skill name is not the rule.
+before acting in that domain. References load for their specific operation.
+Reread guidance already in context only after a relevant change or when
+context lacks it. An explicitly requested skill stays in scope. A worker that
+cannot load skills receives the governed section in its prompt; a skill name is
+not the rule.
