@@ -177,6 +177,9 @@ their items. Their next turn restarts the heartbeat.
    ago, or a question they just asked you) and no timed check falls due before
    an answer could arrive, ask in one round through the harness's decision
    interface, worded to answer cold: plain words and what each option does.
+   When an identified design answers the question, it is the recommended
+   option; offer an interim only if the human asked for one, naming what it
+   leaves to remove.
    Otherwise put the questions in "Waiting on the human", batched by theme
    with the time each batch needs, and notify them only for what needs their
    hands before they would otherwise look. A due check fires first.
@@ -206,8 +209,8 @@ Change a running agent's brief only by addendum and pointer.
 ### Launch a lane
 
 1. Check: the theme is one the human chose, under its lane limit, with fewer
-   than two parks and no pending design that rewrites this code; the problem
-   reproduces on the current base; no hold covers it. Pick the host from the
+   than two parks and no identified design, pending or parked, that rewrites
+   this code (fund that design instead); the problem reproduces on the current base; no hold covers it. Pick the host from the
    charter's hosts: of those with a free slot and the capabilities the lane
    needs (fleet file: an iOS or macOS build needs Xcode, a localnet needs
    its stack), the one with the lowest load per core in `lane.sh slots`.
@@ -322,8 +325,8 @@ The watch changes hands only when the session has ended or the human asks
   acting on an outcome or artifact the grant does not name exceeds it. When
   unsure which, ask once and record the answer as part of the grant.
 - **Provisional:** when a window grants provisional decisions, they cover
-  reversible interior calls only; a high-risk approval needs that exception
-  named. Log each as provisional, lead the next sitrep with it, and treat it
+  reversible interior calls only, never an interim (`AGENTS.md`); a high-risk
+  approval needs that exception named. Log each as provisional, lead the next sitrep with it, and treat it
   as standing until the human rules.
 - **Hold:** "hold <scope>" stops launching, landing, and relaying in that
   scope until the human lifts it; watching, verifying, and reporting
@@ -340,7 +343,9 @@ Plan by theme, not by the newest issue: a theme is the items one design owns
 (an RFC, a spec section, or "no design needed").
 
 - Every new item gets a theme before it gets a lane. When the theme's design
-  is pending or would rewrite the code, fold the item into the design.
+  is identified (pending or parked) or would rewrite the code, fold the item
+  into the design. Parking a design parks its theme; to fix an item, pull the
+  design forward.
 - A theme whose design gates other work appears in every portfolio review
   with its next step and who holds it.
 - Two parks in one theme (items stopped by non-convergence) make it a design
