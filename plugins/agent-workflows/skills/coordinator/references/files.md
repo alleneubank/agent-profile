@@ -31,6 +31,8 @@ each charter.
 Fallback when a quota runs out: <order>
 Tier windows: <tier> allowed until <date or reset> (the human's; a lapsed
 window means the tier is not used)
+Coordinator skill: reload if your session started before <UTC time>
+(agent-workflows <version>: <what changed in launching, mail, or the lease>)
 
 ## Reservations
 | Resource (device, host, account) | Owner charter | Until | Notes |
@@ -41,6 +43,10 @@ window means the tier is not used)
 |---|---|---|
 ```
 
+Whoever deploys an agent-workflows release that changes how lanes launch,
+how mail is sent, or what the lease holds sets the Coordinator skill line to
+the deploy time, so coordinators already running reload before their next
+launch; a skill loads once per session and is not re-read otherwise.
 Verified is the date a fact was last checked on the host. Only `lease.sh state`
 writes State; add a registry row with an empty State, then use the command.
 State is `live`,
