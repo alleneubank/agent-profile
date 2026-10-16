@@ -15,13 +15,15 @@
 #
 # The lease is ~/.handoffs/<charter>/lease. The caller is this Claude Code
 # session (CLAUDE_CODE_SESSION_ID) in the sox shell `sox which` names, so a
-# caller cannot claim another's identity by passing it. The file is key=value
+# caller cannot claim another's identity by passing it. `state` records the
+# word in the lease as well as the fleet registry, so send.sh can tell a
+# stood-down coordinator from a live one on this host. The file is key=value
 # lines in a fixed order. Writes take a lock directory and replace the file by
 # rename, so a reader never sees half a lease and two takes never both
 # succeed. Tests override COORDINATION_HOME, SOX_BIN and LEASE_NOW.
 set -eu
 
-FIELDS="charter watch session shell harness taken_at prior reason released_at handoff"
+FIELDS="charter watch session shell harness taken_at prior reason released_at handoff state"
 
 usage() {
   sed -n '4,9p' "$0" | sed 's/^# \{0,1\}//' >&2
@@ -167,7 +169,7 @@ case "$command" in
       prior="$(field session) $(field shell) watch $watch"
     fi
     case "$watch" in ''|*[!0-9]*) fail "$lease has no numeric watch" 2 ;; esac
-    write "$charter" $((watch + 1)) "$session" "$shell" "${AI_AGENT:-claude-code}" "$(now)" "$prior" "$reason" "" ""
+    write "$charter" $((watch + 1)) "$session" "$shell" "${AI_AGENT:-claude-code}" "$(now)" "$prior" "$reason" "" "" ""
     cat "$lease"
     ;;
 
@@ -188,7 +190,7 @@ case "$command" in
     lock
     holds || fail "only the holder of watch $(field watch) may release it" 4
     write "$(field charter)" "$(field watch)" "$(field session)" "$(field shell)" "$(field harness)" \
-      "$(field taken_at)" "$(field prior)" "$(field reason)" "$(now)" "$handoff"
+      "$(field taken_at)" "$(field prior)" "$(field reason)" "$(now)" "$handoff" "$(field state)"
     ;;
 
   state)
@@ -213,6 +215,9 @@ case "$command" in
     else
       registry_write
     fi
+    # After the registry, so a failed registry write changes neither.
+    write "$(field charter)" "$(field watch)" "$(field session)" "$(field shell)" "$(field harness)" \
+      "$(field taken_at)" "$(field prior)" "$(field reason)" "$(field released_at)" "$(field handoff)" "$state"
     ;;
 
   *) usage ;;

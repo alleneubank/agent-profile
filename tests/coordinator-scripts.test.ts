@@ -58,6 +58,7 @@ esac
       COORDINATION_HOME: coordination,
       SOX_BIN: sox,
       LEASE_NOW: now,
+      SEND_HOSTNAME: "control",
     };
     if (who) {
       env.CLAUDE_CODE_SESSION_ID = who.session;
@@ -380,6 +381,66 @@ describe("send.sh", () => {
     expect((await f.run(SEND, args("glyphs", "event"), null, "one\ntwo")).status).toBe(2);
     expect((await f.run(SEND, args("glyphs", "event"), null, "x".repeat(2001))).status).toBe(2);
     expect(f.typed()).toBe(false);
+  });
+
+  it("refuses a coordinator stood down on this host until the sender passes --wake-stood-down", async () => {
+    const f = fleet();
+    const file = join(f.home, "fleet.md");
+    writeFileSync(file, FLEET);
+    f.shells([{ host: "localhost", backing: ONE.shell, command: "claude", attention: "done" }]);
+    const toDemo = (...extra: string[]) => f.run(SEND, [...args("glyphs", "event", ONE.shell), ...extra], null, "report.md is written");
+    await f.take(ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE);
+    const blocked = await toDemo();
+    expect(blocked.status).toBe(5);
+    expect(blocked.stderr).toContain("demo coordinator, stood down (blocked-on-human)");
+    await f.run(LEASE, ["release", "demo", "--handoff", "/kept/handoff.md"], ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "parked", "--fleet", file], ONE);
+    expect((await toDemo()).stderr).toContain("stood down (watch released at 2026-10-04T20:00:00Z)");
+    expect(f.typed()).toBe(false);
+
+    expect((await toDemo("--wake-stood-down")).status).toBe(0);
+    expect(f.read("typed")).toBe(`[demo glyphs → ${ONE.shell}; event] report.md is written`);
+    expect(readFileSync(join(f.coordination, "demo", "sent.log"), "utf8")).toMatch(/ sha=[0-9a-f]{12} wake-stood-down\n$/);
+  });
+
+  it("reaches a coordinator once a new watch is taken or its State is live again", async () => {
+    const f = fleet();
+    const file = join(f.home, "fleet.md");
+    writeFileSync(file, FLEET);
+    f.shells([{ host: "localhost", backing: ONE.shell, command: "claude", attention: "working" }]);
+    await f.take(ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "live", "--fleet", file], ONE);
+    expect((await f.run(SEND, args("glyphs", "event", ONE.shell), null, "hello")).status).toBe(0);
+    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE);
+    await f.take(ONE);
+    expect(readFileSync(f.lease, "utf8")).not.toContain("state=");
+    expect((await f.run(SEND, args("glyphs", "event", ONE.shell), null, "hello")).status).toBe(0);
+  });
+
+  it("keeps a shell reachable while any charter it coordinates is live, and matches leases only on this host", async () => {
+    const f = fleet();
+    mkdirSync(join(f.coordination, "other"));
+    f.shells([
+      { host: "localhost", backing: ONE.shell, command: "claude", attention: "done" },
+      { host: "onyx", backing: ONE.shell, command: "claude", attention: "done" },
+    ]);
+    await f.take(ONE);
+    await f.run(LEASE, ["release", "demo", "--handoff", "/kept/handoff.md"], ONE);
+    expect((await f.run(SEND, args("glyphs", "event", `onyx/${ONE.shell}`), null, "hello")).status).toBe(0);
+    expect((await f.run(SEND, args("glyphs", "event", ONE.shell), null, "hello")).status).toBe(5);
+    await f.run(LEASE, ["take", "other", "--reason", "Allen: coordinate other too"], ONE);
+    expect((await f.run(SEND, args("glyphs", "event", ONE.shell), null, "hello")).status).toBe(0);
+  });
+
+  it("leaves the lease's State unchanged when the registry write fails", async () => {
+    const f = fleet();
+    const file = join(f.home, "fleet.md");
+    writeFileSync(file, FLEET.replace("| demo | elsewhere", "| missing | elsewhere"));
+    await f.take(ONE);
+    expect((await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE)).status).toBe(2);
+    expect(readFileSync(f.lease, "utf8")).not.toContain("state=");
   });
 
   it("passes sox's failure through and logs it", async () => {
