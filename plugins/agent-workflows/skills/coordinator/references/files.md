@@ -25,14 +25,16 @@ each charter.
 ## Devices
 <test devices by id and the host they attach to; devices never to use>
 
-## Launchers (in order of preference)
-| Launcher | Harness and model | Account | Hosts logged in | Use for | Verified |
-|---|---|---|---|---|---|
-Fallback when a quota runs out: <order>
-Tier windows: <tier> allowed until <date or reset> (the human's; a lapsed
-window means the tier is not used)
-Coordinator skill: reload if your session started before <UTC time>
-(agent-workflows <version>: <what changed in launching, mail, or the lease>)
+## Roster (the human's; only the human edits it)
+| Role | Models | Launchers (personal / Send) |
+|---|---|---|
+| <coordinator, workers, reviewers in order, mechanical, beta user> | <models> | <launchers> |
+- Reviewer: <how the reviewer is picked from its row, e.g. the first whose provider differs from the author's>
+- Account: <which tree uses which account's launchers>
+- Fallback when a quota runs out: <order>
+- Windows: <launcher or tier> until <date or reset> (a lapsed window means it is not used)
+- Coordinator skill: reload if your session started before <UTC time>
+  (agent-workflows <version>: <what changed in launching, mail, or the lease>)
 
 ## Reservations
 | Resource (device, host, account) | Owner charter | Until | Notes |
@@ -45,8 +47,9 @@ Coordinator skill: reload if your session started before <UTC time>
 
 Whoever deploys an agent-workflows release that changes how lanes launch,
 how mail is sent, or what the lease holds sets the Coordinator skill line to
-the deploy time, so coordinators already running reload before their next
-launch; a skill loads once per session and is not re-read otherwise.
+the deploy time, with the human's word since the Roster is theirs, so
+coordinators already running reload before their next launch; a skill loads
+once per session and is not re-read otherwise.
 Verified is the date a fact was last checked on the host. Only `lease.sh state`
 writes State; add a registry row with an empty State, then use the command.
 State is `live`,
