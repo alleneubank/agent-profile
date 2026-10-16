@@ -224,12 +224,13 @@ Change a running agent's brief only by addendum and pointer.
    in the acceptance of the lane that owns the merging head, a stack's top,
    by addendum when it is running, never a separate runtime lane; that lane
    invites its own guest and reviewers (`done`).
-3. Re-read the fleet file's Launchers section at this launch. If its
+3. Re-read the fleet file's Roster section at this launch. If its
    Coordinator skill line names a time after this session started, invoke
    the coordinator skill again and follow the reloaded text from here on.
-   The launcher comes from that section: the table in its order, narrowed by
-   the charter and by any tier window that has not lapsed; the brief names
-   it. A quota failure moves to the next launcher and is logged.
+   The launcher comes from that section: the row for the lane's role, in
+   its order, with the account the work's tree names, narrowed by the
+   charter and by any window that has not lapsed; the brief names it. A
+   quota failure follows the Roster's fallback and is logged.
 4. If that launcher's worker cannot load this profile's skills, the brief
    includes the applicable text of `AGENTS.md` Verification and Authority, and
    the sections of `code-law`, `testing-best-practices`, `done`, and `sitrep`
