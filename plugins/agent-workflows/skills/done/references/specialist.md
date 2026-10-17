@@ -15,8 +15,15 @@ Read the code the diff touches and the code that calls it, and compare each
 changed interaction with production's behavior.
 
 - Every finding names the file and line and gives a concrete failure: this
-  input or state leads to this wrong outcome. A risk with no scenario is a
-  question, not a finding.
+  input or state leads to this wrong outcome, violating this requirement or
+  threat boundary. Distinguish observed failures, demonstrated code paths,
+  and hypotheses; name assumptions not yet verified. A risk with no scenario
+  is a question, not a finding. If your tools cannot resolve an assumption,
+  name the check and result that would distinguish failure from correct
+  behavior for the author to run; inability to run it proves neither.
+- Separate the defect from its proposed remedy. For a refactor, explain which
+  failure it removes. Flag challenges to the supplied scope or threat model
+  explicitly rather than silently widening it.
 - Rank findings: **blocking** (it would break production or the category's
   guarantee), **should fix**, or **note**.
 - Say what you did not examine.

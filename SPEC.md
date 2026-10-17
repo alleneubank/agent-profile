@@ -67,7 +67,11 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   diff and the author's reasoning. Each specialist round gets one reviewer
   unless the human asks for a second, and a merge ask for a high-risk change
   states its review status, so a yes without one is a recorded waiver (ai-wiki
-  EXP-023, EXP-024, EXP-025).
+  EXP-023, EXP-024, EXP-025). Review responses distinguish supported,
+  rebutted, excluded-by-scope, and unresolved findings; evidence and remedy
+  are judged separately. Reviewer verification limits hand a distinguishing
+  check to the author. Scope challenges are explicit, and credible unresolved
+  security concerns remain subject to the high-risk landing gates.
 - REQ-PROFILE-008 — **Completion boundary:** work stops when the selected
   check passes; another check needs a named risk it would expose. Done claims
   name the check that ran and what was not checked, not the author's assurance.
@@ -147,6 +151,14 @@ guidance is not counted as universally loaded context.
   replaced that skill on 2026-10-10; the exception is open again when a new
   skill-not-loaded failure shows up. Raise the universal budget to 1,480
   words. **ratified (human)**
+
+- 2026-10-17 — From ai-wiki's blind-review quality review and the human's
+  approval to add the discussed clarification: `done` owns evidence-based
+  disposition of findings, and the specialist charter distinguishes evidence
+  from assumptions and defects from remedies. Notes do not automatically
+  demand changes; scope decisions and high-risk gates remain explicit. This
+  refines EXP-025 without adding roles, launchers, or a tighter round cap.
+  **ratified (human)**
 
 ### Acceptance
 

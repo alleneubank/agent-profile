@@ -54,9 +54,29 @@ A guest shares your host and uses the build you are already running. Point it
 at the build, not at a setup of its own, and say whether that environment is
 disposable or live and shared, with its funding budget when it is live. Run the specialist through a
 read-only, profile-free launcher, one reviewer per round unless the human asks
-for a second. Fix what a verdict finds, then invite a fresh guest or reviewer
-at the new head for what the fix could change; the one that saw the last
-round tends to confirm its own finding rather than look around it.
+for a second. After a fix, invite a fresh guest or reviewer at the new head
+for what the fix could change.
+
+## Respond to findings
+
+Judge the failure separately from its proposed remedy. In the existing review
+response, record whether each finding is supported, rebutted with evidence,
+excluded by the agreed scope, or unresolved. Establish reachability under the
+requirements and threat model; name unverified assumptions. An observed failure
+or a demonstrated code path can support a finding. Difficulty reproducing it,
+or the size of its repair, does not settle validity.
+
+Fix supported defects at their cause, following `code-law` for recurring classes.
+A proposed refactor needs a violated requirement and an explanation of how it
+removes the defect; a preference alone stays a suggestion. Notes and hypotheses
+do not automatically require code changes or another round. If the reviewer
+cannot run a distinguishing check, take that check into the author's verification.
+Reuse unchanged evidence; reopen settled findings when new evidence warrants it.
+
+Keep credible unresolved security concerns visible and subject to the high-risk
+landing gates below. A challenge to the agreed scope or threat model is an
+explicit decision, not an evidentiary rebuttal; unresolved changes to those
+boundaries go to the human.
 
 ## Land
 
