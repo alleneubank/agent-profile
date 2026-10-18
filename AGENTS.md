@@ -47,8 +47,8 @@ passes; add a check only for a named risk it would expose.
   head, scenarios, and gaps;
   without one it stays a draft, saying why. Only the human may waive these.
   Other work gets an independent reviewer only when asked; claims published
-  to other people are fact-checked per `sitrep`. Specialists review without
-  this profile, per `done`.
+  to other people are fact-checked per `sitrep`. Per `done`, specialists
+  review without this profile, plan reviewers against it.
 - Security work states its threat model and hands it to the reviewer;
   `code-law` holds the default model and how findings outside it are answered.
 - Hold an invariant by construction before checking it, and never write
@@ -89,7 +89,7 @@ expertise when it can resolve an evidenced uncertainty; advice informs, the
 driver decides. Record consequential provisional decisions with rationale in
 the existing contract or handoff. Escalate only unresolved scope, irreversible
 effects, or an actual human boundary. Ask through the harness's blocking
-decision interface (its question tool or question widget) when one exists,
+question tool or widget when one exists,
 options and the recommended one first, not as prose.
 Keep working independent items while a necessary decision is pending.
 

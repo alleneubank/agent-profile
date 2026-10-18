@@ -159,6 +159,13 @@ guidance is not counted as universally loaded context.
   demand changes; scope decisions and high-risk gates remain explicit. This
   refines EXP-025 without adding roles, launchers, or a tighter round cap.
   **ratified (human)**
+- 2026-10-18 — From ai-wiki EXP-034: a plan reviewer on a different provider
+  than the author approves high-risk plans, judging against `AGENTS.md` and
+  the charter's standing decisions supplied as a standard, with the plan's
+  rejected alternatives. Specialists stay profile-free and run separately.
+  Waivers, rehearsal gaps, irreversible effects, publishing, credentials,
+  devices, data deletion, scope changes, and plans contested at the cap stay
+  with the human; a charter may reserve plan approval. **ratified (human)**
 
 ### Acceptance
 

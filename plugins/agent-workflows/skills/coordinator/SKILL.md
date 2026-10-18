@@ -131,7 +131,8 @@ read. Anything you cannot attribute to the charter belongs to another owner
 4. Fill each free lane slot (`lane.sh slots`) with the next queued item that can move, or with
    design-ahead work (Themes) when none can: it runs
    to its first human gate (a publish go, a credential, device, or biometric
-   step, a budget, a high-risk plan approval), parks there with the gate on
+   step, a budget, a high-risk plan the plan reviewer sent to the human),
+   parks there with the gate on
    the waiting list, and the slot takes the next item. A host below its disk
    floor (fleet file; 10% free when unset) takes no launch until you clear
    the charter's finished footprint there; whatever still holds it below the
@@ -368,7 +369,9 @@ limits go to the themes file, their decisions to the charter.
 - Specialist review and its three-round cap follow `AGENTS.md` and `done`.
   Each round gets one reviewer: the first launcher in the fleet file's order
   that has found material problems in this workspace. A second runs only when
-  the human asks.
+  the human asks. A plan reviewer also comes from a different provider than
+  the plan's author; log each plan it approves and lead the next sitrep with
+  it.
 - Land through the workspace's fail-closed landing path; without one, chain
   every step so a failure stops the push.
 - Once the human names what a release (a tip included) contains, freeze it:
