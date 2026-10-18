@@ -121,10 +121,10 @@ Keep working independent items while a necessary decision is pending.
   the work would have under `~` (a worktree of `~/src/app.worktrees` goes in
   `~/Work/src/app.worktrees/<task>`); `~/Work` carries the same instruction
   files. If `~/Work` does not exist, use the workspace root the prompt names
-  and say so in the record. Point tools that write elsewhere by default into
+  and record that. Point tools that write elsewhere by default into
   that directory (`TMPDIR`, `CARGO_TARGET_DIR`, `-derivedDataPath`,
   `ANDROID_AVD_HOME`). Tear down the shells and stacks you started and
-  delete the task folder once its result is in.
+  delete the task folder (`rm -r`, no force flag) once its result is in.
 
 ## Operations
 
