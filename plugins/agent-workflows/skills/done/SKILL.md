@@ -1,6 +1,6 @@
 ---
 name: done
-description: Use when claiming a change done, asking for acceptance or a merge, inviting someone to try a build (a bug bash, dogfood run, or visual or design review), requesting a specialist review, or landing reviewed work.
+description: Use when claiming a change done, asking for acceptance or a merge, inviting someone to try a build (a bug bash, dogfood run, or visual or design review), requesting a plan or specialist review, or landing reviewed work.
 ---
 
 # Done
@@ -34,7 +34,8 @@ or the task record when there is no pull request:
   only that the check catches the break it names.
 - **Author run:** the surface, the head, and that the author drove each changed
   flow. A guest's run is a separate row.
-- **High-risk:** the plan approval, and the rehearsal record (environment, head,
+- **High-risk:** the plan approval (who approved which plan revision), and the
+  rehearsal record (environment, head,
   scenarios, gaps). If there is no rehearsal, the draft reason.
 
 ## Invite others to check your work
@@ -48,14 +49,23 @@ input classes, callers, and paths. Each returns a verdict file.
 | --- | --- | --- |
 | Guest | whenever a build is worth trying; at the merging head for a new feature or changed flow | [guest](references/guest.md) |
 | Design reviewer | a change touches UI | [design reviewer](references/design-reviewer.md) |
+| Plan reviewer | a high-risk change's plan is ready, before it is built | [plan reviewer](references/plan-reviewer.md) |
 | Specialist | a change is high-risk (`AGENTS.md`) | [specialist](references/specialist.md) |
 
 A guest shares your host and uses the build you are already running. Point it
 at the build, not at a setup of its own, and say whether that environment is
 disposable or live and shared, with its funding budget when it is live. Run the specialist through a
 read-only, profile-free launcher, one reviewer per round unless the human asks
-for a second. After a fix, invite a fresh guest or reviewer at the new head
-for what the fix could change.
+for a second. Run the plan reviewer read-only on a different provider than the
+plan's author, separately from the specialist, and give it the standard as
+files: the profile's `AGENTS.md` and the charter's standing decisions. After a
+fix, invite a fresh guest or reviewer at the new head for what the fix could change.
+
+A plan reviewer's `approve` at a plan revision is the high-risk plan approval
+unless the charter reserves it for the human. Record the reviewer and revision,
+and lead your next report to the human with it; the human may reverse it.
+`needs the human`, or a plan still contested at the review cap, goes to the
+human.
 
 ## Respond to findings
 
@@ -96,7 +106,8 @@ stops at the first gap:
    its result.
 4. A UI change has a design verdict at that head with no open blocking
    finding.
-5. A high-risk change has a recorded plan approval, a specialist verdict at
+5. A high-risk change has a recorded plan approval (the human's or a plan
+   reviewer's), a specialist verdict at
    that head with no open blocking finding (or the human's recorded waiver),
    and an author rehearsal at that head in the closest real environment,
    recording environment, head, scenarios, and gaps. Without the rehearsal

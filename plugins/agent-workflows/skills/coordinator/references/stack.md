@@ -198,6 +198,8 @@ brief, run in a detached worktree
 of the lane's ref, writing a verdict file. Only the prompt keeps it
 read-only, so give it a checkout whose writes cannot land. Remove the
 checkout once its verdict is read.
+A plan review runs the same way with the `done` plan-reviewer charter, on a
+checkout of the plan's ref.
 
 ## Credentials
 
