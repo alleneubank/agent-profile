@@ -128,7 +128,8 @@ read. Anything you cannot attribute to the charter belongs to another owner
    or parked since the last pass; file claims live state contradicts;
    anomalies; free disk on each lane host.
 3. Handle each change as a lane event (below).
-4. Fill each free lane slot (`lane.sh slots`) with the next queued item that can move: it runs
+4. Fill each free lane slot (`lane.sh slots`) with the next queued item that can move, or with
+   design-ahead work (Themes) when none can: it runs
    to its first human gate (a publish go, a credential, device, or biometric
    step, a budget, a high-risk plan approval), parks there with the gate on
    the waiting list, and the slot takes the next item. A host below its disk
@@ -346,6 +347,10 @@ Plan by theme, not by the newest issue: a theme is the items one design owns
   is identified (pending or parked) or would rewrite the code, fold the item
   into the design. Parking a design parks its theme; to fix an item, pull the
   design forward.
+- While a design waits on a human gate, free slots may take design-ahead
+  work: what any approved version still needs and that sets no contract,
+  such as the reproduction or red test the design names, or its fixtures.
+  None of it lands before the design is approved.
 - A theme whose design gates other work appears in every portfolio review
   with its next step and who holds it.
 - Two parks in one theme (items stopped by non-convergence) make it a design
@@ -403,7 +408,7 @@ Breaking a law, plus:
 - A UI brief that says how to render but not what the user does
 - A retired lane whose shell, root, or resources remain with no line on the
   waiting list
-- A free lane slot while a queued item can still run to its gate, or a gated
-  item filed as out of scope
+- A free lane slot while a queued item or design-ahead work can still run
+  to its gate, or a gated item filed as out of scope
 - A lane fixing code its theme's pending design replaces, or a fix round in a
   theme with two parks
