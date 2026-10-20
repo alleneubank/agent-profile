@@ -31,7 +31,7 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   requested; guests run when requested and on new features and changed user
   flows, and design reviews on UI changes (REQ-PROFILE-010, REQ-PROFILE-012).
 - REQ-PROFILE-006 — **Measurable context:** universal `AGENTS.md` stays at or
-  below 1,480 whitespace-delimited words, from a 2,325-word baseline. This is a
+  below 1,495 whitespace-delimited words, from a 2,325-word baseline. This is a
   size constraint, not proof of behavior; fresh scenarios judge decision quality.
 - REQ-PROFILE-007 — **Verification proportionality:** verification runs the
   cheapest check that can catch the likely failure of the requested behavior,
@@ -166,6 +166,9 @@ guidance is not counted as universally loaded context.
   Waivers, rehearsal gaps, irreversible effects, publishing, credentials,
   devices, data deletion, scope changes, and plans contested at the cap stay
   with the human; a charter may reserve plan approval. **ratified (human)**
+- 2026-10-20 — From ai-wiki EXP-035: standing requirements and decisions are
+  recorded in the owning repository or wiki, never harness memory. Raise the
+  universal budget to 1,495 words for the sentence. **ratified (human)**
 
 ### Acceptance
 

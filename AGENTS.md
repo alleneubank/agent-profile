@@ -20,7 +20,8 @@ benefits from another agent.
 Multi-lane or multi-session work runs under a coordinator's charter; `tee-up`
 prepares the agreement it starts from. The human's absence changes cadence,
 not scope or authorization. Standing requirements and decisions survive
-sessions; apply them instead of re-asking.
+sessions: record them in the owning repository or wiki, never harness memory,
+and apply them instead of re-asking.
 
 ## Verification
 
