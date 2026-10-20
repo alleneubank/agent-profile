@@ -47,8 +47,10 @@ maintainer approves.
 6. **Branding and design system.** For a customer-facing product: the
    brand (name and how it is written, logo and its uses, color, type, voice
    and tone for copy) and the design system (tokens, components, design
-   files, and the canonical screens new work should match). Without these,
-   design findings stay notes.
+   files, and the canonical screens new work should match), plus where design
+   records live and the brief's owner's-taste section (`design`). Without these,
+   design findings stay notes. An established product's surfaces get as-built
+   records when a change first reaches them, not at onboarding.
 7. **Customer-facing basics.** Where each lives, or that it is missing: the
    accessibility target; legal pages (terms, privacy, required notices);
    a support path and contact; a status or incident page; how errors, empty

@@ -44,7 +44,8 @@ limits rather than claiming an unobserved failure.
 - Captures walk each changed interaction, not first paint: production today,
   then the change, in each state it touches (empty, error, loading, larger
   text, dark). They go in the change record, never committed, and show
-  visible state only.
+  visible state only. A design record's renderings, as-built baselines
+  included, are design intent and live with the record (`design`).
 
 ## Evidence or permanent test
 
