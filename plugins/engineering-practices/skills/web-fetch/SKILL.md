@@ -8,7 +8,9 @@ description: Use when fetching documentation, articles, or reference pages from 
 Fetch web content in this order:
 1. Prefer markdown-native endpoints (`content-type: text/markdown`)
 2. Use selector-based HTML extraction for known sites
-3. Use the bundled Bun fallback script when selectors fail
+3. Use the bundled Bun fallback script when selectors fail or the page is
+   built by JavaScript (empty or near-empty output); it renders such pages in
+   headless Chrome automatically
 
 ## Prerequisites
 
@@ -19,6 +21,10 @@ command -v curl >/dev/null || echo "curl is required"
 command -v html2markdown >/dev/null || echo "html2markdown is required for HTML extraction"
 command -v bun >/dev/null || echo "bun is required for fetch.ts fallback"
 ```
+
+Rendering JavaScript-built pages needs Chrome or Chromium: the macOS app,
+`google-chrome`/`chromium` on PATH, or `CHROME_PATH`. Headless Linux hosts get
+one from the dotfiles installer's `--chrome`.
 
 Install Bun dependencies for the bundled script:
 
@@ -80,11 +86,18 @@ curl -sL "<url>" | html2markdown --include-selector "<selector>" | wc -l
 
 ## Universal Fallback Script
 
-When selectors produce poor output, run the bundled parser:
+When selectors produce poor or empty output, run the bundled parser:
 
 ```bash
 bun <path-to-this-skill-directory>/fetch.ts "<url>"
+bun <path-to-this-skill-directory>/fetch.ts --render "<url>"   # always render
 ```
+
+A page with almost no server-rendered text (Apple's Human Interface Guidelines,
+Material Design, most single-page apps) is re-fetched through headless Chrome
+with a throwaway profile, which runs its scripts and dumps the finished DOM.
+Use a driven browser (playwriter) only when the page needs a signed-in session
+or interaction such as clicking tabs.
 
 If already in the skill directory:
 
@@ -120,4 +133,4 @@ curl -s "<url>" | grep -o '<article[^>]*>'
 
 **Missing code blocks**: Check if the site uses non-standard code formatting.
 
-**Client-rendered content**: If HTML only has "Loading..." placeholders, the content is JS-rendered. Neither curl nor the Bun script can extract it; use browser-based tools.
+**Client-rendered content**: If HTML only has "Loading..." placeholders or a "requires JavaScript" notice, run `fetch.ts`, which renders it; force rendering with `--render` when the page has some static text but the content is still missing.
