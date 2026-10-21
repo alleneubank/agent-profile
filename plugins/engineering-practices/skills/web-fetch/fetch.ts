@@ -1,27 +1,115 @@
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { parseHTML } from "linkedom";
 import TurndownService from "turndown";
 
-const url = process.argv[2];
-if (!url) {
-  console.error("Usage: bun fetch.ts <url>");
+const USAGE = "Usage: bun fetch.ts [--render] <url>";
+const FETCH_TIMEOUT_MS = 30_000;
+const RENDER_TIMEOUT_MS = 60_000;
+// Time the page's scripts get to build the DOM before Chrome dumps it.
+const RENDER_SCRIPT_BUDGET_MS = 10_000;
+// Server-rendered pages carry thousands of characters of body text; pages built
+// by client-side JavaScript carry almost none until a browser runs them.
+const STATIC_TEXT_CHARS_MIN = 200;
+
+const BROWSER_PATHS_MACOS = [
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "/Applications/Chromium.app/Contents/MacOS/Chromium",
+];
+const BROWSER_COMMANDS = ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"];
+
+const args = process.argv.slice(2);
+const renderForced = args.includes("--render");
+const positional = args.filter((arg) => arg !== "--render");
+if (positional.length !== 1) {
+  console.error(USAGE);
+  process.exit(1);
+}
+const url = positional[0];
+
+function visibleTextLength(html: string): number {
+  const { document } = parseHTML(html);
+  document.querySelectorAll("script,style,noscript,template").forEach((el) => el.remove());
+  return (document.body?.textContent ?? "").replace(/\s+/g, " ").trim().length;
+}
+
+async function fetchStatic(target: string): Promise<string> {
+  const response = await fetch(target, {
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; ClaudeCode/1.0)" },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  if (!response.ok) {
+    throw new Error(`fetch failed: ${response.status} ${response.statusText}`);
+  }
+  return response.text();
+}
+
+function findBrowser(): string {
+  const configured = process.env.CHROME_PATH;
+  if (configured) {
+    if (!existsSync(configured)) throw new Error(`CHROME_PATH does not exist: ${configured}`);
+    return configured;
+  }
+  const found =
+    BROWSER_PATHS_MACOS.find((path) => existsSync(path)) ??
+    BROWSER_COMMANDS.map((command) => Bun.which(command)).find((path) => path !== null);
+  if (!found) {
+    throw new Error(
+      "this page needs JavaScript and no Chrome or Chromium was found; " +
+        "install one (dotfiles: ./install.sh --chrome) or set CHROME_PATH",
+    );
+  }
+  return found;
+}
+
+// Runs the page's JavaScript in headless Chrome with a throwaway profile, so no
+// signed-in browser state is read or changed.
+async function fetchRendered(target: string): Promise<string> {
+  const browser = findBrowser();
+  const profile = mkdtempSync(join(tmpdir(), "web-fetch-chrome-"));
+  try {
+    const chrome = Bun.spawn(
+      [
+        browser,
+        "--headless=new",
+        "--disable-gpu",
+        "--no-first-run",
+        "--no-default-browser-check",
+        `--user-data-dir=${profile}`,
+        `--virtual-time-budget=${RENDER_SCRIPT_BUDGET_MS}`,
+        "--dump-dom",
+        target,
+      ],
+      { stdout: "pipe", stderr: "ignore", timeout: RENDER_TIMEOUT_MS },
+    );
+    const [dom, exitCode] = await Promise.all([new Response(chrome.stdout).text(), chrome.exited]);
+    if (exitCode !== 0) {
+      throw new Error(`headless Chrome exited with ${exitCode} (timeout ${RENDER_TIMEOUT_MS} ms)`);
+    }
+    return dom;
+  } finally {
+    rmSync(profile, { recursive: true });
+  }
+}
+
+async function loadHtml(target: string): Promise<string> {
+  if (renderForced) return fetchRendered(target);
+  const html = await fetchStatic(target);
+  if (visibleTextLength(html) >= STATIC_TEXT_CHARS_MIN) return html;
+  console.error(`web-fetch: ${target} has no server-rendered text; rendering with headless Chrome`);
+  return fetchRendered(target);
+}
+
+let html: string;
+try {
+  html = await loadHtml(url);
+} catch (error) {
+  console.error(`web-fetch: ${(error as Error).message}`);
   process.exit(1);
 }
 
-// Step 1: Fetch
-const response = await fetch(url, {
-  headers: {
-    "User-Agent": "Mozilla/5.0 (compatible; ClaudeCode/1.0)",
-  },
-});
-
-if (!response.ok) {
-  console.error(`Fetch failed: ${response.status} ${response.statusText}`);
-  process.exit(1);
-}
-
-const html = await response.text();
-
-// Step 2: Parse DOM
+// Step 2: Parse DOM (step 1 loads the HTML above)
 const { document } = parseHTML(html);
 
 // Step 3: Find the content-rich element
