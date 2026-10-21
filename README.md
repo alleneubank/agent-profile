@@ -14,7 +14,8 @@ get a little better each time I put work into it.
   `done` defines finished as merged with an evidence record and hands a
   guest, a design reviewer or a specialist their charter; `onboard` sets a
   repository up for that loop; `coordinator` runs many agent lanes under one
-  charter; plus `tee-up`, `handoff`, `sitrep`, `papercuts` and others.
+  charter; `design` takes a surface from flow to spec before it is built;
+  plus `tee-up`, `handoff`, `sitrep`, `papercuts` and others.
 - **[`engineering-practices`](plugins/engineering-practices/skills/)**: how
   code gets written: `code-law`, testing, git and pull requests, and
   per-language and per-tool guides.

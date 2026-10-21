@@ -169,6 +169,11 @@ guidance is not counted as universally loaded context.
 - 2026-10-20 — From ai-wiki EXP-035: standing requirements and decisions are
   recorded in the owning repository or wiki, never harness memory. Raise the
   universal budget to 1,495 words for the sentence. **ratified (human)**
+- 2026-10-20 — From ai-wiki EXP-036: a `design` skill runs design before
+  build, scaled by change size, with the record in the product repository,
+  the owner's reactions turned into taste rules, directions that name their
+  school of thought, and an as-built record backfilled when a change first
+  reaches an established surface without one. **ratified (human)**
 
 ### Acceptance
 

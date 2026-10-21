@@ -225,7 +225,9 @@ Change a running agent's brief only by addendum and pointer.
    acceptance, gates, budget, boundaries, the lane root, the human's
    decisions verbatim, the report path, and the Coordination section.
    Acceptance is scenarios (`done`): for UI, what each touched control does
-   on production today and what the user does. The Verification law's run goes
+   on production today and what the user does. A lane building a designed
+   surface links its design issue; departures from the spec are raised there
+   first (`design`). The Verification law's run goes
    in the acceptance of the lane that owns the merging head, a stack's top,
    by addendum when it is running, never a separate runtime lane; that lane
    invites its own guest and reviewers (`done`).
@@ -351,7 +353,9 @@ Plan by theme, not by the newest issue: a theme is the items one design owns
 - While a design waits on a human gate, free slots may take design-ahead
   work: what any approved version still needs and that sets no contract,
   such as the reproduction or red test the design names, or its fixtures.
-  None of it lands before the design is approved.
+  None of it lands before the design is approved. Free slots may also
+  backfill as-built design records (`design`) for surfaces queued items will
+  reach, busiest first.
 - A theme whose design gates other work appears in every portfolio review
   with its next step and who holds it.
 - Two parks in one theme (items stopped by non-convergence) make it a design
