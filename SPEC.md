@@ -306,6 +306,10 @@ Dated entries; provisional statuses ratify only with human confirmation at the p
 - D9 2026-08-30 — **Skill usage is Recall-owned and fail-closed across the complete fleet.** The wrapper owns only current-catalog canonicalization and presentation; no skill is archived in this campaign. `afk` remains public and `writing-plans` remains a candidate only. **ratified (human)**
 
 Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into this SPEC + README + git history (dissolve-docs, 2026-08-11).
+- 2026-10-23 — From ai-wiki EXP-035: narrow the 2026-10-20 memory rule. Harness
+  memory holds only what is true of this host alone, and points to a record
+  rather than copying it; anything another host or harness needs goes to the
+  owning repository or wiki. **ratified (human)**
 - 2026-08-29 — SPEC.md D7 is amended in place to the single SessionStart hook instead of adding a superseding decision, because the compaction hooks never shipped. **provisional (driver)**
 - 2026-08-29 — The stack diagram lists MISSION last as optional rather than removing it, so cross-campaign outcomes keep a named home. **provisional (driver)**
 - 2026-08-30 — Keep afk public and make no archival or renaming changes in this campaign. **ratified (human)**
