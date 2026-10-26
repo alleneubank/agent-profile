@@ -306,6 +306,10 @@ Dated entries; provisional statuses ratify only with human confirmation at the p
 - D9 2026-08-30 — **Skill usage is Recall-owned and fail-closed across the complete fleet.** The wrapper owns only current-catalog canonicalization and presentation; no skill is archived in this campaign. `afk` remains public and `writing-plans` remains a candidate only. **ratified (human)**
 
 Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into this SPEC + README + git history (dissolve-docs, 2026-08-11).
+- 2026-10-26 — Merge gates are keyed on inputs (`onboard`), and lane briefs
+  ask for the repo's gate at the final head, not a full rerun (coordinator
+  `files.md`); a full fresh run is for release candidates. Basis: a one-line
+  dev-shell change reran every job of a file-keyed gate. **ratified (human)**
 - 2026-10-23 — From ai-wiki EXP-035: narrow the 2026-10-20 memory rule. Harness
   memory holds only what is true of this host alone, and points to a record
   rather than copying it; anything another host or harness needs goes to the
