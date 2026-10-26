@@ -29,6 +29,10 @@ maintainer approves.
    budget, shared with deployed services or vendors). For a live rung, say who
    funds it, the budget, how leftovers are returned, and what must never be
    reset or deleted; record a missing rule as missing rather than invent one.
+   Key the merge gate on inputs: a job reruns only when the files, tools or
+   environment variables it reads change, and green results are reused
+   across checkouts on a host. A dev shell enters a key as what it produces
+   (tool identities, the variables each job reads), not as its source file.
 2. **How to try it.** For someone who did not build it: getting a running
    build, an account, and test funds or data, and where each feature lives.
    This is a guest's entry point and doubles as beta-tester docs. It assumes

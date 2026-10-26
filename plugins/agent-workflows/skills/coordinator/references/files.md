@@ -175,7 +175,11 @@ root: host, what it is, its teardown command). Agent mail receipts go to
 addendum to the lane host before launching or pointing the lane at it.
 
 The brief carries: Outcome. Acceptance (evidence to show). Gates: each
-command, run in the foreground, and what green means. Budget: iterations or a stop time. Boundaries.
+command, run in the foreground, and what green means. Lanes iterate on
+focused checks of what they changed, then run the repo's gate at the final
+head, which reruns only what changed since their evidence; a full fresh run
+is for release candidates or a gate that cannot key its inputs, which the
+evidence says. Budget: iterations or a stop time. Boundaries.
 Lane root: its path on the lane host; build output, caches, and scratch stay
 inside it, and anything that cannot (a container project, simulator, VM,
 localnet) is appended to `resources` with its teardown command as the lane
