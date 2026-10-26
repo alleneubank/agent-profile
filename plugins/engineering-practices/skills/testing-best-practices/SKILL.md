@@ -92,5 +92,8 @@ failure and report the block. Inspect progress before killing a slow run.
 
 Record which inputs a result covered: reuse it while they are unchanged, and
 not after they change. A new commit id, message, or squash alone does not
-invalidate it. After changes, rerun only the affected checks. A required check
-that cannot execute remains blocked, never replaced by static confidence.
+invalidate it. After changes, rerun only the affected checks. A green result
+stands until its inputs change: do not rerun it, retry a flake outside the
+change with the whole suite, or wait on gate jobs the change cannot affect.
+A required check that cannot execute remains blocked, never replaced by
+static confidence.
