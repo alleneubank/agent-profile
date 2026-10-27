@@ -97,7 +97,7 @@ Hosts: <fleet hosts this charter's lanes use, with its lane directory on each
 - <UTC time> hold <scope> (<the human's words>); lifted <UTC time | not yet>.
 
 ## Budgets and cadence
-- Lanes per host, within each host's cap; heartbeat schedule; event watcher script.
+- Lanes per host, within each host's cap; heartbeat schedule; lane watcher, plus any other event watcher.
 
 ## Decisions (newest last)
 - <UTC time> <the human's words where they matter> -> <what it changes>
