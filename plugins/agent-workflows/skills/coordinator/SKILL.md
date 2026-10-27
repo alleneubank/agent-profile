@@ -65,9 +65,10 @@ word). Lanes start through
    the human's own actions against git, logs, sox, recall, and the forge. An
    exit code, a live row, or a send receipt proves nothing about the task.
 10. **Never end a turn blind.** While a lane works or a relay awaits pickup,
-    confirm the heartbeat is armed now and name it in your final message. Add
-    an event watcher only for an event that must be handled before the next
-    heartbeat.
+    confirm the heartbeat and the lane watcher are armed now and name both in
+    your final message. The lane watcher wakes you when a lane finishes,
+    blocks, or exits, or a host drops ([stack.md](references/stack.md#sox-where-every-agent-lives));
+    the heartbeat catches what it cannot see.
 11. **Lanes start only through `lane.sh launch`.** That covers every agent
     shell you start for the charter: a lane, a relaunch, a reviewer, a beta
     tester. Never `sox new` one or write its `lane=` label by hand; a shell
@@ -114,11 +115,15 @@ read. Anything you cannot attribute to the charter belongs to another owner
    and recall say about it; reachable or not, the human's turn decides.
 4. `lease.sh take <charter> --reason "<the human's words and time>"`.
 5. Label your shell as the coordinator, use `lease.sh state` to write
-   `live` in the registry, start the heartbeat, and run a pass. Its report is
+   `live` in the registry, start the heartbeat and the lane watcher, and run
+   a pass. Its report is
    your opening sitrep. A workspace without a themes file gets a portfolio review
    before any lane starts in a new item.
 
 ### Run a pass
+
+A heartbeat or a lane watcher line starts a pass; re-arm the watcher in each
+pass once it has expired.
 
 1. `lease.sh check <charter>` (law 1).
 2. Take stock through a subagent, given the last pass time and the log and
@@ -144,7 +149,7 @@ read. Anything you cannot attribute to the charter belongs to another owner
 
 When three consecutive passes change nothing and every queued item is done or
 parked at a human gate (no lane, landing, rollout, or watcher in flight), stop
-the heartbeat, write `blocked-on-human` with `lease.sh state`, keep the lease,
+the heartbeat and the lane watcher, write `blocked-on-human` with `lease.sh state`, keep the lease,
 and end with a sitrep that opens with the scorecard (End of shift) and leads with
 their items. Their next turn restarts the heartbeat.
 
@@ -305,7 +310,8 @@ The watch changes hands only when the session has ended or the human asks
   skill, the handoff, and your session id for `/recall continue`, after
   `claude-pretrust` for its directory (stack.md, Startup dialogs). It takes
   the watch with `lease.sh take <charter> --reason` quoting the request. Once
-  your `lease.sh check <charter>` fails, stop the heartbeat and end with the
+  your `lease.sh check <charter>` fails, stop the heartbeat and the lane
+  watcher and end with the
   handoff path; the successor retires your shell unless the
   human started it.
 - **Park or retire** (the human asks): tear down finished lanes, write the
