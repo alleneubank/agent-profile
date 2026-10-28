@@ -11,13 +11,17 @@
 # list prints one tab-separated line per charter with a lease on this host:
 # charter, watch, held or released, session, shell, taken_at.
 #
-# Exit: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the watch, 5 lease busy.
+# Exit: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the watch, 5 lease busy,
+# 6 blocked-on-human refused: the charter's queue still has a ready item.
 #
 # The lease is ~/.handoffs/<charter>/lease. The caller is this Claude Code
 # session (CLAUDE_CODE_SESSION_ID) in the sox shell `sox which` names, so a
 # caller cannot claim another's identity by passing it. `state` records the
 # word in the lease as well as the fleet registry, so send.sh can tell a
-# stood-down coordinator from a live one on this host. The file is key=value
+# stood-down coordinator from a live one on this host. blocked-on-human is
+# written only when ~/.handoffs/<charter>/queue lists no ready item: one
+# tab-separated line per item, `<state>\t<theme>\t<item>[\t<note>]`, state
+# one of ready, running, gated, parked, done; `#` lines are comments. The file is key=value
 # lines in a fixed order. Writes take a lock directory and replace the file by
 # rename, so a reader never sees half a lease and two takes never both
 # succeed. Tests override COORDINATION_HOME, SOX_BIN and LEASE_NOW.
@@ -82,6 +86,25 @@ write() {
 # holds: 0 when the caller holds an unreleased watch.
 holds() {
   [ -z "$(field released_at)" ] && [ "$(field session)" = "$session" ] && [ "$(field shell)" = "$shell" ]
+}
+
+# ready_count: the queue's ready items. Fails on a missing, oversized or
+# malformed queue, so blocked-on-human cannot be written past unread work.
+ready_count() {
+  queue="$dir/queue"
+  [ -f "$queue" ] || fail "no queue at $queue: list the charter's items before writing blocked-on-human" 2
+  [ "$(wc -c < "$queue")" -le 1048576 ] || fail "queue exceeds 1 MiB: $queue" 2
+  awk -F '\t' '
+    /^#/ || /^[ \t\r]*$/ { next }
+    {
+      sub(/\r$/, "")
+      if (NF < 3 || $1 !~ /^(ready|running|gated|parked|done)$/) {
+        printf "line %d: want <ready|running|gated|parked|done>\\t<theme>\\t<item>\n", NR > "/dev/stderr"
+        bad = 1
+      } else if ($1 == "ready") ready++
+    }
+    END { if (bad) exit 2; print ready + 0 }
+  ' "$queue" || fail "malformed queue: $queue" 2
 }
 
 # Runs on the fleet host; its file lock serializes writers from all charters.
@@ -206,6 +229,10 @@ case "$command" in
       [ -n "$(field released_at)" ] || fail "release the watch before writing parked" 4
     else
       holds || fail "a released watch cannot write $state" 4
+    fi
+    if [ "$state" = blocked-on-human ]; then
+      ready=$(ready_count)
+      [ "$ready" -eq 0 ] || fail "$ready ready item(s) in $dir/queue: launch them, or mark each gated with its gate" 6
     fi
     if [ -n "$fleet_host" ]; then
       # Values travel as Bash assignments on stdin, never through ssh quoting.

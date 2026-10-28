@@ -1,5 +1,5 @@
 import { execFile, spawn, spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -27,6 +27,8 @@ function fleet(sendExit = 0) {
   const home = mkdtempSync(join(tmpdir(), "coordinator-scripts-"));
   const coordination = join(home, "handoffs");
   mkdirSync(join(coordination, "demo"), { recursive: true });
+  // A charter whose only item waits on the human, so blocked-on-human is true.
+  writeFileSync(join(coordination, "demo", "queue"), "gated\tforum\t#208\tplan approval\n");
   const sox = join(home, "sox");
   writeFileSync(
     sox,
@@ -204,6 +206,31 @@ describe("lease.sh", () => {
     expect(readFileSync(file)).toEqual(before);
   });
 
+  it("refuses blocked-on-human while the queue has a ready item, or when the queue is missing or malformed", async () => {
+    const f = fleet();
+    const file = join(f.home, "fleet.md");
+    const queue = join(f.coordination, "demo", "queue");
+    writeFileSync(file, FLEET);
+    await f.take(ONE);
+    const blocked = () => f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE);
+
+    rmSync(queue);
+    expect((await blocked()).status).toBe(2);
+    writeFileSync(queue, "# state\ttheme\titem\tnote\nready\ttraining\tdraft\nblocked\tforum\t#208\n");
+    expect((await blocked()).stderr).toContain("line 3:");
+    writeFileSync(queue, "# state\ttheme\titem\tnote\ngated\tforum\t#208\tplan approval\nready\ttraining\tdraft\n\ndone\tbugs\t#320\n");
+    const refused = await blocked();
+    expect(refused.status).toBe(6);
+    expect(refused.stderr).toContain("1 ready item(s)");
+    expect(readFileSync(file, "utf8")).toBe(FLEET);
+    expect(readFileSync(f.lease, "utf8")).not.toContain("state=");
+
+    writeFileSync(queue, "gated\tforum\t#208\tplan approval\r\nrunning\ttraining\tdraft\r\n");
+    expect((await blocked()).status).toBe(0);
+    expect(readFileSync(f.lease, "utf8")).toContain("state=blocked-on-human\n");
+    expect((await f.run(LEASE, ["state", "demo", "--state", "live", "--fleet", file], ONE)).status).toBe(0);
+  });
+
   it("requires the current holder and a released watch for parked", async () => {
     const f = fleet();
     const file = join(f.home, "fleet.md");
@@ -249,7 +276,7 @@ describe("lease.sh", () => {
     // Pause scheduling after the locks; the parser itself remains the real awk.
     writeFileSync(awk, '#!/bin/bash\nprintf "lock held\\n" >&2\nread -r proceed < "$HOME/continue"\nexec /usr/bin/awk "$@"\n');
     chmodSync(awk, 0o755);
-    const args = ["state", "demo", "--state", "blocked-on-human", "--fleet", file];
+    const args = ["state", "demo", "--state", "live", "--fleet", file];
     const env = f.environment(ONE);
     const first = spawn("/bin/bash", [LEASE, ...args], { env: { ...env, PATH: `${join(f.home, "bin")}:${env.PATH}` } });
     const completed = new Promise<number | null>((resolve, reject) => {
@@ -261,11 +288,11 @@ describe("lease.sh", () => {
         const timer = setTimeout(() => reject(new Error("State writer did not reach its lock")), 2000);
         first.stderr.once("data", () => { clearTimeout(timer); resolve(); });
       });
-      expect((await f.run(LEASE, ["state", "demo", "--state", "live", "--fleet", file], ONE)).status).toBe(5);
+      expect((await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE)).status).toBe(5);
       expect(readFileSync(file, "utf8")).toBe(FLEET);
       writeFileSync(fifo, "continue\n");
       expect(await completed).toBe(0);
-      expect(readFileSync(file, "utf8")).toBe(FLEET.replace("live (old prose)", "blocked-on-human"));
+      expect(readFileSync(file, "utf8")).toBe(FLEET.replace("live (old prose)", "live"));
       expect(existsSync(`${file}.lock`)).toBe(false);
       expect(existsSync(`${f.lease}.lock`)).toBe(false);
     } finally {

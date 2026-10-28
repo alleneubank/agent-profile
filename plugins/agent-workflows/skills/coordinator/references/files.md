@@ -174,14 +174,31 @@ Chosen now: <themes the human picked, in order>
 Design: <RFC, spec section, or "none needed"> - <status>; next step <...>,
 held by <human | lane | coordinator>
 Lanes: <limit>; running <host/sN.gM lane, ...>
-Items, in the human's order: <id> <one line> - <fix lane | folded into
-  design | parked (round N) | at gate>; runs to <its first human gate | done>
+Items: in the queue, under this theme's name
 Parks: <count>; at 2 the theme goes to a design session
 Decisions for the human: <pointer into Waiting on the human>
 ```
 
 A theme's lane limit caps lanes within the charter's budgets; it never raises
 them.
+
+## Queue: `~/.handoffs/<charter>/queue`
+
+One tab-separated line per item, in the human's order (theme order, then
+item order), the first `ready` line next:
+
+```text
+# state	theme	item	note
+ready	bugs	#320	Duo crash on resume
+running	bugs	#212	storage-impl on cometoasis
+gated	forum	#208	plan approval (W50)
+done	bugs	#339	landed fb27ca7
+```
+
+States are `ready`, `running`, `gated`, `parked`, and `done`; the note names
+the lane, the gate, or the landing. Narrative stays in the log. `lease.sh
+state blocked-on-human` refuses while any line is `ready` (exit 6) and
+when the queue is missing or malformed.
 
 A stocktake script, when the workspace has one, reads live sources only and
 prints running, finished, and parked work per lane; the subagent compares it

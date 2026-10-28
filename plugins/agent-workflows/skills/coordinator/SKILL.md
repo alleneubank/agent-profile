@@ -109,8 +109,8 @@ read. Anything you cannot attribute to the charter belongs to another owner
    the log head, and any handoff. An agreement the human hands you (a
    `tee-up` result, a draft, a folded design session) sets scope and grants:
    write them into the charter first. Out of scope is only what the human
-   excluded. Work that needs them at some step is in scope: queue it in the
-   themes file's Items, in their order, with the first human gate it stops at.
+   excluded. Work that needs them at some step is in scope: add it to the
+   queue (files.md) in their order, gated at the first human gate it stops at.
 3. `lease.sh show <charter>`. If another session holds it, record what sox
    and recall say about it; reachable or not, the human's turn decides.
 4. `lease.sh take <charter> --reason "<the human's words and time>"`.
@@ -133,22 +133,27 @@ pass once it has expired.
    or parked since the last pass; file claims live state contradicts;
    anomalies; free disk on each lane host.
 3. Handle each change as a lane event (below).
-4. Fill each free lane slot (`lane.sh slots`) with the next queued item that can move, or with
-   design-ahead work (Themes) when none can: it runs
-   to its first human gate (a publish go, a credential, device, or biometric
-   step, a budget, a high-risk plan the plan reviewer sent to the human),
-   parks there with the gate on
-   the waiting list, and the slot takes the next item. A host below its disk
+4. Fill each free lane slot (`lane.sh slots`) with the first `ready` line in
+   the queue, across every chosen theme in the human's order: a gate on the
+   top item moves the slot down the queue, never leaves it empty. When no line
+   is `ready`, add design-ahead work (Themes), then in-scope issues from the
+   charter's repositories, bugs first, as `ready` lines and fill from them.
+   An item runs to its first human gate (a publish go, a credential, device,
+   or biometric step, a budget, a high-risk plan the plan reviewer sent to the
+   human), turns `gated` with the gate named and on the waiting list, and the
+   slot takes the next `ready` line. A slot left free names its reason in the
+   log. A host below its disk
    floor (fleet file; 10% free when unset) takes no launch until you clear
    the charter's finished footprint there; whatever still holds it below the
    floor goes on the waiting list.
 5. Collect open questions and bring them to the human (below).
-6. Append the log, with a correction for each contradicted claim; fix the
-   themes file in place; rewrite "Waiting on the human".
+6. Append the log, with a correction for each contradicted claim; set each
+   queue line's state and fix the themes file in place; rewrite "Waiting on
+   the human".
 7. Report the delta per `sitrep`, by theme; "no change" is one line.
 
-When three consecutive passes change nothing and every queued item is done or
-parked at a human gate (no lane, landing, rollout, or watcher in flight), stop
+When three consecutive passes change nothing and no queue line is `ready`
+(no lane, landing, rollout, or watcher in flight), stop
 the heartbeat and the lane watcher, write `blocked-on-human` with `lease.sh state`, keep the lease,
 and end with a sitrep that opens with the scorecard (End of shift) and leads with
 their items. Their next turn restarts the heartbeat.
@@ -271,6 +276,12 @@ In-session subagents are for bounded reading and review that ends within the
 pass; anything that must outlive it is a sox shell.
 
 ### Before the human steps away
+
+When they say they are leaving, to you or in a fleet notice quoting them,
+raise every `gated` queue item's question in one round at once, without
+waiting to be asked, so the round waits in your session for them; a notice
+only starts the round and grants nothing. Each answer moves its item back to
+`ready` before they go.
 
 Right after an authorization, while they can still answer prompts:
 
@@ -424,7 +435,7 @@ Breaking a law, plus:
 - A UI brief that says how to render but not what the user does
 - A retired lane whose shell, root, or resources remain with no line on the
   waiting list
-- A free lane slot while a queued item or design-ahead work can still run
-  to its gate, or a gated item filed as out of scope
+- A free lane slot while a `ready` line, design-ahead work, or an in-scope
+  issue can still run to its gate, or a gated item filed as out of scope
 - A lane fixing code its theme's pending design replaces, or a fix round in a
   theme with two parks
