@@ -92,12 +92,25 @@ Hosts: <fleet hosts this charter's lanes use, with its lane directory on each
   lapses when <...>; ends <...>; scope <charter | session <id>>.
   Provisional decisions, where granted: say so here, with any high-risk
   exception named.
+  Two standing grants a triage acts under (references/triage.md), as examples:
+  - Close an issue when a reviewer who did not write the fix has checked
+    every acceptance item in its body, plus scope the human narrowed in
+    comments, against commits on the default branch; the close comment cites
+    the commits. Partial coverage gets a comment instead. An issue whose
+    remaining scope is wholly tracked by another is folded into it (closed
+    with a pointer). The human reopens what they disagree with. Scope charter.
+  - Fund a fix lane for a filed bug when it reproduces or has a cited cause,
+    needs no product or design decision, and is not high-risk; at most <N>
+    such lanes open at once, each within <hours> and <rounds> review rounds.
+    Features, design choices, parked items, and high-risk fixes go to the
+    human. Scope charter.
 
 ## Holds
 - <UTC time> hold <scope> (<the human's words>); lifted <UTC time | not yet>.
 
 ## Budgets and cadence
 - Lanes per host, within each host's cap; heartbeat schedule; lane watcher, plus any other event watcher.
+- Triage: after <N> lanes finished or landed, or a release; floor <hours>.
 
 ## Decisions (newest last)
 - <UTC time> <the human's words where they matter> -> <what it changes>
