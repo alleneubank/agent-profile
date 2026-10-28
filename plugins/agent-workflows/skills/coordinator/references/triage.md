@@ -7,11 +7,16 @@ and acts only under the charter's grants.
 
 ## When it runs
 
-After a batch: N lanes finished or landed since the last triage, or a
-release published. When no batch triggers, it runs once the time floor has
-passed since the last triage. The charter's Budgets and cadence line sets N
-and the floor. One triager at a time; it takes a lane slot like any lane.
-Log each triage's start and the default-branch commit it read.
+After a batch: N lanes other than triagers finished or landed since the last
+triage started, or a release published since then. A triager's own
+completion never counts toward a batch. The floor is the minimum gap between
+triage starts and gates every launch: a batch that arrives inside it waits
+until the floor passes. With no batch, no triage runs, unless the charter
+also sets a periodic survey interval; that is a separate cadence, off unless
+set, and the floor still gates it. The charter's Budgets and cadence line
+sets N, the floor, and any interval. One triager at a time; it takes a lane
+slot like any lane. Log each triage's start and the default-branch commit it
+read.
 
 ## Brief
 
