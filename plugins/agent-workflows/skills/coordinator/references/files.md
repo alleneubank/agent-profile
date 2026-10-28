@@ -92,12 +92,33 @@ Hosts: <fleet hosts this charter's lanes use, with its lane directory on each
   lapses when <...>; ends <...>; scope <charter | session <id>>.
   Provisional decisions, where granted: say so here, with any high-risk
   exception named.
+  Two standing grants a triage acts under (references/triage.md), as
+  examples. They are shapes, not grants: one becomes a grant only when the
+  human authorizes it, and the entry quotes their words and time (law 3).
+  - <UTC time> (<the human's words>) close issues and fold duplicates in
+    <forge repositories> when a reviewer who did not write the fix has
+    checked every acceptance item in the issue body, plus scope the human
+    narrowed or widened in comments, against commits on <default branch>;
+    the close comment cites the commits, and a fold closes with a pointer to
+    the item that wholly tracks the remaining scope. Partial coverage gets a
+    progress comment instead. Lapses when <the human reopens a closed item,
+    or a hold covers the repository>; ends <date | charter archive>; scope
+    charter.
+  - <UTC time> (<the human's words>) fund fix lanes for filed bugs in
+    <forge repositories> when the bug reproduces or has a cited cause, needs
+    no product or design decision, and is not high-risk; at most <N> such
+    lanes open at once, each within <hours> and <rounds> review rounds, on
+    <hosts>. Features, design choices, parked items, and high-risk fixes go
+    to the human. Lapses when <a funded lane exceeds its budget, or a hold
+    covers the repository>; ends <date | charter archive>; scope charter.
 
 ## Holds
 - <UTC time> hold <scope> (<the human's words>); lifted <UTC time | not yet>.
 
 ## Budgets and cadence
 - Lanes per host, within each host's cap; heartbeat schedule; lane watcher, plus any other event watcher.
+- Triage: after <N> non-triage lanes finished or landed, or a release;
+  floor <hours> between starts; periodic every <hours> | none.
 
 ## Decisions (newest last)
 - <UTC time> <the human's words where they matter> -> <what it changes>
