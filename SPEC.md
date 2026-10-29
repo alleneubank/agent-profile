@@ -90,6 +90,14 @@ guidance is not counted as universally loaded context.
 
 ### Decisions
 
+- 2026-10-29 — Coordinator charters keep only what governs: a Standing
+  section (grants, holds, rules, provisional calls, each with the human's
+  quoted words and time) plus decisions since the last prune. Pruning at
+  rotation, park, window end, and portfolio review sends durable project
+  knowledge to the repo, narrative to the log, and deletes what lapsed,
+  with no archive; the first prune of an older charter gets a
+  cross-provider review. Measured 2026-10-29: 64-78% of three live charters
+  (61-147 KB) no longer governed. **ratified (human)**
 - 2026-10-03 — Promote the dotfiles coordinator skill into `agent-workflows`.
   Preserve its lane, lease, theme, relay, and rotation workflow; isolate Claude
   tool names in the stack adapter and require wakeup capabilities before a

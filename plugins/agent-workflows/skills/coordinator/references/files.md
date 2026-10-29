@@ -87,14 +87,20 @@ Lease: <path>. Log: <path>. Lanes: <dir>.
 Hosts: <fleet hosts this charter's lanes use, with its lane directory on each
   and anything of this project's lanes must never touch there>
 
-## Grants
-- <UTC time, where given> <action> on <artifacts or refs> when <conditions>;
-  lapses when <...>; ends <...>; scope <charter | session <id>>.
+## Standing (pruned <UTC time>, watch <N>)
+Only what governs the next act. Every entry quotes the human's words with
+their time and where they said them (law 3); a merged entry keeps every
+quote it merged.
+
+### Grants
+- <UTC time> (<the human's words>, <session or file>) <action> on <artifacts
+  or refs> when <conditions>; lapses when <...>; ends <...>; scope <charter |
+  session <id>>.
   Provisional decisions, where granted: say so here, with any high-risk
   exception named.
   Two standing grants a triage acts under (references/triage.md), as
   examples. They are shapes, not grants: one becomes a grant only when the
-  human authorizes it, and the entry quotes their words and time (law 3).
+  human authorizes it.
   - <UTC time> (<the human's words>) close issues and fold duplicates in
     <forge repositories> when a reviewer who did not write the fix has
     checked every acceptance item in the issue body, plus scope the human
@@ -112,22 +118,54 @@ Hosts: <fleet hosts this charter's lanes use, with its lane directory on each
     to the human. Lapses when <a funded lane exceeds its budget, or a hold
     covers the repository>; ends <date | charter archive>; scope charter.
 
-## Holds
-- <UTC time> hold <scope> (<the human's words>); lifted <UTC time | not yet>.
+### Holds
+- <UTC time> (<the human's words>) hold <scope>; lifts when <...>.
 
-## Budgets and cadence
-- Lanes per host, within each host's cap; heartbeat schedule; lane watcher, plus any other event watcher.
+### Rules
+- Budgets: lanes per host, within each host's cap; heartbeat schedule; lane
+  watcher, plus any other event watcher.
 - Triage: after <N> non-triage lanes finished or landed, or a release;
   floor <hours> between starts; periodic every <hours> | none.
+- <UTC time> (<the human's words>) <rule> -> <what it changes>; until it
+  reaches <repo file>, when it is one (see Pruning).
 
-## Decisions (newest last)
-- <UTC time> <the human's words where they matter> -> <what it changes>
-- Provisional decisions: `<UTC time> PROVISIONAL <call> -> <what it changes>`
-  until the human rules.
+### Provisional
+- `<UTC time> PROVISIONAL <call> -> <what it changes>` until the human rules.
+
+## Decisions since the last prune (newest last)
+- <UTC time> (<the human's words>) -> <what it changes>
 
 ## Identifiers
 - <shared identifier> <lane> <date>
 ```
+
+### Pruning
+
+A charter holds what governs, not what happened. Prune at a rotation (the
+handoff's grants in force are the Standing section), when a window ends, and
+at a portfolio review; a charter without a Standing section is pruned at its
+holder's next pass. Fold each entry of Decisions since the last prune, and
+anything else outside Standing, into exactly one place:
+
+- **Still governs:** its Standing entry, replacing what it supersedes.
+- **Durable project knowledge** (a product rule, convention, design call, or
+  fact about the code): the repo, as an instruction, brief, spec, doc,
+  comment, test, or source, through a lane, routed as `dissolve-docs` routes
+  it. Until that merges, Standing keeps
+  one line pointing at the item that carries it.
+- **Lapsed, superseded, or done:** delete it. The merged change, closed issue,
+  and log line record what happened, and lapsed words authorize nothing.
+- **Narrative and evidence** (status, landed refs, watch history): the log,
+  if it is not there already.
+
+An entry leaves Standing only when its own clock or condition has passed,
+when later words of the human replace it, or when the human says so. A
+reading that would end or narrow a grant, hold, or waiver is a question for
+the human; until they answer, the entry stays, marked `(check: <question>)`.
+Settle what a live source answers (a merged PR, a closed issue) before
+asking. The first prune of a charter that predates this shape goes to a
+reviewer from another provider, who compares the draft with the full prior
+text before it replaces the charter.
 
 The charter on the control host is the only authority. Lanes get briefs and
 addenda; a charter copied to a lane host is a hint, never a source.
@@ -267,9 +305,10 @@ and expire after 7 days.
 ## Window agreement
 
 Before the human steps away, write `~/.handoffs/<charter>/window-<UTC date>.md`
-and add one Grants line in the charter pointing to it. Cite standing grants
+and add one Standing Grants line in the charter pointing to it. Cite standing grants
 and decisions by their charter line instead of copying them. When the window
-ends, remove its pointer from Grants and log that its grants lapsed.
+ends, prune the charter (Pruning), delete the window file once its report is
+written, and log that its grants lapsed.
 
 - Window: start and end with timezone, with the last stretch reserved for
   cleanup and the report.
