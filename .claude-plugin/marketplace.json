@@ -22,7 +22,7 @@
       "name": "agent-workflows",
       "source": "./plugins/agent-workflows",
       "description": "Reusable planning, handoff, verification, and workflow skills for agents.",
-      "version": "14.10.0",
+      "version": "14.11.0",
       "author": {
         "name": "Allen Eubank",
         "email": "bigboss@metalrodeo.xyz"
