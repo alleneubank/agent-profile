@@ -33,7 +33,7 @@ word). Lanes start through
    release, run `lease.sh check <charter>`; `send.sh` checks it for you. A
    non-zero exit means you do not hold the watch: observe and report only.
    A decision the human gives you then still counts: record it in the
-   charter's Decisions with its time, send the holder a pointer
+   charter's Decisions since the last prune with its time, send the holder a pointer
    (`send.sh --kind evidence`, no lease), and tell the human it went to the
    holder. Do not ask them again.
 2. **Only the human moves the watch.** It changes hands only when the
@@ -315,8 +315,10 @@ The watch changes hands only when the session has ended or the human asks
   in progress is not delivered, and none is written `delivered: none`.
   Blocked-on-human sums the hours your registry row held `blocked-on-human`
   this shift.
-- **Rotate** (the human asks): write the handoff (scorecard, handover table,
-  waiting list, grants in force, footprint left on each host and why), then
+- **Rotate** (the human asks): prune the charter
+  ([files.md](references/files.md#pruning)), then write the handoff
+  (scorecard, handover table, waiting list, footprint left on each host and
+  why; grants in force are the charter's Standing section), then
   launch a successor in a sox shell on the control host with the coordinator
   skill, the handoff, and your session id for `/recall continue`, after
   `claude-pretrust` for its directory (stack.md, Startup dialogs). It takes
@@ -325,8 +327,8 @@ The watch changes hands only when the session has ended or the human asks
   watcher and end with the
   handoff path; the successor retires your shell unless the
   human started it.
-- **Park or retire** (the human asks): tear down finished lanes, write the
-  handoff, stop the heartbeat and any watchers,
+- **Park or retire** (the human asks): tear down finished lanes, prune the
+  charter, write the handoff, stop the heartbeat and any watchers,
   `lease.sh release <charter> --handoff <path>`, then write `parked` with
   `lease.sh state`, log it, and end with
   `SHIFT ENDED <handoff path>`. When that would orphan work in flight, end
@@ -386,7 +388,8 @@ Plan by theme, not by the newest issue: a theme is the items one design owns
 A portfolio review runs per release, when the human sits down to plan, when
 intake starts a new theme, or on request: a subagent drafts the changes since
 the last review, you decide with the human, and the chosen themes, order, and
-limits go to the themes file, their decisions to the charter.
+limits go to the themes file, their decisions to the charter, which is
+then pruned.
 
 ## Lane quality
 
@@ -431,6 +434,8 @@ Breaking a law, plus:
   talking to
 - "Landing now" with no log line proving it started
 - A decision that lives only in a prompt, memory, or chat
+- Charter text that only records what happened, a lapsed grant left
+  standing, or project knowledge kept in a charter instead of the repo
 - A waiting list or themes file written from memory instead of a stocktake
 - A UI brief that says how to render but not what the user does
 - A retired lane whose shell, root, or resources remain with no line on the
