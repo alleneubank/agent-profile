@@ -82,9 +82,13 @@ hosts and their capabilities, launchers, devices, reservations, and a
 registry of charters), the **charter** (scope, the hosts its lanes use,
 budgets, grants, decisions, holds),
 the **log** (append-only under a rewritten "Waiting on the human"), the
-**themes** file, and the **lease**. Write each decision with its time before
-acting on it; never record what a live source answers. A charter copied to a
-lane host is a hint, never a source.
+**themes** file, the **queue**, and the **lease**. Write each decision with
+its time before acting on it; never record what a live source answers. A
+charter copied to a lane host is a hint, never a source. Host facts
+(capabilities, access, paths) come only from the fleet file, which
+fleet-watch keeps: never place or withhold a lane on a host fact from a
+charter, log, or memory. When a live probe contradicts the fleet file, send
+fleet-watch a request and place by the probe.
 
 What the charter creates on a host is its **footprint**: shells, worktrees,
 build output and caches, scratch, and any container project, simulator, VM,
@@ -150,7 +154,9 @@ pass once it has expired.
 6. Append the log, with a correction for each contradicted claim; set each
    queue line's state and fix the themes file in place; rewrite "Waiting on
    the human".
-7. Report the delta per `sitrep`, by theme; "no change" is one line.
+7. Report the delta per `sitrep`, by theme, opening with `slots: free N ·
+   launched M · held: <item> → <reason>, ...`; "no change" is that line
+   alone.
 
 When three consecutive passes change nothing and no queue line is `ready`
 (no lane, landing, rollout, or watcher in flight), stop
@@ -195,8 +201,9 @@ their items. Their next turn restarts the heartbeat.
    Otherwise put the questions in "Waiting on the human", batched by theme
    with the time each batch needs, and notify them only for what needs their
    hands before they would otherwise look. A due check fires first.
-4. Close the round: record each answer in the charter with its time and name
-   what it started, and where.
+4. Close the round: record each answer in the charter with its time, and in
+   the same act set its queue line to `ready`, or `gated` with the gate
+   named. Step 4 of the same pass fills from it.
 
 Never send the human to a lane's pane to answer or type "go", nor step back
 from a lane they are talking to. When a request looks wrong or risky, say so
@@ -442,5 +449,7 @@ Breaking a law, plus:
   waiting list
 - A free lane slot while a `ready` line, design-ahead work, or an in-scope
   issue can still run to its gate, or a gated item filed as out of scope
+- A heartbeat prompt that names lanes or state instead of files.md's line,
+  or a workspace without a queue file
 - A lane fixing code its theme's pending design replaces, or a fix round in a
   theme with two parks
