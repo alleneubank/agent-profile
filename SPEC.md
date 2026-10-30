@@ -13,8 +13,10 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   This repository does not uninstall binaries or erase session history.
 - REQ-PROFILE-002 — **Campaign ownership:** multi-lane and multi-session work
   runs under a coordinator's charter. `agent-workflows:coordinator` owns the
-  workflow and its reference file shapes; fleet state and grants stay outside
-  repositories. The profile ships no separate loop lifecycle or presence skill.
+  workflow and its reference file shapes; `agent-workflows:fleet-watch` owns
+  the fleet-level role above the coordinators and the fleet file shapes;
+  fleet state and grants stay outside repositories. The profile ships no
+  separate loop lifecycle or presence skill.
 - REQ-PROFILE-003 — **Proportional work:** bounded attended changes may use
   existing requirements and a session plan; persistent campaign documents are
   required only when unattended multi-session work or recovery needs them.
@@ -89,6 +91,15 @@ belongs to this consolidation. Repository-local
 guidance is not counted as universally loaded context.
 
 ### Decisions
+
+- 2026-10-30 — The fleet watch becomes `agent-workflows:fleet-watch`: the
+  role (Does, Never, take, pass, nudges, host fixes the charter grants,
+  pruning of its charter and the fleet file) moves from its charter into the
+  skill, and the fleet-level sections leave the coordinator's references.
+  It nudges coordinators and never launches lanes or starts a coordinator.
+  Its `take`, `watch`, and `pass` commands ship beside the skill; dotfiles
+  puts them and the coordinator scripts on PATH. Basis and measures: ai-wiki
+  EXP-042. **ratified (human)**
 
 - 2026-10-29 — Coordinator charters keep only what governs: a Standing
   section (grants, holds, rules, provisional calls, each with the human's

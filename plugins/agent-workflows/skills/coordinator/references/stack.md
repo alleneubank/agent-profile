@@ -19,20 +19,15 @@ The coordinator runs on Claude Code (SKILL.md); these are its tools.
 
 ## Scripts
 
-`lease.sh`, `send.sh`, `lane.sh`, and `retire.sh` live in `scripts/` beside the skill's `SKILL.md`
-(the harness shows the skill's base directory when it loads). Each script's
-header is its reference. The caller is `CLAUDE_CODE_SESSION_ID` in the shell
-`sox which` names; the target's foreground comes from `sox ls <host>`, and
-`sox send --expect-fg` refuses if it changes before the write. Receipts go
-to `~/.handoffs/<charter>/sent.log` on the sending host. On a lane host, find
-the installed `send.sh` before writing it into a brief:
-`ls ~/.claude/plugins/cache/agent-profile/agent-workflows/*/skills/coordinator/scripts/send.sh ~/.codex/plugins/cache/agent-profile/agent-workflows/*/skills/coordinator/scripts/send.sh 2>/dev/null | tail -1`.
+`lease.sh`, `send.sh`, `lane.sh`, and `retire.sh` live in `scripts/` beside
+the skill's `SKILL.md`, and every host has them on PATH (dotfiles links them
+from the pinned profile), so a brief names them bare. Each script's header is
+its reference. The caller is `CLAUDE_CODE_SESSION_ID` in the shell `sox which`
+names; the target's foreground comes from `sox ls <host>`, and `sox send
+--expect-fg` refuses if it changes before the write. Receipts go to
+`~/.handoffs/<charter>/sent.log` on the sending host.
 They need bash 3.2 or later and coreutils; remote State writes also use ssh,
-and `lane.sh` needs jq. While many coordinators run at once, whoever starts
-them also starts `lane.sh drift --fleet <caps file> --every 300 --stop-at <end>`
-in a sox shell on the control host labeled `role=fleet-check`, and kills it at
-the end. It costs no agent turns; its findings are in
-`~/.handoffs/fleet-drift.txt`.
+and `lane.sh` needs jq.
 `lease.sh state <c> --state <word> --fleet <absolute path> [--fleet-host <host>]`
 writes only that registry row's State, under a fleet-wide lock (exit 5 busy).
 Its stdout is `<charter>\t<state>\tchanged|unchanged`.
@@ -110,41 +105,6 @@ Verified 2026-10-27 with sox v0.3.30: a labeled `--no-attach --exec` shell
 printed one `none → gone` line when it exited. A slow host printed one
 `unreachable` line. A live Claude lane streamed `done → working` (dropped by
 the filter). Its return to `done` was not observed.
-
-### Fleet watch
-
-A watch over every lane, not one charter's (no `--label`), needs more
-filtering:
-
-- Drop your own shell (`.backing_id == $ZMX_SESSION`). The unfiltered stream
-  includes it, so each reply you post ends your turn, prints `done`, and wakes
-  you again: a feedback loop.
-- Drop a line whose `state` equals its `previous`, except `blocked`. The
-  stream re-reports unchanged states.
-- Report a host only once it has stayed `unreachable` past a grace period
-  (60 s works), and again when it recovers. One-tick `unreachable` flaps on
-  healthy masters are routine: sox v0.3.30 had 15 in 37 minutes, all of them
-  `RemoteHomeExecutionFailed` or `RpcTunnelFailed` (0xsend/sox#1153).
-- `gone` from `none` is a short-lived or headless shell exiting. `gone` from
-  `working` or `blocked` may be a death: check it.
-- Run one stream per watcher. Every `watch --all` subscriber re-resolves HOME
-  and opens a fresh RPC tunnel to every host on every tick, so each extra
-  stream or `sox ls` loop adds load to the shared masters.
-
-A host entry whose `ssh_host` is this machine's own name is a self-target. It
-stays on the SSH path by design (REQ-LSX-106), and while several subscribers
-run it reads `unreachable` almost continuously (0xsend/sox#1152). If its
-private home (`~/.sox-self-*`) holds no shells (`SOX_HOME=<that home> sox
-ls`), `sox host rm <name>` removes the duplicate and `localhost` still covers
-the machine.
-
-To tell sox from SSH when a host drops, probe its master directly:
-`ssh -S ~/.sox/ssh/<id>.sock -o ControlMaster=no -o RemoteCommand=none <ssh_host> true`.
-`<id>.sock` is the `-S` path on that host's `ssh -M` process. Without
-`RemoteCommand=none`, a host whose ssh config sets a `RemoteCommand` fails
-with `Cannot execute command-line and remote command`. A fast success while
-sox reports the host `unreachable` puts the fault in sox's own exec path,
-whose trace names only the error category.
 
 Write each message as one line with no trailing newline (the Write tool does
 this) and send it on stdin: inline, an apostrophe breaks single quotes, and
