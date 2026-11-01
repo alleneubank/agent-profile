@@ -245,7 +245,7 @@ and expire after 7 days.
 
 ## Window agreement
 
-Before the human steps away, write `~/.handoffs/<charter>/window-<UTC date>.md`
+Before an unattended window starts, write `~/.handoffs/<charter>/window-<UTC date>.md`
 and add one Standing Grants line in the charter pointing to it. Cite standing grants
 and decisions by their charter line instead of copying them. When the window
 ends, prune the charter (Pruning), delete the window file once its report is
