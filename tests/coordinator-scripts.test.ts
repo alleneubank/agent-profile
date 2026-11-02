@@ -7,8 +7,9 @@ import { PROCESS_TIMEOUT_MS } from "./process-timeout";
 
 // The coordinator skill's scripts, run for real under /bin/bash (macOS ships
 // bash 3.2 there; Linux ships bash 5), with no network and a stub sox. The
-// stub answers `which` with SOX_STUB_SHELL, `ls` from ls.jsonl, and records
-// what `send` would have typed.
+// stub answers `which` with SOX_STUB_SHELL, `ls` from ls.jsonl, keeps each
+// backing's labels as sox does (one value per key), and records what `send`
+// would have typed.
 const SCRIPTS = resolve(__dirname, "../plugins/agent-workflows/skills/coordinator/scripts");
 const LEASE = join(SCRIPTS, "lease.sh");
 const SEND = join(SCRIPTS, "send.sh");
@@ -31,6 +32,17 @@ function fleet(sendExit = 0) {
 case "$1" in
   which) [ -n "$SOX_STUB_SHELL" ] || exit 1; printf '%s\\n' "$SOX_STUB_SHELL" ;;
   ls) grep -F "\\"host\\":\\"$2\\"" "${home}/ls.jsonl" ;;
+  label)
+    id=\${2#*/}; file="${home}/labels-$id"; shift 2
+    if [ $# -eq 0 ]; then cat "$file" 2>/dev/null || echo "no labels on this backing" >&2; exit 0; fi
+    for kv in "$@"; do
+      touch "$file"
+      while IFS= read -r line; do
+        case "$line" in "\${kv%%=*}="*) ;; *) printf '%s\\n' "$line" ;; esac
+      done < "$file" > "$file.tmp"
+      printf '%s\\n' "$kv" >> "$file.tmp"
+      mv "$file.tmp" "$file"
+    done ;;
   send) printf '%s\\n' "$*" > "${home}/argv"; cat > "${home}/typed"; exit ${sendExit} ;;
 esac
 `,
@@ -48,11 +60,11 @@ esac
       rows.map((r) => JSON.stringify({ kind: "shell", backing_id: r.backing, host: r.host, status: r.status ?? "live", command: r.command, attention: r.attention })).join("\n") + "\n",
     );
   }
-  function environment(who: Caller | null, now = "2026-10-04T20:00:00Z") {
+  function environment(who: Caller | null, now = "2026-10-04T20:00:00Z", coordinationHome = coordination) {
     const env: Record<string, string> = {
       PATH: process.env.PATH ?? "/usr/bin:/bin",
       HOME: home,
-      COORDINATION_HOME: coordination,
+      COORDINATION_HOME: coordinationHome,
       SOX_BIN: sox,
       LEASE_NOW: now,
       SEND_HOSTNAME: "control",
@@ -63,12 +75,12 @@ esac
     }
     return env;
   }
-  function run(script: string, args: string[], who: Caller | null, input = "", now = "2026-10-04T20:00:00Z") {
+  function run(script: string, args: string[], who: Caller | null, input = "", now = "2026-10-04T20:00:00Z", coordinationHome = coordination) {
     // Keep the worker responsive to runner messages while a shell is working.
     return new Promise<{ status: number; stdout: string; stderr: string }>((resolve, reject) => {
       let inputError: NodeJS.ErrnoException | undefined;
       const child = execFile("/bin/bash", [script, ...args], {
-        env: environment(who, now), encoding: "utf8", timeout: PROCESS_TIMEOUT_MS,
+        env: environment(who, now, coordinationHome), encoding: "utf8", timeout: PROCESS_TIMEOUT_MS,
       }, (error, stdout, stderr) => {
         const status = error ? error.code : 0;
         // A rejected command can exit before reading stdin; its exit status is asserted.
@@ -440,6 +452,25 @@ describe("send.sh", () => {
     await f.run(LEASE, ["take", "other", "--reason", "Allen: coordinate other too"], ONE);
     const fromFleet = ["--charter", "fleet", "--role", "fleet-desk", "--to", ONE.shell, "--kind", "evidence"];
     expect((await f.run(SEND, fromFleet, null, "hello")).status).toBe(0);
+  });
+
+  it("refuses a stood-down coordinator whose lease lives under another coordination home", async () => {
+    const f = fleet();
+    const work = join(f.home, "work-handoffs");
+    mkdirSync(join(work, "other"), { recursive: true });
+    writeFileSync(join(work, "other", "queue"), "gated\tforum\t#9\tmerge approval\n");
+    f.shells([{ host: "localhost", backing: ONE.shell, command: "claude", attention: "done" }]);
+    const inWork = (args: string[]) => f.run(LEASE, args, ONE, "", undefined, work);
+    expect((await inWork(["take", "other", "--reason", "the human: coordinate other from Work"])).status).toBe(0);
+    expect((await inWork(["state", "other", "--state", "blocked-on-human"])).status).toBe(0);
+    const toOther = () => f.run(SEND, ["--charter", "demo", "--role", "glyphs", "--to", ONE.shell, "--kind", "event"], null, "hello");
+    const refused = await toOther();
+    expect(refused.status).toBe(5);
+    expect(refused.stderr).toContain("other coordinator, stood down (blocked-on-human)");
+    expect(f.typed()).toBe(false);
+
+    expect((await inWork(["state", "other", "--state", "live"])).status).toBe(0);
+    expect((await toOther()).status).toBe(0);
   });
 
   it("judges a shared shell by the sender's own charter, fails closed on an unknown State, and records refusals", async () => {
