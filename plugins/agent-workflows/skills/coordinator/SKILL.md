@@ -262,10 +262,14 @@ Change a running agent's brief only by addendum and pointer.
    its order, with the account the work's tree names, narrowed by the
    charter and by any window that has not lapsed; the brief names it. A
    quota failure follows the Roster's fallback and is logged.
-4. If that launcher's worker cannot load this profile's skills, the brief
-   includes the applicable text of `AGENTS.md` Verification and Authority, and
-   the sections of `code-law`, `testing-best-practices`, `done`, and `sitrep`
-   that govern the lane's actions, plus this preamble:
+4. If that launcher's worker cannot load this profile's skills: a read-only
+   reviewer (it reads and reports; it never edits, commits, pushes, or
+   launches) gets only its charge and the inputs its charter lists (`done`).
+   Any other lane's brief pastes the text, not the names, of `AGENTS.md`
+   Verification and Authority and the sections of `code-law`,
+   `testing-best-practices`, `done`, and `sitrep` that govern its actions,
+   plus the preamble below. A brief missing either is incomplete; check the
+   brief file before launching.
 
    ```text
    Harness notes for this worker:
