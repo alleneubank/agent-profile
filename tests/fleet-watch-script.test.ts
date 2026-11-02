@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -55,7 +55,10 @@ describe("fleet-watch.sh", () => {
     const f = fleet();
     expect(f.run("take", "--reason", "the human: become the fleet watch")).toContain("watch=1");
     expect(readFileSync(join(f.coordination, "fleet-watch", "lease"), "utf8")).toContain(`shell=${OWN_SHELL}`);
-    expect(readFileSync(join(f.home, "labels"), "utf8")).toBe(`${OWN_SHELL} role=fleet-watch charter=fleet-watch\n`);
+    expect(readFileSync(join(f.home, "labels"), "utf8")).toBe(
+      `${OWN_SHELL} lease.fleet-watch=${realpathSync(f.coordination)}/fleet-watch/lease\n` +
+      `${OWN_SHELL} role=fleet-watch charter=fleet-watch\n`,
+    );
   });
 
   it("reports what the watch acts on and never its own shell", () => {

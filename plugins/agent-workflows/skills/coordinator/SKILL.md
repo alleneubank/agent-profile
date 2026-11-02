@@ -22,7 +22,8 @@ through [scripts/lease.sh](scripts/lease.sh)
 (`send.sh --charter <c> --role coordinator --to <host/sN.gM> --kind <k> < line`).
 Both identify your session and shell themselves; `send.sh` checks the lease
 and refuses a target that is not running an agent, or a coordinator whose
-lease says it is stood down (exit 5; `--wake-stood-down` only on the human's
+lease says it is stood down, found through the `lease.<charter>` label
+`lease.sh` puts on its shell (exit 5; `--wake-stood-down` only on the human's
 word). Lanes start through
 [scripts/lane.sh](scripts/lane.sh) (`lane.sh slots|launch|cap|drift --fleet
 <caps file>`), which holds each host to its cap.

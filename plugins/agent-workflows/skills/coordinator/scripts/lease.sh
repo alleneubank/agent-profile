@@ -16,15 +16,18 @@
 # died keeps the state it last wrote, so read the two together.
 #
 # Exit: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the watch, 5 lease busy,
-# 6 blocked-on-human refused: the charter's queue still has a ready item.
+# 6 blocked-on-human refused: the charter's queue still has a ready item,
+# 7 sox could not label the shell the lease names.
 #
-# The lease is ~/.handoffs/<charter>/lease, the only record of a charter's
-# state. The caller is this Claude Code
+# The lease is $COORDINATION_HOME/<charter>/lease (~/.handoffs by default),
+# the only record of a charter's state. The caller is this Claude Code
 # session (CLAUDE_CODE_SESSION_ID) in the sox shell `sox which` names, so a
 # caller cannot claim another's identity by passing it. take writes live;
 # `state` replaces the word, so send.sh can tell a stood-down coordinator from
-# a live one on this host. blocked-on-human is
-# written only when ~/.handoffs/<charter>/queue lists no ready item: one
+# a live one. Every write first labels the shell the lease names with
+# lease.<charter>=<absolute lease path>; send.sh finds a target's leases
+# through that label, whatever coordination home each lives under.
+# blocked-on-human is written only when ~/.handoffs/<charter>/queue lists no ready item: one
 # tab-separated line per item, `<state>\t<theme>\t<item>[\t<note>]`, state
 # one of ready, running, gated, parked, done; `#` lines are comments. The file is key=value
 # lines in a fixed order. Writes take a lock directory and replace the file by
@@ -81,9 +84,13 @@ lock() {
   trap 'rmdir "$lease.lock" 2>/dev/null || true' EXIT
 }
 
-# write <one value per FIELDS key, in order>: replace the lease, leaving out
-# empty values.
+# write <one value per FIELDS key, in order>: label the shell the lease names
+# with the lease's path, then replace the lease, leaving out empty values.
+# Labeling first means no lease names a shell that cannot lead back to it.
 write() {
+  path="$(cd "$dir" && pwd -P)/lease"
+  sox_pinned label "$4" "lease.$charter=$path" >/dev/null ||
+    fail "sox could not label $4 with lease.$charter=$path; the lease is unchanged" 7
   tmp="$lease.tmp.$$"
   : > "$tmp"
   for key in $FIELDS; do

@@ -117,8 +117,12 @@ Written only by `scripts/lease.sh` (take, release, state); read with `show`,
 `list`, and `check`. `key=value` lines: `charter`, `watch`, `session`,
 `shell`, `harness`, `taken_at`, `prior`, `reason` (the human's words that
 appointed this watch), once released `released_at` and `handoff`, and
-`state`. Exit codes: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the
-watch, 5 another write is in progress (retry).
+`state`. Each write first labels the shell the lease names
+`lease.<charter>=<absolute lease path>`, which is how `send.sh` finds a
+target's lease whatever coordination home the charter uses. Exit codes: 0 ok,
+2 usage, 3 no lease, 4 caller does not hold the watch, 5 another write is in
+progress (retry), 6 blocked-on-human refused (a ready queue item), 7 sox could
+not label the shell (the lease is unchanged).
 
 The lease is the only record of the charter's state: `live` (written by
 take), `blocked-on-human`, or `parked`, set with

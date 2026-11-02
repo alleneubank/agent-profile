@@ -19,14 +19,18 @@
 # A target on this host that a lease names as its coordinator's shell is
 # refused while that coordinator is stood down: its watch released, or a
 # lease State other than live. A typed line would start a turn the human did
-# not ask for. The sender's own charter's lease decides when it names the
-# target; otherwise one live lease naming the shell keeps it reachable, since
-# a session may coordinate several charters. --wake-stood-down sends anyway,
-# on the human's word only, and the receipt says so. A refusal is recorded.
+# not ask for. The leases come from the target itself: lease.sh labels the
+# shell each lease names with lease.<charter>=<lease path>, so a charter's
+# lease is found whatever coordination home it lives under. A label whose
+# lease no longer names the shell is ignored. The sender's own charter's
+# lease decides when it names the target; otherwise one live lease naming the
+# shell keeps it reachable, since a session may coordinate several charters.
+# --wake-stood-down sends anyway, on the human's word only, and the receipt
+# says so. A refusal is recorded.
 #
 # Exit: 0 sent, 2 usage, 3 no lease, 4 sender does not hold the watch,
-# 5 target is a stood-down coordinator, 6 target not found or not running an
-# agent, otherwise sox's exit code.
+# 5 target is a stood-down coordinator, 6 target not found, not running an
+# agent, or its labels unreadable, otherwise sox's exit code.
 # Tests override COORDINATION_HOME, SOX_BIN and SEND_HOSTNAME; the sox home is
 # pinned.
 set -eu
@@ -116,20 +120,6 @@ refusal_for() {
     "$to" "$owner" "$why" "$owner"
 }
 
-# Leases record shells on this host only, so only a target here can match.
-refusal=""
-if [ "$host" = localhost ] || [ "$host" = "${SEND_HOSTNAME:-$(hostname -s)}" ]; then
-  own="$coordination/$charter/lease"
-  if [ -f "$own" ] && grep -qxF "shell=$backing" "$own"; then
-    refusal=$(refusal_for "$own")
-  else
-    for lease in "$coordination"/*/lease; do
-      [ -f "$lease" ] && grep -qxF "shell=$backing" "$lease" || continue
-      refusal=$(refusal_for "$lease")
-      [ -n "$refusal" ] || break
-    done
-  fi
-fi
 row=$(sox_pinned ls "$host" --json 2>/dev/null | grep -F "\"backing_id\":\"$backing\"" |
   grep -F '"status":"live"' | head -n 1) || true
 [ -n "$row" ] || fail "no live shell $to: check sox ls $host" 6
@@ -142,6 +132,31 @@ case "$row" in
 esac
 foreground=$(printf '%s\n' "$row" | sed -n 's/.*"command":"\([^"]*\)".*/\1/p')
 [ -n "$foreground" ] || fail "$to's foreground command could not be sampled" 6
+
+# names_target <lease>: 0 when that lease names the target as its shell.
+names_target() {
+  [ -f "$1" ] && grep -qxF "shell=$backing" "$1"
+}
+
+# Leases and their paths are this host's, so only a target here can match.
+refusal=""
+if [ "$host" = localhost ] || [ "$host" = "${SEND_HOSTNAME:-$(hostname -s)}" ]; then
+  labels=$(sox_pinned label "$backing") || fail "$to's labels could not be read: check sox label $backing" 6
+  own=$(printf '%s\n' "$labels" | awk -v key="lease.$charter=" 'index($0, key) == 1 { print substr($0, length(key) + 1) }')
+  if [ -n "$own" ] && names_target "$own"; then
+    refusal=$(refusal_for "$own")
+  else
+    leases=$(printf '%s\n' "$labels" | awk 'index($0, "lease.") == 1 { sub(/^[^=]*=/, ""); print }')
+    # sox label values hold no whitespace, so each line is one whole path.
+    while IFS= read -r lease; do
+      names_target "$lease" || continue
+      refusal=$(refusal_for "$lease")
+      [ -n "$refusal" ] || break
+    done <<EOF
+$leases
+EOF
+  fi
+fi
 
 line="[$charter $role$watch → $to; $kind] $message"
 if command -v sha256sum >/dev/null; then hasher="sha256sum"; else hasher="shasum -a 256"; fi
