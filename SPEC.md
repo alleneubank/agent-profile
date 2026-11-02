@@ -92,6 +92,17 @@ guidance is not counted as universally loaded context.
 
 ### Decisions
 
+- 2026-11-01 — A worker that cannot load this profile's skills gets the
+  governed sections and harness preamble only when it acts (edits, runs,
+  commits, pushes, lands, or launches). A read-only reviewer gets its charge
+  and its charter's inputs, as `done` already runs specialists without this
+  profile. For an acting lane, a brief missing the pasted text or the
+  preamble is incomplete, and the coordinator checks the brief file before
+  launch. Basis: ai-wiki EXP-030 (review 2026-11-01): the first three Grok
+  implementer briefs carried the preamble but none pasted the governed
+  sections, and 149 of 252 Grok/Kimi lanes, nearly all read-only reviewers,
+  had no preamble. **ratified (human)**
+
 - 2026-11-01 — Every coordinator decision round asks every open question,
   including each `gated` queue line waiting on the human's answer, in queue
   order; a harness cap on questions per call means several calls in the same
