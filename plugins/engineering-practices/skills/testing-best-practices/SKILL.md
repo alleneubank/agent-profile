@@ -89,6 +89,10 @@ the change. Repair it or report the check blocked; a narrower test that cannot
 reach the failure is no substitute. Reproduce claimed pre-existing failures at the baseline. A retry is
 a diagnostic probe, not evidence of correctness; stop repeated structural
 failure and report the block. Inspect progress before killing a slow run.
+A harness may kill a long background command at a fixed limit (Claude Code:
+2 hours) without running its teardown; split longer gate chains into separate
+commands, and after such a kill attribute leftover fixtures before stopping
+them.
 
 Record which inputs a result covered: reuse it while they are unchanged, and
 not after they change. A new commit id, message, or squash alone does not

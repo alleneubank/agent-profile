@@ -326,6 +326,10 @@ Sometimes useful data isn't on the typed commands. Examples:
 - Never volunteer `gh pr merge --admin` (or any protection bypass) as a way
   past failing checks or branch rules; use it only when the human explicitly
   orders the bypass.
+- Closing keywords ignore negation: "close", "fix", or "resolve" in any form
+  before `#N` in a PR body or squash message closes issue N on merge, even in
+  "does not close #N". Reference an issue that must stay open as "Refs #N",
+  and check its state after merging a partial fix.
 - `gh pr edit --body` replaces the description wholesale — treat it as
   destructive. Fetch the current body (`gh pr view --json body`), merge your
   change additively, and show the proposed body before writing.

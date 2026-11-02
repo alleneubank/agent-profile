@@ -183,7 +183,12 @@ bash <skill-dir>/scripts/worktree.sh remove <worktree-path>
 ```
 
 The guard rechecks immediately before Git. A hit or error refuses removal;
-report and skip. Add `--force` only for approved dirty state.
+report and skip. Add `--force` only for approved dirty state, or for a clean
+worktree with initialized submodules, which Git refuses without it; first
+confirm each submodule is clean and its commits are pushed. Never run
+`git submodule deinit` in a linked worktree: submodule registration lives in
+the shared `.git/config`, so it de-initializes every worktree's submodules,
+the primary's included.
 
 ### 7) Delete stale branches
 
