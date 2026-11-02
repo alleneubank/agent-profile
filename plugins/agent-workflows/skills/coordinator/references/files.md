@@ -186,8 +186,9 @@ with these files.
 ## Lane directory: `~/.handoffs/<charter>/<lane>/`
 
 `brief.md`, `addendum-N.md`, `run.sh`, `report.md`, `worker.log`,
-`worker.exit`, and `resources` (one line per footprint item outside the lane
-root: host, what it is, its teardown command). Agent mail receipts go to
+`worker.exit`, `resources` (one line per footprint item outside the lane
+root: host, what it is, its teardown command), and `kept/`, where `retire.sh`
+puts what the lane's retirement keeps (its evidence and unpushed work). Agent mail receipts go to
 `~/.handoffs/<charter>/sent.log` on the sending host. Copy the brief and each
 addendum to the lane host before launching or pointing the lane at it.
 

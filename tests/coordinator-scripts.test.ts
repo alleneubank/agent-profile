@@ -303,39 +303,64 @@ describe("lease.sh", () => {
 });
 
 describe("retire.sh", () => {
-  it("keeps the root and readable files when copying a kept file fails", async () => {
+  // A lane root under ~/Work and its lane directory under the coordination home.
+  function lane() {
     const f = fleet();
-    const root = join(f.home, "lane");
-    const archive = join(f.home, "archive");
-    mkdirSync(root);
-    writeFileSync(join(root, "kept.txt"), "kept work\n");
-    expect((await f.run(RETIRE, ["--root", root, "--delete", "--to", archive, "--keep", "missing.txt"], null)).status).toBe(3);
-    expect(readFileSync(join(root, "kept.txt"), "utf8")).toBe("kept work\n");
-  });
+    const root = join(f.home, "Work", "demo-l1");
+    const kept = join(f.coordination, "demo", "l1", "kept");
+    mkdirSync(root, { recursive: true });
+    mkdirSync(join(f.coordination, "demo", "l1"));
+    const retire = (...args: string[]) =>
+      f.run(RETIRE, ["--root", root, "--delete", "--charter", "demo", "--lane", "l1", ...args], null);
+    return { f, root, kept, retire };
+  }
 
-  it("copies a directory including hidden files and symlinks before deleting the root", async () => {
-    const f = fleet();
-    const root = join(f.home, "lane");
-    const archive = join(f.home, "archive");
-    mkdirSync(join(root, "empty"), { recursive: true });
-    writeFileSync(join(root, ".kept.txt"), "kept work\n");
-    symlinkSync(".kept.txt", join(root, "link"));
-    expect((await f.run(RETIRE, ["--root", root, "--delete", "--to", archive, "--keep", "."], null)).status).toBe(0);
-    expect(readFileSync(join(archive, "link"), "utf8")).toBe("kept work\n");
-    expect(existsSync(join(archive, "empty"))).toBe(true);
+  it("moves evidence out of the lane root into the lane directory before deleting the root", async () => {
+    const { root, kept, retire } = lane();
+    mkdirSync(join(root, "evidence"));
+    writeFileSync(join(root, "RECORD.md"), "# l1 record\n");
+    writeFileSync(join(root, "evidence", "audit.tar.zst"), "sealed bundle\n");
+    writeFileSync(join(root, "scratch.log"), "noise\n");
+    expect((await retire("--keep", "RECORD.md", "--keep", "evidence")).status).toBe(0);
+    expect(readFileSync(join(kept, "RECORD.md"), "utf8")).toBe("# l1 record\n");
+    expect(readFileSync(join(kept, "evidence", "audit.tar.zst"), "utf8")).toBe("sealed bundle\n");
+    expect(existsSync(join(kept, "scratch.log"))).toBe(false);
     expect(existsSync(root)).toBe(false);
   });
 
-  it("rejects deleting without opt-in and archiving inside the root or through a symlink", async () => {
-    const f = fleet();
-    const root = join(f.home, "lane");
-    mkdirSync(root);
-    writeFileSync(join(root, "kept.txt"), "kept work\n");
+  it("copies a directory including hidden files and symlinks before deleting the root", async () => {
+    const { root, kept, retire } = lane();
+    mkdirSync(join(root, "empty"));
+    writeFileSync(join(root, ".kept.txt"), "kept work\n");
+    symlinkSync(".kept.txt", join(root, "link"));
+    expect((await retire("--keep", ".")).status).toBe(0);
+    expect(readFileSync(join(kept, "link"), "utf8")).toBe("kept work\n");
+    expect(existsSync(join(kept, "empty"))).toBe(true);
+    expect(existsSync(root)).toBe(false);
+  });
+
+  it("keeps the root when a kept path is missing or cannot be copied", async () => {
+    const { root, retire } = lane();
+    writeFileSync(join(root, "RECORD.md"), "# l1 record\n");
+    writeFileSync(join(root, "sealed"), "unreadable\n");
+    chmodSync(join(root, "sealed"), 0o000);
+    expect((await retire("--keep", "RECORD.md", "--keep", "missing.txt")).status).toBe(2);
+    expect((await retire("--keep", "RECORD.md", "--keep", "sealed")).status).toBe(3);
+    chmodSync(join(root, "sealed"), 0o644);
+    expect(readFileSync(join(root, "RECORD.md"), "utf8")).toBe("# l1 record\n");
+  });
+
+  it("rejects deleting without opt-in, keeping anywhere else, an unknown lane, and paths through a symlink", async () => {
+    const { f, root, retire } = lane();
+    writeFileSync(join(root, "RECORD.md"), "# l1 record\n");
     symlinkSync(f.home, join(root, "outside"));
-    expect((await f.run(RETIRE, ["--root", root], null)).status).toBe(2);
-    expect((await f.run(RETIRE, ["--root", root, "--delete", "--to", join(root, "archive"), "--keep", "kept.txt"], null)).status).toBe(2);
-    expect((await f.run(RETIRE, ["--root", root, "--delete", "--to", join(f.home, "archive"), "--keep", "outside/sox"], null)).status).toBe(2);
-    expect(readFileSync(join(root, "kept.txt"), "utf8")).toBe("kept work\n");
+    expect((await f.run(RETIRE, ["--root", root, "--charter", "demo", "--lane", "l1"], null)).status).toBe(2);
+    expect((await f.run(RETIRE, ["--root", root, "--delete"], null)).status).toBe(2);
+    expect((await f.run(RETIRE, ["--root", root, "--delete", "--charter", "demo", "--lane", "l9"], null)).status).toBe(2);
+    expect((await f.run(RETIRE, ["--root", root, "--delete", "--charter", "demo", "--lane", "../demo"], null)).status).toBe(2);
+    expect((await retire("--to", join(f.home, "Work", "archive"), "--keep", "RECORD.md")).status).toBe(2);
+    expect((await retire("--keep", "outside/sox")).status).toBe(2);
+    expect(readFileSync(join(root, "RECORD.md"), "utf8")).toBe("# l1 record\n");
   });
 });
 

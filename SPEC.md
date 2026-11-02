@@ -101,6 +101,17 @@ guidance is not counted as universally loaded context.
   signals presence. Basis: ai-wiki review 2026-11-01-weekly. **ratified
   (human)**
 
+- 2026-11-01 — A retired lane keeps nothing in its root. `retire.sh` takes
+  `--charter` and `--lane` and copies every kept path (evidence and unpushed
+  work) into `~/.handoffs/<charter>/<lane>/kept/`, its only destination,
+  before deleting the root; it refuses on a missing kept path or an unknown
+  lane directory. Large bundles are copied like anything else, not replaced
+  by a pointer, since a pointer's target would sit outside the coordination
+  home again. Prompted by ai-wiki EXP-013: incident-20261022 left its sealed
+  evidence in lane roots under `~/Work`, which a later cleanup deleted and
+  Time Machine does not back up. The human approved drafting the fix
+  (2026-11-01) and its merge. **ratified (human)**
+
 - 2026-10-30 — The fleet watch becomes `agent-workflows:fleet-watch`: the
   role (Does, Never, take, pass, nudges, host fixes the charter grants,
   pruning of its charter and the fleet file) moves from its charter into the
