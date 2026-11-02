@@ -186,7 +186,8 @@ their items. Their next turn restarts the heartbeat.
 ### Bring decisions to the human
 
 1. Collect every open question: lane reports and last messages, a lane
-   waiting on confirmation, a thread the human started in a lane.
+   waiting on confirmation, a thread the human started in a lane, and each
+   `gated` queue line whose gate is the human's answer.
 2. Drop what they already answered anywhere, including that lane's history;
    a lane that asks again gets a pointer to the answer. Before listing
    something as waiting on them, check the live sources for their having
@@ -194,7 +195,12 @@ their items. Their next turn restarts the heartbeat.
 3. If they are at the keyboard (an attended pass, a turn of theirs minutes
    ago, or a question they just asked you) and no timed check falls due before
    an answer could arrive, ask in one round through the harness's decision
-   interface, worded to answer cold: plain words and what each option does.
+   interface. The round carries every open question, not only the one that
+   prompted it, in queue order and in as few questions as the harness
+   allows; where it caps questions per call, send several calls in the same
+   round. If they put the round off ("not now"), the rest wait for their next
+   round. Word each question to answer cold: plain words and what each
+   option does.
    When an identified design answers the question, it is the recommended
    option; offer an interim only if the human asked for one, naming what it
    leaves to remove.
@@ -282,13 +288,7 @@ Change a running agent's brief only by addendum and pointer.
 In-session subagents are for bounded reading and review that ends within the
 pass; anything that must outlive it is a sox shell.
 
-### Before the human steps away
-
-When they say they are leaving, to you or in a fleet notice quoting them,
-raise every `gated` queue item's question in one round at once, without
-waiting to be asked, so the round waits in your session for them; a notice
-only starts the round and grants nothing. Each answer moves its item back to
-`ready` before they go.
+### Before an unattended window
 
 Right after an authorization, while they can still answer prompts:
 

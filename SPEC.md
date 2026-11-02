@@ -92,6 +92,15 @@ guidance is not counted as universally loaded context.
 
 ### Decisions
 
+- 2026-11-01 — Every coordinator decision round asks every open question,
+  including each `gated` queue line waiting on the human's answer, in queue
+  order; a harness cap on questions per call means several calls in the same
+  round, and "not now" defers the rest to the next round. The leaving sweep
+  (ask everything when the human says they are leaving) is removed: it ran
+  in 0 of 7 departures under 14.10.0–14.13.0, while their answering reliably
+  signals presence. Basis: ai-wiki review 2026-11-01-weekly. **ratified
+  (human)**
+
 - 2026-10-30 — The fleet watch becomes `agent-workflows:fleet-watch`: the
   role (Does, Never, take, pass, nudges, host fixes the charter grants,
   pruning of its charter and the fleet file) moves from its charter into the
