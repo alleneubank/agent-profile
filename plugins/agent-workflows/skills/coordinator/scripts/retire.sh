@@ -1,26 +1,29 @@
 #!/usr/bin/env bash
 # Retire a stopped lane on its host, after its resources have been torn down.
-#   retire.sh --root PATH --delete [--to NEW_DIRECTORY --keep RELATIVE_PATH ...]
-# Kept paths are copied with metadata to a new directory outside the root,
-# then compared before deletion. Use --keep . for the whole root. On failure
-# the root survives; a partial destination stays for inspection, not reuse.
-# Stop all writers first. Transfer a kept archive elsewhere separately;
-# confirm the destination before deleting that archive.
+#   retire.sh --root PATH --delete --charter NAME --lane NAME [--keep RELATIVE_PATH ...]
+# Kept paths (unpushed work, evidence records and bundles) are copied with
+# metadata into the lane directory's kept/ folder under the coordination home,
+# $COORDINATION_HOME/<charter>/<lane>/kept (~/.handoffs by default), then
+# compared before the root is deleted. There is no other destination, so
+# nothing kept stays under ~/Work. Use --keep . for the whole root. Every kept
+# path must exist; on failure the root survives, and a partial kept/ stays for
+# inspection, not reuse. Stop all writers first.
 # Exit: 0 retired, 2 usage, 3 copy/verification failure (root kept).
 set -e
 shopt -s dotglob nullglob
 
 fail() { echo "retire.sh: $1" >&2; exit "$2"; }
-root="" destination="" delete=no
+root="" charter="" lane="" delete=no
 kept=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --delete) delete=yes; shift; continue ;;
-    --root|--to|--keep)
+    --root|--charter|--lane|--keep)
       [ $# -ge 2 ] || fail "missing value for $1" 2
       case "$1" in
         --root) root=$2 ;;
-        --to) destination=$2 ;;
+        --charter) charter=$2 ;;
+        --lane) lane=$2 ;;
         --keep) kept[${#kept[@]}]=$2 ;;
       esac ;;
     *) fail "unknown argument: $1" 2 ;;
@@ -33,6 +36,13 @@ case "$root" in /*) ;; *) fail "--root must be an absolute lane directory" 2 ;; 
 root=$(cd "$root" && pwd -P)
 [ "$root" != / ] && [ "$root" != "$HOME" ] || fail "root cannot be / or HOME" 2
 [ ${#kept[@]} -le 128 ] || fail "at most 128 kept paths" 2
+for name in "$charter" "$lane"; do
+  case "$name" in ''|.|..|*/*) fail "--charter and --lane must each name one directory" 2 ;; esac
+done
+lane_directory="${COORDINATION_HOME:-$HOME/.handoffs}/$charter/$lane"
+[ -d "$lane_directory" ] || fail "no lane directory: $lane_directory" 2
+destination=$(cd "$lane_directory" && pwd -P)/kept
+case "$destination/" in "$root/"*) fail "the lane directory must be outside the root" 2 ;; esac
 
 # Compare bytes, symlink targets, entry sets, and types without following links.
 verify() {
@@ -56,16 +66,15 @@ verify() {
 }
 
 if [ ${#kept[@]} -gt 0 ]; then
-  case "$destination" in /*) ;; *) fail "--to must be an absolute new directory" 2 ;; esac
-  case "${destination##*/}" in ''|.|..) fail "--to must name a new directory" 2 ;; esac
-  destination=$(cd "$(dirname "$destination")" && pwd -P)/${destination##*/}
-  case "$destination/" in "$root/"*) fail "destination must be outside the root" 2 ;; esac
+  [ ! -e "$destination" ] && [ ! -L "$destination" ] ||
+    fail "$destination already exists; inspect it before retiring again" 2
   for path in "${kept[@]}"; do
     case "$path" in ''|/*|..|../*|*/../*|*/..) fail "keep paths must stay inside the root" 2 ;; esac
     parent=$(cd "$(dirname "$root/$path")" && pwd -P) || fail "missing kept parent: $path" 2
     case "$parent/" in "$root/"*) ;; *) fail "kept parent escapes the root: $path" 2 ;; esac
+    [ -e "$root/$path" ] || [ -L "$root/$path" ] || fail "missing kept path: $path" 2
   done
-  mkdir "$destination" || fail "cannot create destination: $destination; root kept" 3
+  mkdir "$destination" || fail "cannot create $destination; root kept" 3
   for path in "${kept[@]}"; do
     mkdir -p "$(dirname "$destination/$path")" &&
       cp -a "$root/$path" "$destination/$path" || fail "copy failed: $path; root kept" 3
@@ -73,8 +82,10 @@ if [ ${#kept[@]} -gt 0 ]; then
   for path in "${kept[@]}"; do
     verify "$root/$path" "$destination/$path" 0 || fail "verification failed: $path; root kept" 3
   done
-elif [ -n "$destination" ]; then
-  fail "--to requires a kept path" 2
 fi
 rm -rf "$root"
-printf '%s\tretired\n' "$root"
+if [ ${#kept[@]} -gt 0 ]; then
+  printf '%s\tretired\tkept in %s\n' "$root" "$destination"
+else
+  printf '%s\tretired\n' "$root"
+fi

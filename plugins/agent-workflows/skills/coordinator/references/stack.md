@@ -32,12 +32,13 @@ and `lane.sh` needs jq.
 writes only that registry row's State, under a fleet-wide lock (exit 5 busy).
 Its stdout is `<charter>\t<state>\tchanged|unchanged`.
 After stopping a lane's writers and resources, run on its host:
-`retire.sh --root <lane root> --delete --to <new archive directory> --keep <relative path>`.
+`retire.sh --root <lane root> --delete --charter <c> --lane <l> --keep <relative path>`.
 Repeat `--keep` for separate paths, or use `--keep .` for the whole root;
-omit `--to` and `--keep` when nothing is kept. The destination's parent must
-exist. Copy or verification failure leaves the root and any partial archive;
-retry with a new destination. Transfer the archive separately and confirm
-the destination before removing the local copy.
+omit `--keep` when nothing is kept. Kept paths land in
+`~/.handoffs/<c>/<l>/kept/`, the only destination, so the lane directory must
+exist on that host. A missing kept path refuses before anything is copied.
+Copy or verification failure leaves the root and the partial `kept/`; inspect
+and remove that partial copy before retrying.
 
 ## Who sent a turn
 

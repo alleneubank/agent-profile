@@ -172,12 +172,13 @@ their items. Their next turn restarts the heartbeat.
    verbatim, relaunch, or retire. Retiring tears the lane down in the pass
    that processes it: kill its shell, run each `resources` teardown, then
    use [retire.sh](scripts/retire.sh) on the lane host. It copies kept paths
-   to a new directory outside the root, verifies them, and only then deletes
-   the root; a failure keeps the root. Stop every writer first. Keep only what
-   could lose work: a root with
-   uncommitted changes or commits on no remote, or a resource holding data.
-   Each kept item gets a waiting-list line naming its location and what it holds.
-   Confirm any later transfer before deleting the local kept copy.
+   into the lane directory's `kept/` under the coordination home, verifies
+   them, and only then deletes the root; a failure keeps the root. Stop every
+   writer first. Keep what could be lost: the lane's evidence (records, sealed
+   bundles, captures) and any uncommitted changes or commits on no remote.
+   Nothing kept stays in a lane root; a root left behind is a lane not yet
+   retired. A resource holding data gets a waiting-list line naming its
+   location and what it holds.
 3. A quiet agent: look in sox first. Nudge a live interactive agent once with
    a one-line pointer (`send.sh --kind request`) and confirm a new turn
    landed; if the next pass shows no change, relaunch what you launched. An
@@ -445,8 +446,8 @@ Breaking a law, plus:
   standing, or project knowledge kept in a charter instead of the repo
 - A waiting list or themes file written from memory instead of a stocktake
 - A UI brief that says how to render but not what the user does
-- A retired lane whose shell, root, or resources remain with no line on the
-  waiting list
+- A retired lane whose root remains, or whose shell or resources remain with
+  no line on the waiting list
 - A free lane slot while a `ready` line, design-ahead work, or an in-scope
   issue can still run to its gate, or a gated item filed as out of scope
 - A heartbeat prompt that names lanes or state instead of files.md's line,
