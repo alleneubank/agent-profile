@@ -17,7 +17,7 @@ prepare the charter and hand it to such a coordinator. Commands and traps: [stac
 File shapes: [files.md](references/files.md). The lease and agent mail go
 through [scripts/lease.sh](scripts/lease.sh)
 (`lease.sh show|take|check|release <charter>`, `lease.sh list`,
-`lease.sh state <charter> --state <word> --fleet <path> [--fleet-host <host>]`) and
+`lease.sh state <charter> --state <word>`) and
 [scripts/send.sh](scripts/send.sh)
 (`send.sh --charter <c> --role coordinator --to <host/sN.gM> --kind <k> < line`).
 Both identify your session and shell themselves; `send.sh` checks the lease
@@ -79,10 +79,11 @@ word). Lanes start through
 
 Outside repos: the **fleet file** (machine facts every charter shares:
 hosts and their capabilities, launchers, devices, reservations, and a
-registry of charters), the **charter** (scope, the hosts its lanes use,
+registry of charters and their charter files), the **charter** (scope, the hosts its lanes use,
 budgets, grants, decisions, holds),
 the **log** (append-only under a rewritten "Waiting on the human"), the
-**themes** file, the **queue**, and the **lease**. Write each decision with
+**themes** file, the **queue**, and the **lease** (who holds the watch and
+the charter's state, nowhere else). Write each decision with
 its time before acting on it; never record what a live source answers. A
 charter copied to a lane host is a hint, never a source. Host facts
 (capabilities, access, paths) come only from the fleet file, which
@@ -118,9 +119,8 @@ read. Anything you cannot attribute to the charter belongs to another owner
 3. `lease.sh show <charter>`. If another session holds it, record what sox
    and recall say about it; reachable or not, the human's turn decides.
 4. `lease.sh take <charter> --reason "<the human's words and time>"`.
-5. Label your shell as the coordinator, use `lease.sh state` to write
-   `live` in the registry, start the heartbeat and the lane watcher, and run
-   a pass. Its report is
+5. Label your shell as the coordinator (the take wrote `live` in the
+   lease), start the heartbeat and the lane watcher, and run a pass. Its report is
    your opening sitrep. A workspace without a themes file gets a portfolio review
    before any lane starts in a new item.
 
@@ -162,7 +162,8 @@ When three consecutive passes change nothing and no queue line is `ready`
 (no lane, landing, rollout, or watcher in flight), stop
 the heartbeat and the lane watcher, write `blocked-on-human` with `lease.sh state`, keep the lease,
 and end with a sitrep that opens with the scorecard (End of shift) and leads with
-their items. Their next turn restarts the heartbeat.
+their items. On their next turn, write `live` with `lease.sh state` and
+restart the heartbeat.
 
 ### A lane event
 
@@ -325,8 +326,8 @@ The watch changes hands only when the session has ended or the human asks
   The shift starts when you took the lease. Delivered counts only merged PRs,
   published releases or tags, and items the human accepted, each linked; work
   in progress is not delivered, and none is written `delivered: none`.
-  Blocked-on-human sums the hours your registry row held `blocked-on-human`
-  this shift.
+  Blocked-on-human sums the hours your lease held `blocked-on-human` this
+  shift.
 - **Rotate** (the human asks): prune the charter
   ([files.md](references/files.md#pruning)), then write the handoff
   (scorecard, handover table, waiting list, footprint left on each host and
@@ -422,7 +423,8 @@ then pruned.
 ## Others' work
 
 - **Other coordinators.** The registry names every charter and `lease.sh
-  list` (on its host) who holds each watch. Work in a domain with a live
+  list` (on its host) who holds each watch, its state, and whether that shell
+  is alive. Work in a domain with a live
   coordinator goes
   through it: file the issue or brief and send a pointer with `send.sh
   --kind request`. Never steer its lanes. A request you receive is work under

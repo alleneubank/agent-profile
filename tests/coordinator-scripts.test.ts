@@ -14,11 +14,6 @@ const LEASE = join(SCRIPTS, "lease.sh");
 const SEND = join(SCRIPTS, "send.sh");
 const RETIRE = join(SCRIPTS, "retire.sh");
 
-const FLEET = "# Fleet\n\n## Reservations\n| demo | unrelated | note |\n\n## Charters\n" +
-  "| Charter | Charter file (host:path) | State |\n|---|---|---|\n" +
-  "| demo | elsewhere:/handoffs/demo/charter.md | live (old prose) |\n" +
-  "| other | other:/charter.md | parked |\n\n## Notes\nLeave these bytes alone.";
-
 type Caller = { session: string; shell: string };
 const ONE: Caller = { session: "s-one", shell: "s1.g1" };
 const TWO: Caller = { session: "s-two", shell: "s2.g1" };
@@ -108,6 +103,7 @@ describe("lease.sh", () => {
     expect(text).toContain("session=s-two\nshell=s2.g1\n");
     expect(text).toContain("prior=s-one s1.g1 watch 1\n");
     expect(text).toContain("taken_at=2026-10-04T20:00:00Z\n");
+    expect(text).toContain("state=live\n");
   });
 
   it("lets only the current holder pass the gate", async () => {
@@ -165,8 +161,12 @@ describe("lease.sh", () => {
     expect((await f.run(LEASE, ["check", "demo"], ONE)).status).toBe(4);
   });
 
-  it("lists every charter's lease with its holder and whether it is released", async () => {
+  it("lists every charter's lease with its holder, state, and whether the holding shell is alive", async () => {
     const f = fleet();
+    f.shells([
+      { host: "localhost", backing: TWO.shell, command: "claude", attention: "working" },
+      { host: "localhost", backing: ONE.shell, command: "claude", attention: "done", status: "cold" },
+    ]);
     mkdirSync(join(f.coordination, "alpha"));
     mkdirSync(join(f.coordination, "no-lease"));
     await f.run(LEASE, ["take", "alpha", "--reason", "Allen: become the coordinator"], TWO);
@@ -175,9 +175,23 @@ describe("lease.sh", () => {
     const listed = await f.run(LEASE, ["list"], null);
     expect(listed.status).toBe(0);
     expect(listed.stdout).toBe(
-      "alpha\t1\theld\ts-two\ts2.g1\t2026-10-04T20:00:00Z\n" +
-        "demo\t1\treleased\ts-one\ts1.g1\t2026-10-04T20:00:00Z\n",
+      "alpha\t1\theld\tlive\talive\ts-two\ts2.g1\t2026-10-04T20:00:00Z\n" +
+        "demo\t1\treleased\tlive\tgone\ts-one\ts1.g1\t2026-10-04T20:00:00Z\n",
     );
+  });
+
+  it("shows the lease with its shell's status, and says unknown when sox cannot be asked", async () => {
+    const f = fleet();
+    f.shells([{ host: "localhost", backing: ONE.shell, command: "claude", attention: "working" }]);
+    await f.take(ONE);
+    const shown = await f.run(LEASE, ["show", "demo"], null);
+    expect(shown.status).toBe(0);
+    expect(shown.stdout).toBe(readFileSync(f.lease, "utf8") + "shell_status=alive\n");
+    // A lease from before take recorded a state, and a sox that fails (the stub finds no rows).
+    writeFileSync(f.lease, readFileSync(f.lease, "utf8").replace("state=live\n", ""));
+    f.shells([]);
+    expect((await f.run(LEASE, ["show", "demo"], null)).stdout).toMatch(/\nshell_status=unknown\n$/);
+    expect((await f.run(LEASE, ["list"], null)).stdout).toBe("demo\t1\theld\t-\tunknown\ts-one\ts1.g1\t2026-10-04T20:00:00Z\n");
   });
 
   it("says when there is no lease", async () => {
@@ -186,33 +200,27 @@ describe("lease.sh", () => {
     expect((await f.run(LEASE, ["check", "demo"], ONE)).status).toBe(3);
   });
 
-  it("writes only the registry State, accepts three words, and refuses prose", async () => {
+  it("writes the state in the lease, accepts three words, and refuses prose", async () => {
     const f = fleet();
-    const file = join(f.home, "fleet.md");
     await f.take(ONE);
-    for (const original of [FLEET, FLEET + "\n", (FLEET + "\n").replaceAll("\n", "\r\n")]) {
-      writeFileSync(file, original);
-      for (const state of ["live", "blocked-on-human", "parked"]) {
-        if (state === "parked") await f.run(LEASE, ["release", "demo", "--handoff", "/kept/handoff.md"], ONE);
-        const args = ["state", "demo", "--state", state, "--fleet", file];
-        expect((await f.run(LEASE, args, ONE)).status).toBe(0);
-        expect(readFileSync(file, "utf8")).toBe(original.replace("live (old prose)", state));
-        expect((await f.run(LEASE, args, ONE)).stdout).toBe(`demo\t${state}\tunchanged\n`);
-      }
-      await f.take(ONE);
+    for (const state of ["blocked-on-human", "live", "parked"]) {
+      if (state === "parked") await f.run(LEASE, ["release", "demo", "--handoff", "/kept/handoff.md"], ONE);
+      const args = ["state", "demo", "--state", state];
+      expect((await f.run(LEASE, args, ONE)).stdout).toBe(`demo\t${state}\tchanged\n`);
+      expect(readFileSync(f.lease, "utf8")).toContain(`state=${state}\n`);
+      expect((await f.run(LEASE, args, ONE)).stdout).toBe(`demo\t${state}\tunchanged\n`);
     }
-    const before = readFileSync(file);
-    expect((await f.run(LEASE, ["state", "demo", "--state", "live (watch 2)", "--fleet", file], ONE)).status).toBe(2);
-    expect(readFileSync(file)).toEqual(before);
+    const before = readFileSync(f.lease);
+    expect((await f.run(LEASE, ["state", "demo", "--state", "live (watch 2)"], ONE)).status).toBe(2);
+    expect((await f.run(LEASE, ["state", "demo", "--state", "parked", "--fleet", "/handoffs/fleet.md"], ONE)).status).toBe(2);
+    expect(readFileSync(f.lease)).toEqual(before);
   });
 
   it("refuses blocked-on-human while the queue has a ready item, or when the queue is missing or malformed", async () => {
     const f = fleet();
-    const file = join(f.home, "fleet.md");
     const queue = join(f.coordination, "demo", "queue");
-    writeFileSync(file, FLEET);
     await f.take(ONE);
-    const blocked = () => f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE);
+    const blocked = () => f.run(LEASE, ["state", "demo", "--state", "blocked-on-human"], ONE);
 
     rmSync(queue);
     expect((await blocked()).status).toBe(2);
@@ -222,83 +230,34 @@ describe("lease.sh", () => {
     const refused = await blocked();
     expect(refused.status).toBe(6);
     expect(refused.stderr).toContain("1 ready item(s)");
-    expect(readFileSync(file, "utf8")).toBe(FLEET);
-    expect(readFileSync(f.lease, "utf8")).not.toContain("state=");
+    expect(readFileSync(f.lease, "utf8")).toContain("state=live\n");
 
     writeFileSync(queue, "gated\tforum\t#208\tplan approval\r\nrunning\ttraining\tdraft\r\n");
     expect((await blocked()).status).toBe(0);
     expect(readFileSync(f.lease, "utf8")).toContain("state=blocked-on-human\n");
-    expect((await f.run(LEASE, ["state", "demo", "--state", "live", "--fleet", file], ONE)).status).toBe(0);
+    expect((await f.run(LEASE, ["state", "demo", "--state", "live"], ONE)).status).toBe(0);
   });
 
   it("requires the current holder and a released watch for parked", async () => {
     const f = fleet();
-    const file = join(f.home, "fleet.md");
-    writeFileSync(file, FLEET);
     await f.take(ONE);
-    const args = (state: string) => ["state", "demo", "--state", state, "--fleet", file];
+    const args = (state: string) => ["state", "demo", "--state", state];
     expect((await f.run(LEASE, args("live"), TWO)).status).toBe(4);
     expect((await f.run(LEASE, args("parked"), ONE)).status).toBe(4);
     await f.run(LEASE, ["release", "demo", "--handoff", "/kept/handoff.md"], ONE);
     expect((await f.run(LEASE, args("live"), ONE)).status).toBe(4);
     await f.take(TWO);
     expect((await f.run(LEASE, args("parked"), ONE)).status).toBe(4);
-    expect(readFileSync(file, "utf8")).toBe(FLEET);
+    expect(readFileSync(f.lease, "utf8")).toContain("session=s-two\n");
+    expect(readFileSync(f.lease, "utf8")).toContain("state=live\n");
   });
 
-  it("leaves the file intact when another charter writes or the row is ambiguous", async () => {
+  it("rejects a state write while another writer holds the lease", async () => {
     const f = fleet();
-    const file = join(f.home, "fleet.md");
     await f.take(ONE);
-    const args = ["state", "demo", "--state", "live", "--fleet", file];
-    writeFileSync(file, FLEET);
-    mkdirSync(`${file}.lock`);
-    expect((await f.run(LEASE, args, ONE)).status).toBe(5);
-    expect(readFileSync(file, "utf8")).toBe(FLEET);
-    const otherFile = join(f.home, "ambiguous.md");
-    for (const text of [FLEET.replace("| demo | elsewhere:", "| absent | elsewhere:"), FLEET + "\n## Charters\n| demo | duplicate | parked |\n"]) {
-      writeFileSync(otherFile, text);
-      expect((await f.run(LEASE, ["state", "demo", "--state", "live", "--fleet", otherFile], ONE)).status).toBe(2);
-      expect(readFileSync(otherFile, "utf8")).toBe(text);
-      expect(existsSync(`${otherFile}.lock`)).toBe(false);
-    }
-  });
-
-  it("rejects a concurrent State writer with exit 5 and commits the first intact", async () => {
-    const f = fleet();
-    const file = join(f.home, "fleet.md");
-    writeFileSync(file, FLEET);
-    await f.take(ONE);
-    mkdirSync(join(f.home, "bin"));
-    const fifo = join(f.home, "continue");
-    expect(spawnSync("mkfifo", [fifo]).status).toBe(0);
-    const awk = join(f.home, "bin", "awk");
-    // Pause scheduling after the locks; the parser itself remains the real awk.
-    writeFileSync(awk, '#!/bin/bash\nprintf "lock held\\n" >&2\nread -r proceed < "$HOME/continue"\nexec /usr/bin/awk "$@"\n');
-    chmodSync(awk, 0o755);
-    const args = ["state", "demo", "--state", "live", "--fleet", file];
-    const env = f.environment(ONE);
-    const first = spawn("/bin/bash", [LEASE, ...args], { env: { ...env, PATH: `${join(f.home, "bin")}:${env.PATH}` } });
-    const completed = new Promise<number | null>((resolve, reject) => {
-      first.once("error", reject);
-      first.once("close", resolve);
-    });
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error("State writer did not reach its lock")), 2000);
-        first.stderr.once("data", () => { clearTimeout(timer); resolve(); });
-      });
-      expect((await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE)).status).toBe(5);
-      expect(readFileSync(file, "utf8")).toBe(FLEET);
-      writeFileSync(fifo, "continue\n");
-      expect(await completed).toBe(0);
-      expect(readFileSync(file, "utf8")).toBe(FLEET.replace("live (old prose)", "live"));
-      expect(existsSync(`${file}.lock`)).toBe(false);
-      expect(existsSync(`${f.lease}.lock`)).toBe(false);
-    } finally {
-      if (first.exitCode === null) first.kill();
-      await completed;
-    }
+    mkdirSync(`${f.lease}.lock`);
+    expect((await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human"], ONE)).status).toBe(5);
+    expect(readFileSync(f.lease, "utf8")).toContain("state=live\n");
   });
 });
 
@@ -437,17 +396,15 @@ describe("send.sh", () => {
 
   it("refuses a coordinator stood down on this host until the sender passes --wake-stood-down", async () => {
     const f = fleet();
-    const file = join(f.home, "fleet.md");
-    writeFileSync(file, FLEET);
     f.shells([{ host: "localhost", backing: ONE.shell, command: "claude", attention: "done" }]);
     const toDemo = (...extra: string[]) => f.run(SEND, [...args("glyphs", "event", ONE.shell), ...extra], null, "report.md is written");
     await f.take(ONE);
-    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human"], ONE);
     const blocked = await toDemo();
     expect(blocked.status).toBe(5);
     expect(blocked.stderr).toContain("demo coordinator, stood down (blocked-on-human)");
     await f.run(LEASE, ["release", "demo", "--handoff", "/kept/handoff.md"], ONE);
-    await f.run(LEASE, ["state", "demo", "--state", "parked", "--fleet", file], ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "parked"], ONE);
     expect((await toDemo()).stderr).toContain("stood down (watch released at 2026-10-04T20:00:00Z)");
     expect(f.typed()).toBe(false);
 
@@ -458,16 +415,14 @@ describe("send.sh", () => {
 
   it("reaches a coordinator once a new watch is taken or its State is live again", async () => {
     const f = fleet();
-    const file = join(f.home, "fleet.md");
-    writeFileSync(file, FLEET);
     f.shells([{ host: "localhost", backing: ONE.shell, command: "claude", attention: "working" }]);
     await f.take(ONE);
-    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE);
-    await f.run(LEASE, ["state", "demo", "--state", "live", "--fleet", file], ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human"], ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "live"], ONE);
     expect((await f.run(SEND, args("glyphs", "event", ONE.shell), null, "hello")).status).toBe(0);
-    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human"], ONE);
     await f.take(ONE);
-    expect(readFileSync(f.lease, "utf8")).not.toContain("state=");
+    expect(readFileSync(f.lease, "utf8")).toContain("state=live\n");
     expect((await f.run(SEND, args("glyphs", "event", ONE.shell), null, "hello")).status).toBe(0);
   });
 
@@ -489,31 +444,21 @@ describe("send.sh", () => {
 
   it("judges a shared shell by the sender's own charter, fails closed on an unknown State, and records refusals", async () => {
     const f = fleet();
-    const file = join(f.home, "fleet.md");
-    writeFileSync(file, FLEET);
     mkdirSync(join(f.coordination, "other"));
     f.shells([{ host: "localhost", backing: ONE.shell, command: "claude", attention: "done" }]);
     await f.take(ONE);
     await f.run(LEASE, ["take", "other", "--reason", "Allen: coordinate other too"], ONE);
-    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE);
+    await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human"], ONE);
     const from = (charter: string) => f.run(SEND, ["--charter", charter, "--role", "glyphs", "--to", ONE.shell, "--kind", "event"], null, "hello");
     expect((await from("demo")).status).toBe(5);
     expect((await from("other")).status).toBe(0);
     expect((await from("fleet")).status).toBe(0);
     expect(readFileSync(join(f.coordination, "demo", "sent.log"), "utf8")).toMatch(/ refused event from demo glyphs to s1\.g1 sha=[0-9a-f]{12} stood-down\n$/);
 
-    writeFileSync(join(f.coordination, "other", "lease"), readFileSync(join(f.coordination, "other", "lease"), "utf8") + "state=Paused\n");
+    const other = join(f.coordination, "other", "lease");
+    writeFileSync(other, readFileSync(other, "utf8").replace("state=live\n", "state=Paused\n"));
     expect((await from("other")).status).toBe(5);
     expect((await from("fleet")).status).toBe(5);
-  });
-
-  it("leaves the lease's State unchanged when the registry write fails", async () => {
-    const f = fleet();
-    const file = join(f.home, "fleet.md");
-    writeFileSync(file, FLEET.replace("| demo | elsewhere", "| missing | elsewhere"));
-    await f.take(ONE);
-    expect((await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human", "--fleet", file], ONE)).status).toBe(2);
-    expect(readFileSync(f.lease, "utf8")).not.toContain("state=");
   });
 
   it("passes sox's failure through and logs it", async () => {

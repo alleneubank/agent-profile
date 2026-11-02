@@ -6,9 +6,10 @@ them. Keep them out of repos.
 ## Fleet file: `~/.handoffs/fleet.md` on the control host
 
 One file for the whole fleet, whichever host a charter runs on. It holds
-machine facts every charter shares and names no project: which hosts a
-project's lanes use, its lane directories, and its own never-touch list go in
-its charter.
+machine facts every charter shares and names no project: which hosts or slots
+a project's lanes use, its lane directories, and its own never-touch list go
+in its charter. It holds no live state either: whether a charter's
+coordinator is running is the lease's to answer.
 
 ```markdown
 # Fleet
@@ -38,8 +39,8 @@ each charter.
 |---|---|---|---|
 
 ## Charters
-| Charter | Charter file (host:path) | State |
-|---|---|---|
+| Charter | Charter file (host:path) |
+|---|---|
 ```
 
 Whoever deploys an agent-workflows release that changes how lanes launch,
@@ -47,14 +48,15 @@ how mail is sent, or what the lease holds sets the Coordinator skill line to
 the deploy time, with the human's word since the Roster is theirs, so
 coordinators already running reload before their next launch; a skill loads
 once per session and is not re-read otherwise.
-Verified is the date a fact was last checked on the host. Only `lease.sh state`
-writes State; add a registry row with an empty State, then use the command.
-State is `live`,
-`blocked-on-human` (heartbeat stopped, lease kept; the human's next turn
-resumes it), or `parked` (the human stood it down and the lease is released;
-a fresh coordinator resumes from the handoff). Who holds a watch, in which
-shell and session, is the lease's to answer (`lease.sh show` or `list` on the
-charter's host), never a column here. An archived charter leaves the
+Verified is the date a fact was last checked on the host. A charter's state
+and who holds its watch live only in its lease on the charter's host:
+`lease.sh list` there prints each charter's watch, state (`live`,
+`blocked-on-human`: heartbeat stopped, lease kept, the human's next turn
+resumes it; `parked`: the human stood it down and the lease is released, a
+fresh coordinator resumes from the handoff), and whether the holding shell is
+still alive; `lease.sh show <charter>` prints one lease the same way. A
+coordinator that dies keeps the state it last wrote, so a `live` state with a
+`gone` shell means no one is running it. An archived charter leaves the
 registry; its charter and log keep its history. A reservation past its Until
 is free. Lane counts are read live (`lane.sh slots`), never stored here.
 

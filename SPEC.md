@@ -103,6 +103,17 @@ guidance is not counted as universally loaded context.
   sections, and 149 of 252 Grok/Kimi lanes, nearly all read-only reviewers,
   had no preamble. **ratified (human)**
 
+- 2026-11-01 — The fleet file keeps machine facts only. A charter's state
+  (`live`, `blocked-on-human`, `parked`) lives only in its lease: `take`
+  writes `live`, `lease.sh state` writes the lease alone and no longer takes
+  `--fleet` or `--fleet-host`, and `lease.sh list` and `show` report the
+  state with whether the holding shell is alive in sox. The Charters registry
+  lists charter and charter file; project facts in host rows move to the
+  charters they name. Basis: ai-wiki EXP-014 (review 2026-11-01): the fleet
+  file reached 25.7 KB, and after the 11-01 reboot its State column still
+  said `live` for three dead coordinators and named a fleet-watch watch two
+  behind the lease. **ratified (human)**
+
 - 2026-11-01 — Every coordinator decision round asks every open question,
   including each `gated` queue line waiting on the human's answer, in queue
   order; a harness cap on questions per call means several calls in the same

@@ -88,8 +88,8 @@ window sets its end; these terms stand.
 A nudge is `send.sh --charter fleet-watch --role coordinator --kind request`
 to a live coordinator, naming the action, the evidence, and the host. The
 coordinator decides; a nudge grants nothing. Send one per condition per
-crossing, again only if the condition worsens, never to a coordinator that is
-`blocked-on-human` or parked. Conditions:
+crossing, again only if the condition worsens, never to a coordinator whose
+lease (`lease.sh list` on its host) says `blocked-on-human` or parked. Conditions:
 
 - free slots beside `ready` queue lines, or a dry queue while its charter's
   repositories have in-scope issues; name the free hosts;
@@ -123,7 +123,10 @@ Prune at each rotation, at a window's end, and when the human returns:
 
 - **The watch's charter**, as the coordinator prunes one.
 - **The fleet file:** lapsed rules, past reservations, and resolved known
-  gaps leave; their history goes to the watch's log. A gap a repository can
+  gaps leave; their history goes to the watch's log. A project fact in a
+  host row (which charter uses the host or one of its slots) moves to the
+  charter it names, and live state (whether a charter is running) leaves for
+  its lease. A gap a repository can
   fix becomes an issue there, leaving a pointer. A rule leaves only by its own
   clock or condition, or the human's later words; a reading that would end or
   narrow one is a question for the human, and it stays until they answer.

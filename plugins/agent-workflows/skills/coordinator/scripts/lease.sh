@@ -6,19 +6,24 @@
 #   lease.sh check   <charter>
 #   lease.sh release <charter> --handoff PATH
 #   lease.sh list
-#   lease.sh state   <charter> --state live|blocked-on-human|parked --fleet PATH [--fleet-host HOST]
+#   lease.sh state   <charter> --state live|blocked-on-human|parked
 #
 # list prints one tab-separated line per charter with a lease on this host:
-# charter, watch, held or released, session, shell, taken_at.
+# charter, watch, held or released, state, the holding shell's status,
+# session, shell, taken_at. show prints the lease, then shell_status=. The
+# shell's status is alive when this host's sox daemon lists it live, gone when
+# it does not, and unknown when sox cannot be asked; a coordinator whose shell
+# died keeps the state it last wrote, so read the two together.
 #
 # Exit: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the watch, 5 lease busy,
 # 6 blocked-on-human refused: the charter's queue still has a ready item.
 #
-# The lease is ~/.handoffs/<charter>/lease. The caller is this Claude Code
+# The lease is ~/.handoffs/<charter>/lease, the only record of a charter's
+# state. The caller is this Claude Code
 # session (CLAUDE_CODE_SESSION_ID) in the sox shell `sox which` names, so a
-# caller cannot claim another's identity by passing it. `state` records the
-# word in the lease as well as the fleet registry, so send.sh can tell a
-# stood-down coordinator from a live one on this host. blocked-on-human is
+# caller cannot claim another's identity by passing it. take writes live;
+# `state` replaces the word, so send.sh can tell a stood-down coordinator from
+# a live one on this host. blocked-on-human is
 # written only when ~/.handoffs/<charter>/queue lists no ready item: one
 # tab-separated line per item, `<state>\t<theme>\t<item>[\t<note>]`, state
 # one of ready, running, gated, parked, done; `#` lines are comments. The file is key=value
@@ -56,12 +61,17 @@ one_line() {
   esac
 }
 
+# Run sox from /tmp so no directory's .envrc re-points the sox home.
+sox_pinned() {
+  (cd /tmp && env SOX_HOME="$HOME/.sox" "${SOX_BIN:-sox}" "$@")
+}
+
 # caller: set session and shell to this process's Claude Code session and
-# sox shell. Run from /tmp so no directory's .envrc re-points the sox home.
+# sox shell.
 caller() {
   session=${CLAUDE_CODE_SESSION_ID:-}
   [ -n "$session" ] || fail "no CLAUDE_CODE_SESSION_ID: coordinators run in Claude Code" 2
-  shell=$(cd /tmp && env SOX_HOME="$HOME/.sox" "${SOX_BIN:-sox}" which $$) ||
+  shell=$(sox_pinned which $$) ||
     fail "sox which could not name this process's shell: run the coordinator in a sox shell" 2
   [ -n "$shell" ] || fail "sox which named no shell" 2
 }
@@ -107,48 +117,42 @@ ready_count() {
   ' "$queue" || fail "malformed queue: $queue" 2
 }
 
-# Runs on the fleet host; its file lock serializes writers from all charters.
-registry_write() (
-  fleet=$(cd "$(dirname "$fleet")" && pwd -P)/${fleet##*/}
-  [ -f "$fleet" ] && [ ! -L "$fleet" ] || fail "fleet must be a regular file: $fleet" 2
-  mkdir "$fleet.lock" 2>/dev/null || fail "$fleet is being written by another process" 5
-  tmp="$fleet.tmp.$$"
-  trap 'rm -f "$tmp"; rmdir "$fleet.lock"' EXIT
-  [ "$(wc -c < "$fleet")" -le 1048576 ] || fail "fleet exceeds 1 MiB: $fleet" 2
-  cp -p "$fleet" "$tmp"
-  newline=$(tail -c 1 "$fleet" | wc -l)
-  awk -v charter="$charter" -v state="$state" -v newline="$newline" '
-    /^## / { heading = $0; sub(/\r$/, "", heading); registry = (heading == "## Charters") }
-    {
-      if (registry && split($0, cells, "|") == 5) {
-        name = cells[2]; gsub(/^[ \t]+|[ \t]+$/, "", name)
-        if (name == charter) {
-          count++
-          $0 = cells[1] "|" cells[2] "|" cells[3] "| " state " |" cells[5]
-        }
-      }
-      if (NR > 1) printf "\n"
-      printf "%s", $0
-    }
-    END { if (newline) printf "\n"; if (count != 1) exit 2 }
-  ' "$fleet" > "$tmp" || fail "expected exactly one $charter row in $fleet Charters registry" 2
-  if cmp -s "$fleet" "$tmp"; then
-    printf '%s\t%s\tunchanged\n' "$charter" "$state"
+# read_live_shells: set live_shells to this host's sox rows, or leave
+# sox_unreachable set when the daemon cannot be asked.
+read_live_shells() {
+  sox_unreachable=""
+  live_shells=$(sox_pinned ls localhost --json 2>/dev/null) || sox_unreachable=yes
+}
+
+# state_or_dash: the lease's state, or - for a lease written before take
+# recorded one.
+state_or_dash() {
+  local word
+  word=$(field state)
+  printf '%s\n' "${word:--}"
+}
+
+# shell_status <shell>: alive, gone, or unknown, from read_live_shells.
+shell_status() {
+  if [ -n "$sox_unreachable" ]; then
+    echo unknown
+  elif printf '%s\n' "$live_shells" | grep -F "\"backing_id\":\"$1\"" | grep -qF '"status":"live"'; then
+    echo alive
   else
-    mv -f "$tmp" "$fleet"
-    printf '%s\t%s\tchanged\n' "$charter" "$state"
+    echo gone
   fi
-)
+}
 
 # list: every lease under the coordination home, in charter-name order.
 if [ "${1:-}" = list ]; then
   [ $# -eq 1 ] || usage
   LC_ALL=C
+  read_live_shells
   for lease in "${COORDINATION_HOME:-$HOME/.handoffs}"/*/lease; do
     [ -f "$lease" ] || continue
     if [ -n "$(field released_at)" ]; then held=released; else held=held; fi
-    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$(field charter)" "$(field watch)" "$held" \
-      "$(field session)" "$(field shell)" "$(field taken_at)"
+    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$(field charter)" "$(field watch)" "$held" \
+      "$(state_or_dash)" "$(shell_status "$(field shell)")" "$(field session)" "$(field shell)" "$(field taken_at)"
   done
   exit 0
 fi
@@ -160,15 +164,13 @@ case "$charter" in ''|*[!A-Za-z0-9._-]*|.*) fail "charter must be a plain name l
 dir="${COORDINATION_HOME:-$HOME/.handoffs}/$charter"
 lease="$dir/lease"
 
-reason="" handoff="" state="" fleet="" fleet_host=""
+reason="" handoff="" state=""
 while [ $# -gt 0 ]; do
   [ $# -ge 2 ] || usage
   case "$1" in
     --reason) reason=$2 ;;
     --handoff) handoff=$2 ;;
     --state) state=$2 ;;
-    --fleet) fleet=$2 ;;
-    --fleet-host) fleet_host=$2 ;;
     *) usage ;;
   esac
   one_line "${1#--}" "$2"
@@ -179,6 +181,8 @@ case "$command" in
   show)
     [ -f "$lease" ] || fail "no lease at $lease" 3
     cat "$lease"
+    read_live_shells
+    printf 'shell_status=%s\n' "$(shell_status "$(field shell)")"
     ;;
 
   take)
@@ -192,7 +196,7 @@ case "$command" in
       prior="$(field session) $(field shell) watch $watch"
     fi
     case "$watch" in ''|*[!0-9]*) fail "$lease has no numeric watch" 2 ;; esac
-    write "$charter" $((watch + 1)) "$session" "$shell" "${AI_AGENT:-claude-code}" "$(now)" "$prior" "$reason" "" "" ""
+    write "$charter" $((watch + 1)) "$session" "$shell" "${AI_AGENT:-claude-code}" "$(now)" "$prior" "$reason" "" "" live
     cat "$lease"
     ;;
 
@@ -218,8 +222,6 @@ case "$command" in
 
   state)
     case "$state" in live|blocked-on-human|parked) ;; *) fail "State must be live, blocked-on-human, or parked" 2 ;; esac
-    case "$fleet" in /*) ;; *) fail "--fleet must be an absolute path on the fleet host" 2 ;; esac
-    case "$fleet_host" in *[!A-Za-z0-9._-]*|-*) fail "--fleet-host must be an ssh host alias" 2 ;; esac
     caller
     [ -f "$lease" ] || fail "no lease at $lease" 3
     lock
@@ -234,17 +236,11 @@ case "$command" in
       ready=$(ready_count)
       [ "$ready" -eq 0 ] || fail "$ready ready item(s) in $dir/queue: launch them, or mark each gated with its gate" 6
     fi
-    if [ -n "$fleet_host" ]; then
-      # Values travel as Bash assignments on stdin, never through ssh quoting.
-      { printf 'set -eu\n'; printf 'fleet=%q\ncharter=%q\nstate=%q\n' "$fleet" "$charter" "$state"
-        declare -f fail registry_write; printf 'registry_write\n'
-      } | ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 "$fleet_host" 'bash -s'
-    else
-      registry_write
-    fi
-    # After the registry, so a failed registry write changes neither.
+    prior_state=$(field state)
     write "$(field charter)" "$(field watch)" "$(field session)" "$(field shell)" "$(field harness)" \
       "$(field taken_at)" "$(field prior)" "$(field reason)" "$(field released_at)" "$(field handoff)" "$state"
+    if [ "$prior_state" = "$state" ]; then change=unchanged; else change=changed; fi
+    printf '%s\t%s\t%s\n' "$charter" "$state" "$change"
     ;;
 
   *) usage ;;
