@@ -9,7 +9,7 @@
 #   lane.sh drift  --fleet PATH [--fleet-host HOST] [--every SECONDS --stop-at UTC]
 #
 # The caps live in one JSON file on the fleet host (--fleet, an absolute path
-# there; --fleet-host reaches it by ssh, as lease.sh state does):
+# there; --fleet-host reaches it by ssh):
 #   {"version":1,"hosts":{"onyx":{"cap":4,"why":"...","set_at":"...",
 #     "until":"2026-10-12T16:00:00Z","after":2}}}
 # A host key is the name `sox new` takes; the caller's own host (hostname -s)

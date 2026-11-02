@@ -9,11 +9,11 @@ ssh quoting.
 ## Fleet file and caps file
 
 `~/.handoffs/fleet.md` (hosts, rules, Roster, devices, reservations, the
-charter registry) and `~/.handoffs/fleet.json` (lane caps) on the control
+charter registry: charter and charter file only) and `~/.handoffs/fleet.json` (lane caps) on the control
 host are the fleet's, kept by the fleet watch; their shapes are in the
 fleet-watch skill's [fleet-files.md](../../fleet-watch/references/fleet-files.md).
-A coordinator reads both, writes its registry row only with `lease.sh state`
-and its own Reservations rows, and passes `--fleet ~/.handoffs/fleet.json`
+A coordinator reads both, writes only its own Reservations rows (its
+state goes in its lease), and passes `--fleet ~/.handoffs/fleet.json`
 (absolute) to every `lane.sh` call, with `--fleet-host <control host>` from
 any other host.
 
@@ -113,21 +113,21 @@ addenda; a charter copied to a lane host is a hint, never a source.
 
 ## Lease: `~/.handoffs/<charter>/lease`
 
-Written only by `scripts/lease.sh` (take, release); read with `show` and
-`check`. `key=value` lines: `charter`, `watch`, `session`, `shell`,
-`harness`, `taken_at`, `prior`, `reason` (the human's words that appointed
-this watch), and once released `released_at` and `handoff`. Exit codes: 0 ok,
-2 usage, 3 no lease, 4 caller does not hold the watch, 5 another write is in
-progress (retry).
+Written only by `scripts/lease.sh` (take, release, state); read with `show`,
+`list`, and `check`. `key=value` lines: `charter`, `watch`, `session`,
+`shell`, `harness`, `taken_at`, `prior`, `reason` (the human's words that
+appointed this watch), once released `released_at` and `handoff`, and
+`state`. Exit codes: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the
+watch, 5 another write is in progress (retry).
 
-Registry writes: `lease.sh state <charter> --state <word> --fleet <absolute path>`.
-If the fleet is on another control host, add `--fleet-host <ssh alias>`;
-the path is on that host. The caller must hold the watch for `live` or
-`blocked-on-human`; write `parked` after release, from that same session and
-shell. A successor's take revokes the prior caller. State writes lock the
-lease and the fleet file (across charters), replacing the latter atomically.
-Other fleet edits must respect `<fleet path>.lock`; on exit 5, retry after
-the writer finishes. Never remove a lock without attributing its writer.
+The lease is the only record of the charter's state: `live` (written by
+take), `blocked-on-human`, or `parked`, set with
+`lease.sh state <charter> --state <word>`. The caller must hold the watch for
+`live` or `blocked-on-human`; write `parked` after release, from that same
+session and shell. A successor's take revokes the prior caller. `show` and
+`list` add whether the holding shell is still alive in sox on this host, since
+a coordinator that dies keeps the state it last wrote. Never remove a lock
+without attributing its writer.
 
 ## Log: `~/.handoffs/<charter>/log.md`
 

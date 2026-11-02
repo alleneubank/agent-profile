@@ -26,11 +26,10 @@ its reference. The caller is `CLAUDE_CODE_SESSION_ID` in the shell `sox which`
 names; the target's foreground comes from `sox ls <host>`, and `sox send
 --expect-fg` refuses if it changes before the write. Receipts go to
 `~/.handoffs/<charter>/sent.log` on the sending host.
-They need bash 3.2 or later and coreutils; remote State writes also use ssh,
-and `lane.sh` needs jq.
-`lease.sh state <c> --state <word> --fleet <absolute path> [--fleet-host <host>]`
-writes only that registry row's State, under a fleet-wide lock (exit 5 busy).
-Its stdout is `<charter>\t<state>\tchanged|unchanged`.
+They need bash 3.2 or later and coreutils; `lane.sh` needs jq and, from a
+host other than the fleet's, ssh.
+`lease.sh state <c> --state <word>` writes the state in the lease (exit 5
+busy). Its stdout is `<charter>\t<state>\tchanged|unchanged`.
 After stopping a lane's writers and resources, run on its host:
 `retire.sh --root <lane root> --delete --charter <c> --lane <l> --keep <relative path>`.
 Repeat `--keep` for separate paths, or use `--keep .` for the whole root;
