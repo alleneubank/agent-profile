@@ -262,7 +262,10 @@ Change a running agent's brief only by addendum and pointer.
    the coordinator skill again and follow the reloaded text from here on.
    The launcher comes from that section: the row for the lane's role, in
    its order, with the account the work's tree names, narrowed by the
-   charter and by any window that has not lapsed; the brief names it. A
+   charter and by any window that has not lapsed; the brief names it. The
+   reasoning effort comes from the same row and the Roster's effort rule:
+   `run.sh` sets it on the launcher's command line, overriding the
+   launcher's default, and the log line names it with the launcher. A
    quota failure follows the Roster's fallback and is logged.
 4. If that launcher's worker cannot load this profile's skills: a read-only
    reviewer (it reads and reports; it never edits, commits, pushes, or
@@ -293,7 +296,8 @@ Change a running agent's brief only by addendum and pointer.
    the waiting list with its `sox attach` command.
 
 In-session subagents are for bounded reading and review that ends within the
-pass; anything that must outlive it is a sox shell.
+pass, at the Roster's model and effort for their role; anything that must
+outlive it is a sox shell.
 
 ### Before an unattended window
 
