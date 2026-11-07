@@ -17,7 +17,8 @@
 #                ~/.handoffs and every coordination home the charter registry
 #                (fleet.md beside the caps file) names on this host;
 #              QUOTA     an account's weekly window at >= 90% or >= 97%;
-#              DISK      a caps-file host under 15% free on its home volume;
+#              DISK      a caps-file host's home volume at >= 85% used, cleared
+#                only at <= 82% so a host hovering at the line reports once;
 #              HOST UNREACHABLE  a caps-file host failing plain ssh for 15+ min.
 #            It exits 0 after a pass that printed. DIR keeps what was reported,
 #            so a restart with the same DIR stays quiet until something changes.
@@ -46,7 +47,8 @@ STUCK_S=600
 EXCEPTIONS_EVERY_S=600
 QUOTA_THRESHOLDS="97 90"
 HOST_DOWN_S=900
-DISK_FREE_PERCENT_MIN=15
+DISK_USED_PERCENT_RAISE=85
+DISK_USED_PERCENT_CLEAR=82
 
 usage() {
   sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//' >&2
@@ -317,11 +319,11 @@ host_exceptions() { # <fleet>
     rm -f "$down_since"
     resolve "unreachable-$host"
     case $used in ''|*[!0-9]*) continue ;; esac # no df figure: nothing to judge
-    if [ $(( 100 - used )) -lt "$DISK_FREE_PERCENT_MIN" ]; then
-      report "disk-$host" "DISK $host ${used}% used (under ${DISK_FREE_PERCENT_MIN}% free)"
-    else
+    if [ "$used" -ge "$DISK_USED_PERCENT_RAISE" ]; then
+      report "disk-$host" "DISK $host ${used}% used (>= ${DISK_USED_PERCENT_RAISE}%)"
+    elif [ "$used" -le "$DISK_USED_PERCENT_CLEAR" ]; then
       resolve "disk-$host"
-    fi
+    fi # between the two, what was reported stands
   done
 }
 

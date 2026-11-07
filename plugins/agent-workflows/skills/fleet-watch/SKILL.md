@@ -84,7 +84,7 @@ Reading hosts through sox: [hosts.md](references/hosts.md). Its commands:
 The monitor prints one line when a condition starts and one `CLEARED` line
 when it ends, then exits; its exit wakes the watch. Conditions: a live
 coordinator's shell gone or stopped on a usage limit; an account's weekly
-quota at 90% or 97%; a lane host under 15% free disk; a lane host unreachable
+quota at 90% or 97%; a lane host's disk at 85% used (cleared at 82%); a lane host unreachable
 by plain ssh for 15 minutes or more. It reads leases on the control host
 only; a charter whose coordinator runs elsewhere is checked when woken.
 Restart it with the same `--state` after

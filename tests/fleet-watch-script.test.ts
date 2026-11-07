@@ -123,7 +123,7 @@ cat "${home}/ssh/$host"`,
         `| delta | ${here}:${otherHome}/delta/charter.md |\n` +
         `| epsilon | elsewhere:${remoteHome}/epsilon/charter.md |\n`,
     );
-    writeFileSync(join(fleetDir, "fleet.json"), JSON.stringify({ version: 1, hosts: { down: { cap: 2 }, flaky: { cap: 2 }, full: { cap: 2 }, roomy: { cap: 0 } } }));
+    writeFileSync(join(fleetDir, "fleet.json"), JSON.stringify({ version: 1, hosts: { down: { cap: 2 }, flaky: { cap: 2 }, full: { cap: 2 }, hover: { cap: 2 }, roomy: { cap: 0 } } }));
     const shells = (rows: object[]) =>
       writeFileSync(join(home, "shells.jsonl"), rows.map((row) => JSON.stringify({ kind: "shell", host: "localhost", status: "live", ...row })).join("\n") + "\n");
     const quota = (percent: number) =>
@@ -153,6 +153,7 @@ cat "${home}/ssh/$host"`,
     ]);
     quota(95);
     host("full", 90);
+    host("hover", 85);
     host("roomy", 40);
     mkdirSync(state);
     writeFileSync(join(state, ".down-since-down"), `${Math.floor(Date.now() / 1000) - 1000}\n`);
@@ -161,7 +162,8 @@ cat "${home}/ssh/$host"`,
       "COORDINATOR LIMIT-STOPPED beta shell s2.g2",
       "QUOTA acct-a weekly 95% (>= 90%), resets 2026-11-08T08:00:00Z",
       "HOST UNREACHABLE down by plain ssh for 15+ min",
-      "DISK full 90% used (under 15% free)",
+      "DISK full 90% used (>= 85%)",
+      "DISK hover 85% used (>= 85%)",
     ]);
 
     shells([
@@ -173,11 +175,20 @@ cat "${home}/ssh/$host"`,
     quota(98);
     host("full", 50);
     host("down", 30);
+    host("hover", 84);
     expect(run()).toEqual([
       "CLEARED COORDINATOR GONE alpha shell s1.g1 (lease state=live)",
       "QUOTA acct-a weekly 98% (>= 97%), resets 2026-11-08T08:00:00Z",
       "CLEARED HOST UNREACHABLE down by plain ssh for 15+ min",
-      "CLEARED DISK full 90% used (under 15% free)",
+      "CLEARED DISK full 90% used (>= 85%)",
+    ]);
+
+    // hover is back at the line it never cleared from: only the quota changes print.
+    quota(50);
+    host("hover", 85);
+    expect(run()).toEqual([
+      "CLEARED QUOTA acct-a weekly 98% (>= 97%), resets 2026-11-08T08:00:00Z",
+      "CLEARED QUOTA acct-a weekly 95% (>= 90%), resets 2026-11-08T08:00:00Z",
     ]);
   });
 });
