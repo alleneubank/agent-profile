@@ -92,6 +92,18 @@ guidance is not counted as universally loaded context.
 
 ### Decisions
 
+- 2026-11-07 — The fleet watch works by exception. It arms no event watcher
+  and runs no timed pass; it wakes on a message from the human or a
+  coordinator, or on a line from `fleet-watch.sh exceptions`: a live
+  coordinator's shell gone or stopped on a usage limit, an account at 90% or
+  97% weekly, a lane host under 15% free disk, or a lane host unreachable by
+  plain ssh for 15 minutes. It does not relay attention states to the human,
+  who attends lanes and coordinators in Sox.app. Basis: in fleet watch 22
+  (2026-11-06T16:22Z to 2026-11-07T02:5xZ) most turns were watcher events or
+  30-minute passes that changed nothing, and the useful interventions were
+  all exceptions. The human approved drafting it (2026-11-07T02:5xZ).
+  **provisional (driver)**
+
 - 2026-11-01 — A worker that cannot load this profile's skills gets the
   governed sections and harness preamble only when it acts (edits, runs,
   commits, pushes, lands, or launches). A read-only reviewer gets its charge
