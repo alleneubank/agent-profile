@@ -7,9 +7,15 @@ description: Use when taking, holding, or rotating the fleet watch (the human's 
 
 The fleet watch is the human's single point of contact for the fleet as a
 whole: hosts, caps, placement, launchers, logins, and fleet-wide rules. It is
-a coordinator of coordinators: it watches every charter's coordinator and
-keeps work moving across them, but runs no lanes and steers none. One session
-holds it at a time, under the `fleet-watch` lease on the control host.
+a coordinator of coordinators: it keeps work moving across charters, but runs
+no lanes and steers none. One session holds it at a time, under the
+`fleet-watch` lease on the control host.
+
+It works by exception. The human attends lanes and coordinators' questions in
+Sox.app, so the watch does not monitor coordinators and does not relay their
+attention states (questions, answers, lane exits) to the human. It wakes only
+on a message from the human or a coordinator, or on a line from its exception
+monitor.
 
 It keeps the `coordinator` skill's laws and uses its scripts, which are on
 PATH on every host; it launches no lanes, so law 11 never arises. Where this
@@ -22,12 +28,13 @@ last prune), the log `~/.handoffs/fleet-watch/log.md`, whose `## Inbox` takes
 messages while no one holds the watch, and the fleet's shared files it keeps:
 the fleet file and the caps file ([fleet-files.md](references/fleet-files.md)).
 Reading hosts through sox: [hosts.md](references/hosts.md). Its commands:
-[scripts/fleet-watch.sh](scripts/fleet-watch.sh) (`take`, `watch`, `pass`).
+[scripts/fleet-watch.sh](scripts/fleet-watch.sh) (`take`, `exceptions`,
+`pass`, `watch`).
 
 ## Does
 
 - **Sitreps** on hosts, lanes, coordinators, and what waits on the human, per
-  `sitrep`. When the human returns, one "Waiting on the human" across every
+  `sitrep`, when asked. When the human returns, one "Waiting on the human" across every
   charter, read from each charter's log.
 - **Fleet files:** keeps the fleet file and the caps file current. Caps,
   Rules, and the Roster change only on the human's word, quoted with its time.
@@ -49,6 +56,8 @@ Reading hosts through sox: [hosts.md](references/hosts.md). Its commands:
 ## Never
 
 - Types into a coordinator's or lane's shell, or answers their questions.
+- Relays attention states (a question, an answer, a lane's exit) to the
+  human; Sox.app shows them.
 - Launches, lands, or retires lanes; starts, resumes, or restarts a
   coordinator; moves another charter's watch. A charter with ready work and
   no coordinator goes on the human's waiting list.
@@ -65,23 +74,39 @@ Reading hosts through sox: [hosts.md](references/hosts.md). Its commands:
    lease and labels this shell. The lease's `prior=` names the predecessor's
    shell: once its final message is in, retire it with `sox kill
    <host>/<shell>` unless the human started it.
-4. Arm `fleet-watch.sh watch` as the event watcher, re-armed like the
-   coordinator's lane watcher, and run a pass. A charter without a Standing
-   section is pruned in that pass.
+4. Start the exception monitor as a background job:
+   `fleet-watch.sh exceptions --fleet ~/.handoffs/fleet.json --state
+   ~/Work/fleet-watch/exceptions`. Run one pass; a charter without a
+   Standing section is pruned in it.
 
-## Run a pass
+## The exception monitor
 
-A watch line or the heartbeat starts a pass.
+The monitor prints one line when a condition starts and one `CLEARED` line
+when it ends, then exits; its exit wakes the watch. Conditions: a live
+coordinator's shell gone or stopped on a usage limit; an account's weekly
+quota at 90% or 97%; a lane host's disk at 85% used (cleared at 82%); a lane host unreachable
+by plain ssh for 15 minutes or more. It reads leases on the control host
+only; a charter whose coordinator runs elsewhere is checked when woken.
+Restart it with the same `--state` after
+handling its lines, so what it already reported stays quiet.
 
-1. `fleet-watch.sh pass --fleet ~/.handoffs/fleet.json`: the lease, lane slots
-   per host, each coordinator's attention and transcript age, load and disk
-   per host.
-2. Verify each watch line before acting on it (coordinator law 9).
-3. Nudge, fix, or route what changed. Log only what changed.
+Arm no event watcher by default. `fleet-watch.sh watch` streams every
+attention event; run it only for a diagnosis that needs that stream, and stop
+it when the diagnosis ends.
 
-While the human is away, a pass runs every 30 minutes until the end of the
-window they set, which closes with a final sitrep at the top of the log. A
-window sets its end; these terms stand.
+## When woken
+
+A message or a monitor line wakes the watch; no timer does.
+
+1. Verify each monitor line before acting on it (coordinator law 9).
+2. Act on what it names: a stopped coordinator goes on the human's waiting
+   list; a quota or disk line gets the nudges below; an unreachable host gets
+   a diagnosis.
+3. When the wake needs the fleet's picture, run `fleet-watch.sh pass --fleet
+   ~/.handoffs/fleet.json`: the lease, lane slots per host, each
+   coordinator's attention and transcript age, load and disk per host. Check
+   the nudge conditions it shows.
+4. Log only what changed, and restart the monitor.
 
 ## Nudges
 
@@ -89,7 +114,8 @@ A nudge is `send.sh --charter fleet-watch --role coordinator --kind request`
 to a live coordinator, naming the action, the evidence, and the host. The
 coordinator decides; a nudge grants nothing. Send one per condition per
 crossing, again only if the condition worsens, never to a coordinator whose
-lease (`lease.sh list` on its host) says `blocked-on-human` or parked. Conditions:
+lease (`lease.sh list` on its host) says `blocked-on-human` or parked.
+Conditions, checked when the watch is woken or asked, never on a timer:
 
 - free slots beside `ready` queue lines, or a dry queue while its charter's
   repositories have in-scope issues; name the free hosts;
@@ -104,10 +130,10 @@ lease (`lease.sh list` on its host) says `blocked-on-human` or parked. Condition
 - a charter or log grown large enough to slow its holder's reading: a prune
   request (coordinator files.md, Pruning);
 - a coordinator silent past its heartbeat with work in flight: one pointer,
-  then the waiting list if the next pass shows no change.
+  then the waiting list if it is still silent the next time the watch looks.
 
-Log each nudge with its condition, and in the next pass whether it was acted
-on.
+Log each nudge with its condition, and, the next time the watch looks,
+whether it was acted on.
 
 ## Host fixes
 

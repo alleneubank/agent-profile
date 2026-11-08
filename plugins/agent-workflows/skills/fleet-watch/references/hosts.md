@@ -6,9 +6,10 @@ before trusting a line.
 
 ## The watch stream
 
-`fleet-watch.sh watch` is one `sox watch --all` stream over every shell, with
-the fleet watch's own shell dropped (otherwise each reply it posts ends a turn,
-prints `done`, and wakes it again). What its lines mean:
+`fleet-watch.sh watch`, run only for a diagnosis, is one `sox watch --all`
+stream over every shell, with the fleet watch's own shell dropped (otherwise
+each reply it posts ends a turn, prints `done`, and wakes it again). What its
+lines mean:
 
 - A `HOST` line comes only after a host stays `unreachable` past 60 s, and
   again on recovery. One-tick flaps on healthy masters are routine: sox
