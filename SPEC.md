@@ -101,8 +101,9 @@ guidance is not counted as universally loaded context.
   who attends lanes and coordinators in Sox.app. Basis: in fleet watch 22
   (2026-11-06T16:22Z to 2026-11-07T02:5xZ) most turns were watcher events or
   30-minute passes that changed nothing, and the useful interventions were
-  all exceptions. The human approved drafting it (2026-11-07T02:5xZ).
-  **provisional (driver)**
+  all exceptions. The human approved drafting it (2026-11-07T02:5xZ) and
+  publishing it (2026-11-08T21:4xZ, "Merge+release with priority").
+  **ratified (human)**
 
 - 2026-11-01 — A worker that cannot load this profile's skills gets the
   governed sections and harness preamble only when it acts (edits, runs,
