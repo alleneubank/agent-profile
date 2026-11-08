@@ -136,6 +136,14 @@ guidance is not counted as universally loaded context.
   signals presence. Basis: ai-wiki review 2026-11-01-weekly. **ratified
   (human)**
 
+- 2026-11-08 — No item drops out of a decision round to fit an option
+  limit: a question covering more items than it has options names every item
+  in its text, and its options act on the whole set. Basis: ai-wiki review
+  2026-11-08-weekly (EXP-043): in 126 rounds, hands-on items were the ones
+  cut at the four-option limit (sox-lanes left 8 of about 17 gated items
+  unasked on 2026-11-07; #347 was never asked that week), while op-forward
+  named all its hands-on items in one question's text. **ratified (human)**
+
 - 2026-11-01 — A retired lane keeps nothing in its root. `retire.sh` takes
   `--charter` and `--lane` and copies every kept path (evidence and unpushed
   work) into `~/.handoffs/<charter>/<lane>/kept/`, its only destination,

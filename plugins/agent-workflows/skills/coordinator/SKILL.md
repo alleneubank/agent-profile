@@ -201,8 +201,11 @@ restart the heartbeat.
    interface. The round carries every open question, not only the one that
    prompted it, in queue order and in as few questions as the harness
    allows; where it caps questions per call, send several calls in the same
-   round. If they put the round off ("not now"), the rest wait for their next
-   round. Word each question to answer cold: plain words and what each
+   round. No item drops out to fit an option limit: when a question covers
+   more items than it has options, name every item in its text and let the
+   options act on the whole set (all now, choose in a reply, none now). If
+   they put the round off ("not now"), the rest wait for their next round.
+   Word each question to answer cold: plain words and what each
    option does.
    When an identified design answers the question, it is the recommended
    option; offer an interim only if the human asked for one, naming what it
