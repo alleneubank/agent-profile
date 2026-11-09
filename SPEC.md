@@ -114,8 +114,9 @@ guidance is not counted as universally loaded context.
   context per call, and 70 of 169 gaps between sox-lanes watcher events were
   under five minutes (ai-wiki EXP-045). The human chose all coordinators, a
   300k window and batching together (2026-11-09, question tool) and asked
-  for this change ("yes lets go ahead"). Merge and release are not yet
-  granted. **proposed**
+  for this change ("yes lets go ahead"), then its publication
+  (2026-11-09, question tool: "Merge, release, deploy").
+  **ratified (human)**
 
 - 2026-11-01 — A worker that cannot load this profile's skills gets the
   governed sections and harness preamble only when it acts (edits, runs,
