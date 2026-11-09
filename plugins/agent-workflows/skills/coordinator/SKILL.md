@@ -128,7 +128,8 @@ read. Anything you cannot attribute to the charter belongs to another owner
 ### Run a pass
 
 A heartbeat or a lane watcher line starts a pass; re-arm the watcher in each
-pass once it has expired.
+pass once it has expired. A watcher line is a batch: handle every event in
+it in the one pass.
 
 1. `lease.sh check <charter>` (law 1).
 2. Take stock through a subagent, given the last pass time and the log and
@@ -300,7 +301,10 @@ Change a running agent's brief only by addendum and pointer.
 
 In-session subagents are for bounded reading and review that ends within the
 pass, at the Roster's model and effort for their role; anything that must
-outlive it is a sox shell.
+outlive it is a sox shell. Everything you read stays in your context for the
+rest of the watch, so a check that needs more than a screen of output (a
+lane's transcript, a diff, a host's logs) goes to one: ask for the verdict
+and where it found it, not the text.
 
 ### Before an unattended window
 
@@ -340,7 +344,9 @@ The watch changes hands only when the session has ended or the human asks
   ([files.md](references/files.md#pruning)), then write the handoff
   (scorecard, handover table, waiting list, footprint left on each host and
   why; grants in force are the charter's Standing section), then
-  launch a successor in a sox shell on the control host with the coordinator
+  launch a successor in a sox shell on the control host, from the Roster's
+  coordinator row (launcher, effort, and its context window when it names
+  one), with the coordinator
   skill, the handoff, and your session id for `/recall continue`, after
   `claude-pretrust` for its directory (stack.md, Startup dialogs). It takes
   the watch with `lease.sh take <charter> --reason` quoting the request. Once

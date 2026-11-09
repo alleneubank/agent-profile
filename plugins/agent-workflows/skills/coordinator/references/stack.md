@@ -86,8 +86,13 @@ line only for the ones a coordinator acts on:
 
 ```sh
 cd /tmp && env SOX_HOME=$HOME/.sox sox watch --all --json --label owner=<charter> --timeout 1790 2>/dev/null \
-  | jq -c --unbuffered 'select((.kind == "attention" and .previous != null and .state != "working") or (.kind == "host" and .status != "connected")) | {lane: .labels.lane, target, host, state, previous, status, reason}'
+  | jq -c --unbuffered 'select((.kind == "attention" and .previous != null and .state != "working") or (.kind == "host" and .status != "connected")) | {lane: .labels.lane, target, host, state, previous, status, reason}' \
+  | bash -c 'while IFS= read -r l; do e=$((SECONDS+120)); while [ $SECONDS -lt $e ] && IFS= read -r -t $((e-SECONDS)) m; do l="$l $m"; done; printf "%s\n" "$l" | jq -cs .; done'
 ```
+
+- The last stage batches: the first event opens a 120-second window, and
+  every event in it arrives as one line, a JSON array. Lanes often finish
+  close together, and each line costs a full pass.
 
 - `owner=` is the label `lane.sh` writes; your own shell does not carry it,
   so your own turns ending do not wake you.
