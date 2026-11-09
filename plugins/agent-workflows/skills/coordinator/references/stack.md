@@ -184,8 +184,10 @@ repository is already trusted, imports when every external one lands in
 dotfiles `profiles/instructions`, and the servers `.mcp.json` names. Exit 3
 (lane.sh exit 10) means the grant does not cover this directory and nothing
 was written: a main checkout and a plain directory, such as a coordinator or
-cross-repo workspace, always land here. Launch nothing there: put it on the
-waiting list, and launch once the human has answered it. Never answer a
+cross-repo workspace, always land here. Launch nothing there until the
+dialogs are answered: the fleet file's Trust rule says which of them a
+coordinator answers itself and how, and the rest go on the waiting list
+until the human has answered. Never answer a
 dialog by keystroke, and never `sox send --answer` into one.
 
 Proof of start is the agent's transcript with its first turn:

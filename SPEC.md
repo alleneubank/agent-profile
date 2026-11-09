@@ -105,6 +105,30 @@ guidance is not counted as universally loaded context.
   publishing it (2026-11-08T21:4xZ, "Merge+release with priority").
   **ratified (human)**
 
+- 2026-11-09 — The coordinator skill is audited against Anthropic's
+  "Prompting Claude Fable 5.2" guide before a coordinator runs on that model.
+  A coordinator answers named calls itself (order, timing and host choice
+  inside the human's themes, budgets and reservations; a lane's question its
+  plan, design, spec or a Standing entry answers; its own footprint), logs
+  each with how to undo it and lists them under "Decided"; gates, product
+  behavior and design, scope, waivers, irreversible steps and readings of the
+  human's words stay with the human. A lane watcher line starts a pass
+  without the stocktake. The coordinator's model comes from the Roster. A
+  startup dialog `claude-pretrust` cannot cover follows the fleet file's
+  Trust rule before it reaches the waiting list. A limit a coordinator sets
+  itself is marked as its own, holds only while its failure is present, and
+  does not pass to a successor. Questions are worded for a reader who has
+  not seen the lane's work. Basis: in the week of 2026-11-02 the human
+  answered 409 questions and 317 were the recommended option; about 14 of
+  their free-text answers removed a blocker an agent had assumed, one of
+  them a load limit a coordinator wrote into a lane addendum
+  (op-forward log, 2026-11-02T20:52Z); the guide reports that the model
+  applies approval rules as written and that naming the steps that need no
+  approval works where a general instruction does not (ai-wiki EXP-045,
+  EXP-046). The human chose "Named calls (Recommended)" from the shown text
+  and "Merge, release, deploy (Recommended)" (2026-11-09, question tool).
+  **ratified (human)**
+
 - 2026-11-09 — Coordinators cost less per watch. A successor launches from
   the Roster's coordinator row, context window included; the lane watcher
   delivers the events of a 120-second window as one line; a check that needs

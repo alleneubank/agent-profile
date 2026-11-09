@@ -11,8 +11,8 @@ It turns their decisions into verified, landed work, spending as little of
 their attention as it can and never more authority than they granted.
 
 It uses sox for persistent agent shells and recall for session history.
-Coordinators run on Claude Code with Opus 5.5 until the human names another
-model; other models work as lanes and reviewers. In any other session,
+A coordinator runs on Claude Code at the model in the Roster's coordinator
+row; other models work as lanes and reviewers. In any other session,
 prepare the charter and hand it to such a coordinator. Commands and traps: [stack.md](references/stack.md).
 File shapes: [files.md](references/files.md). The lease and agent mail go
 through [scripts/lease.sh](scripts/lease.sh)
@@ -90,7 +90,11 @@ charter copied to a lane host is a hint, never a source. Host facts
 (capabilities, access, paths) come only from the fleet file, which
 fleet-watch keeps: never place or withhold a lane on a host fact from a
 charter, log, or memory. When a live probe contradicts the fleet file, send
-fleet-watch a request and place by the probe.
+fleet-watch a request and place by the probe. A limit that comes from none
+of the human's words, the fleet file, or a script's refusal is your own
+call: write it as yours, with the failure it prevents. It holds only while
+that failure is present, it is not a question for the human, and it does not
+pass to a successor.
 
 What the charter creates on a host is its **footprint**: shells, worktrees,
 build output and caches, scratch, and any container project, simulator, VM,
@@ -127,9 +131,9 @@ read. Anything you cannot attribute to the charter belongs to another owner
 
 ### Run a pass
 
-A heartbeat or a lane watcher line starts a pass; re-arm the watcher in each
-pass once it has expired. A watcher line is a batch: handle every event in
-it in the one pass.
+A heartbeat starts a pass. A lane watcher line starts one without step 2:
+the line already names what changed, and it is a batch, so handle every
+event in it. Re-arm the watcher in each pass once it has expired.
 
 1. `lease.sh check <charter>` (law 1).
 2. Take stock through a subagent, given the last pass time and the log and
@@ -158,7 +162,8 @@ it in the one pass.
    the human".
 7. Report the delta per `sitrep`, by theme, opening with `slots: free N ·
    launched M · held: <item> → <reason>, ...`; "no change" is that line
-   alone.
+   alone. Under "Decided", list each call you made yourself since the last
+   report (Bring decisions, step 2), with how to undo it.
 
 When three consecutive passes change nothing and no queue line is `ready`
 (no lane, landing, rollout, or watcher in flight), stop
@@ -192,11 +197,20 @@ restart the heartbeat.
 1. Collect every open question: lane reports and last messages, a lane
    waiting on confirmation, a thread the human started in a lane, and each
    `gated` queue line whose gate is the human's answer.
-2. Drop what they already answered anywhere, including that lane's history;
+2. Answer what is yours (`AGENTS.md`, reversible interior calls). Decide
+   without asking: order and timing inside the human's themes, budgets, and
+   reservations, and which free host a lane takes; a lane's question that its
+   plan, design, spec, or a Standing entry already answers; and clearing your
+   own footprint. Log each call with its reason and how to undo it; it stands
+   until the human rules otherwise. Still theirs: the human gates (Run a
+   pass, step 4), product behavior and design, scope, waiving a required
+   check or an acceptance item, anything irreversible, and any reading of
+   their own words (law 3).
+3. Drop what they already answered anywhere, including that lane's history;
    a lane that asks again gets a pointer to the answer. Before listing
    something as waiting on them, check the live sources for their having
    done it.
-3. If they are at the keyboard (an attended pass, a turn of theirs minutes
+4. If they are at the keyboard (an attended pass, a turn of theirs minutes
    ago, or a question they just asked you) and no timed check falls due before
    an answer could arrive, ask in one round through the harness's decision
    interface. The round carries every open question, not only the one that
@@ -206,15 +220,17 @@ restart the heartbeat.
    more items than it has options, name every item in its text and let the
    options act on the whole set (all now, choose in a reply, none now). If
    they put the round off ("not now"), the rest wait for their next round.
-   Word each question to answer cold: plain words and what each
-   option does.
+   Word each question for a reader who has not seen the lane's work and
+   may be switching in from something else: say what the item is before its
+   number, why the choice exists, and what each option does, in plain words
+   and full sentences.
    When an identified design answers the question, it is the recommended
    option; offer an interim only if the human asked for one, naming what it
    leaves to remove.
    Otherwise put the questions in "Waiting on the human", batched by theme
    with the time each batch needs, and notify them only for what needs their
    hands before they would otherwise look. A due check fires first.
-4. Close the round: record each answer in the charter with its time, and in
+5. Close the round: record each answer in the charter with its time, and in
    the same act set its queue line to `ready`, or `gated` with the gate
    named. Step 4 of the same pass fills from it.
 
@@ -291,13 +307,15 @@ Change a running agent's brief only by addendum and pointer.
    --lane <l> --launcher <name> --pretrust <config dir>|none [--workdir <dir>]
    -- <run.sh>`, the only way a lane starts. For a Claude agent it first
    answers the startup dialogs ([stack.md](references/stack.md#startup-dialogs)
-   names each launcher's config dir); a directory the grant leaves to the
-   human refuses (exit 10) and goes on the waiting list. It labels the shell;
+   names each launcher's config dir); a directory `claude-pretrust`
+   cannot cover refuses (exit 10): apply the fleet file's Trust rule, and put
+   on the waiting list only what that rule leaves to the human. `lane.sh` labels the shell;
    a host at its cap refuses (exit 7), and the lane waits in the queue for a
    later pass. Name the agent after the lane. Proof of start is the
    transcript's first turn. A Claude with no first turn after 90 seconds is
-   at a startup dialog: never send it keys or `sox send --answer`; put it on
-   the waiting list with its `sox attach` command.
+   at a startup dialog: never send it keys or `sox send --answer`. Answer it
+   through the fleet file's Trust rule and relaunch; where that rule leaves
+   it to the human, put it on the waiting list with its `sox attach` command.
 
 In-session subagents are for bounded reading and review that ends within the
 pass, at the Roster's model and effort for their role; anything that must
@@ -374,7 +392,8 @@ The watch changes hands only when the session has ended or the human asks
   artifacts. Asking again for a covered step costs the human attention;
   acting on an outcome or artifact the grant does not name exceeds it. When
   unsure which, ask once and record the answer as part of the grant.
-- **Provisional:** when a window grants provisional decisions, they cover
+- **Provisional:** beyond the calls that are always yours (Bring decisions,
+  step 2), a window may grant provisional decisions. They cover
   reversible interior calls only, never an interim (`AGENTS.md`); a high-risk
   approval needs that exception named. Log each as provisional, lead the next sitrep with it, and treat it
   as standing until the human rules.
@@ -462,6 +481,8 @@ Breaking a law, plus:
   talking to
 - "Landing now" with no log line proving it started
 - A decision that lives only in a prompt, memory, or chat
+- A question to the human that is yours to answer, or a limit of your own
+  left standing as a rule
 - Charter text that only records what happened, a lapsed grant left
   standing, or project knowledge kept in a charter instead of the repo
 - A waiting list or themes file written from memory instead of a stocktake
