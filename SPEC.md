@@ -105,6 +105,18 @@ guidance is not counted as universally loaded context.
   publishing it (2026-11-08T21:4xZ, "Merge+release with priority").
   **ratified (human)**
 
+- 2026-11-09 — Coordinators cost less per watch. A successor launches from
+  the Roster's coordinator row, context window included; the lane watcher
+  delivers the events of a 120-second window as one line; a check that needs
+  more than a screen of output goes to a subagent that returns a verdict.
+  Basis: in the week of 2026-11-02 coordinators and fleet-watch took about
+  58% of the fleet's Claude tokens at a median of about 480k tokens of
+  context per call, and 70 of 169 gaps between sox-lanes watcher events were
+  under five minutes (ai-wiki EXP-045). The human chose all coordinators, a
+  300k window and batching together (2026-11-09, question tool) and asked
+  for this change ("yes lets go ahead"). Merge and release are not yet
+  granted. **proposed**
+
 - 2026-11-01 — A worker that cannot load this profile's skills gets the
   governed sections and harness preamble only when it acts (edits, runs,
   commits, pushes, lands, or launches). A read-only reviewer gets its charge
