@@ -35,8 +35,7 @@ each charter.
   (agent-workflows <version>: <what changed in launching, mail, or the lease>)
 
 ## Reservations
-| Resource (device, host, account) | Owner charter | Until | Notes |
-|---|---|---|---|
+In the caps file: `lane.sh reservations --fleet ~/.handoffs/fleet.json`.
 
 ## Charters
 | Charter | Charter file (host:path) |
@@ -57,20 +56,33 @@ fresh coordinator resumes from the handoff), and whether the holding shell is
 still alive; `lease.sh show <charter>` prints one lease the same way. A
 coordinator that dies keeps the state it last wrote, so a `live` state with a
 `gone` shell means no one is running it. An archived charter leaves the
-registry; its charter and log keep its history. A reservation past its Until
-is free. Lane counts are read live (`lane.sh slots`), never stored here.
+registry; its charter and log keep its history. Lane counts are read live
+(`lane.sh slots`), never stored here.
 
 ## Caps file: `~/.handoffs/fleet.json` on the control host
 
 Each lane host's cap, set only by `lane.sh cap` on the human's word (or a
 provisional call they granted), with the reason. A host with no entry takes
 no lanes; a cap of 0 closes it. A temporary cap carries `--until` and the cap
-it falls back to (`--after`), so a capacity window lapses on its own. Pass
+it falls back to (`--after`), so a capacity window lapses on its own.
+
+Reservations live here too, one per resource (a host key, a device id, an
+account), set by `lane.sh reserve --resource R --owners C[,C...] --until UTC
+--why "<the human's word>"` and cleared by `lane.sh release --resource R`,
+which prints the entry it removed for the log. A reservation must end within
+168 hours and holds nothing once its `until` passes. While it holds, `lane.sh
+launch` refuses a lane on a reserved host to every charter but its owners
+(exit 12); the owners still take the cap's slots, and lanes already running
+are not stopped, so an exclusive window still drains before it opens. A
+device or account reservation is a record each coordinator reads with `lane.sh
+reservations`; `lane.sh slots` shows a host's in its last two columns. Pass
 `--fleet ~/.handoffs/fleet.json` (absolute) to every `lane.sh` call, and
 `--fleet-host <control host>` from any other host.
 
 ```json
 {"version":1,"hosts":{
   "onyx":{"cap":4,"why":"32 cores, shared with echo-metis k3s","set_at":"2026-10-12T02:20:00Z"},
-  "aem5":{"cap":6,"why":"capacity window, the human 02:2xZ","set_at":"2026-10-12T02:20:00Z","until":"2026-10-12T16:00:00Z","after":2}}}
+  "aem5":{"cap":6,"why":"capacity window, the human 02:2xZ","set_at":"2026-10-12T02:20:00Z","until":"2026-10-12T16:00:00Z","after":2}},
+ "reservations":{
+  "pixelproton":{"owners":["sox-lanes"],"why":"GUI A/B window, the human 22:1xZ","set_at":"2026-10-12T22:20:00Z","until":"2026-10-13T01:30:00Z"}}}
 ```

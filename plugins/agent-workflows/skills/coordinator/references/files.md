@@ -8,12 +8,13 @@ ssh quoting.
 
 ## Fleet file and caps file
 
-`~/.handoffs/fleet.md` (hosts, rules, Roster, devices, reservations, the
-charter registry: charter and charter file only) and `~/.handoffs/fleet.json` (lane caps) on the control
+`~/.handoffs/fleet.md` (hosts, rules, Roster, devices, the
+charter registry: charter and charter file only) and `~/.handoffs/fleet.json` (lane caps and
+reservations) on the control
 host are the fleet's, kept by the fleet watch; their shapes are in the
 fleet-watch skill's [fleet-files.md](../../fleet-watch/references/fleet-files.md).
-A coordinator reads both, writes only its own Reservations rows (its
-state goes in its lease), and passes `--fleet ~/.handoffs/fleet.json`
+A coordinator reads both, writes only its own charter's reservations
+(`lane.sh reserve --owners <charter>`; its state goes in its lease), and passes `--fleet ~/.handoffs/fleet.json`
 (absolute) to every `lane.sh` call, with `--fleet-host <control host>` from
 any other host.
 

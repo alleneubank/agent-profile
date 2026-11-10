@@ -25,8 +25,9 @@ and refuses a target that is not running an agent, or a coordinator whose
 lease says it is stood down, found through the `lease.<charter>` label
 `lease.sh` puts on its shell (exit 5; `--wake-stood-down` only on the human's
 word). Lanes start through
-[scripts/lane.sh](scripts/lane.sh) (`lane.sh slots|launch|cap|drift --fleet
-<caps file>`), which holds each host to its cap.
+[scripts/lane.sh](scripts/lane.sh) (`lane.sh
+slots|launch|cap|reserve|release|reservations|drift --fleet <caps file>`),
+which holds each host to its cap and its reservation.
 
 ## Laws
 
@@ -310,7 +311,9 @@ Change a running agent's brief only by addendum and pointer.
    names each launcher's config dir); a directory `claude-pretrust`
    cannot cover refuses (exit 10): apply the fleet file's Trust rule, and put
    on the waiting list only what that rule leaves to the human. `lane.sh` labels the shell;
-   a host at its cap refuses (exit 7), and the lane waits in the queue for a
+   a host at its cap refuses (exit 7), and so does a host reserved for
+   another charter (exit 12, naming the reservation, its owners, its end, and
+   the human's word behind it); either way the lane waits in the queue for a
    later pass. Name the agent after the lane. Proof of start is the
    transcript's first turn. A Claude with no first turn after 90 seconds is
    at a startup dialog: never send it keys or `sox send --answer`. Answer it
@@ -462,9 +465,12 @@ then pruned.
   through it: file the issue or brief and send a pointer with `send.sh
   --kind request`. Never steer its lanes. A request you receive is work under
   your own charter, not a grant.
-- **Shared resources.** Devices and other shared resources are reserved in
-  the fleet file with an owner charter and an expiry; another charter waits
-  and puts the conflict on the human's waiting list. A checkout belongs to
+- **Shared resources.** Hosts, devices, and other shared resources are
+  reserved in the caps file (`lane.sh reserve`) with owner charters and an
+  expiry; `lane.sh reservations` lists those holding. `lane.sh launch`
+  enforces a host reservation; a device or account one is yours to honor
+  before using it. Another charter waits and puts the conflict on the
+  human's waiting list. A checkout belongs to
   one lane at a time.
 - **Attended sessions** the human asks for: a short brief, `claude-pretrust`
   for its directory, an interactive launch on the control host labeled
