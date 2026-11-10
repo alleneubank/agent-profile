@@ -849,6 +849,7 @@ describe("lane.sh reservations", () => {
     expect(JSON.parse(released.stdout)).toEqual({
       released: "pixelproton",
       was: { owners: ["demo"], why: "the human: A/B window", set_at: "2026-10-12T02:00:00Z", until: "2026-10-12T04:00:00Z" },
+      pruned: [],
     });
     expect((await f.run(LANE, f.as("boss", f.launch("pixelproton", "sims")), TWO)).status).toBe(0);
     // Releasing again is a no-op that says nothing was held.
@@ -858,13 +859,59 @@ describe("lane.sh reservations", () => {
   it("drops lapsed reservations on the next write", async () => {
     const f = await lanes();
     await f.reserve("pixelproton", "demo", "2026-10-12T03:00:00Z");
-    await f.run(LANE, ["reserve", "--fleet", f.caps, "--resource", "onyx", "--owners", "demo", "--until", "2026-10-12T05:00:00Z", "--why", "w"], null, "2026-10-12T04:00:00Z");
+    const next = await f.run(LANE, ["reserve", "--fleet", f.caps, "--resource", "onyx", "--owners", "demo", "--until", "2026-10-12T05:00:00Z", "--why", "w"], null, "2026-10-12T04:00:00Z");
+    expect(JSON.parse(next.stdout).pruned).toEqual(["pixelproton"]);
     expect(Object.keys(JSON.parse(readFileSync(f.caps, "utf8")).reservations)).toEqual(["onyx"]);
+  });
+
+  it("never lets a hand-edited entry open a reserved host, and keeps it until replaced", async () => {
+    const f = await lanes();
+    const good = { owners: ["demo"], why: "w", set_at: "2026-10-12T01:00:00Z", until: "2026-10-12T04:00:00Z" };
+    writeFileSync(f.caps, JSON.stringify({
+      version: 1,
+      hosts: { onyx: { cap: 4, why: "w", set_at: "x" }, ae: { cap: 4, why: "w", set_at: "x" }, nountil: { cap: 4, why: "w", set_at: "x" } },
+      reservations: {
+        "aaa-bad": { why: "no owners", until: "2026-10-12T04:00:00Z" },
+        ae: { ...good, owners: "demo" },
+        nountil: { owners: ["demo"], why: "w", set_at: "x" },
+        onyx: good,
+      },
+    }));
+    // A malformed entry ahead of a good one does not switch the good one off.
+    expect((await f.run(LANE, f.as("boss", f.launch("onyx", "sims")), TWO)).status).toBe(12);
+    // A malformed entry for the host itself refuses every charter, owner included.
+    for (const host of ["ae", "nountil"]) {
+      const refused = await f.run(LANE, f.launch(host, "x"));
+      expect(refused.status).toBe(12);
+      expect(refused.stderr).toContain(`${host} has a malformed reservation`);
+    }
+    expect(f.launched()).toEqual([]);
+    const slots = await f.slots();
+    expect(slots.status).toBe(0);
+    expect(slots.stdout).toContain("ae\t0\t4\tfree\t-\t-\t-\tmalformed\n");
+    expect(slots.stdout).toContain("onyx\t0\t4\tfree\t-\t-\tdemo\t2026-10-12T04:00:00Z\n");
+    expect((await f.run(LANE, ["reservations", "--fleet", f.caps], null)).stdout.split("\n").filter(Boolean)).toHaveLength(4);
+    // A later write prunes none of them; replacing one makes it well formed.
+    const replaced = await f.reserve("ae", "demo", "2026-10-12T04:00:00Z");
+    expect(JSON.parse(replaced.stdout).pruned).toEqual([]);
+    expect(Object.keys(JSON.parse(readFileSync(f.caps, "utf8")).reservations).sort()).toEqual(["aaa-bad", "ae", "nountil", "onyx"]);
+    expect((await f.run(LANE, f.launch("ae", "x"))).status).toBe(0);
+  });
+
+  it("refuses every launch when the reservations section is not an object", async () => {
+    const f = await lanes();
+    writeFileSync(f.caps, JSON.stringify({ version: 1, hosts: { onyx: { cap: 4, why: "w", set_at: "x" } }, reservations: [] }));
+    const refused = await f.run(LANE, f.launch("onyx", "x"));
+    expect(refused.status).toBe(12);
+    expect(refused.stderr).toContain("unreadable reservations");
+    expect((await f.slots()).status).toBe(2);
+    expect(f.launched()).toEqual([]);
   });
 
   it("rejects reservations it cannot hold", async () => {
     const f = await lanes();
     expect((await f.reserve("pixelproton", "demo", "tonight")).status).toBe(2);
+    expect((await f.reserve("pixelproton", "demo", "2026-10-12T25:00:00Z")).status).toBe(2);
     expect((await f.reserve("pixelproton", "demo", "2026-10-12T01:00:00Z")).status).toBe(2);
     expect((await f.reserve("pixelproton", "demo", "2026-10-19T02:00:01Z")).status).toBe(2);
     expect((await f.reserve("pixelproton", "demo,", "2026-10-12T04:00:00Z")).status).toBe(2);

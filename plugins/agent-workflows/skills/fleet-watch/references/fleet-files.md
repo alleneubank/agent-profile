@@ -69,8 +69,11 @@ it falls back to (`--after`), so a capacity window lapses on its own.
 Reservations live here too, one per resource (a host key, a device id, an
 account), set by `lane.sh reserve --resource R --owners C[,C...] --until UTC
 --why "<the human's word>"` and cleared by `lane.sh release --resource R`,
-which prints the entry it removed for the log. A reservation must end within
-168 hours and holds nothing once its `until` passes. While it holds, `lane.sh
+which prints the entry it removed for the log; both also print any lapsed
+entries they dropped (`pruned`). A reservation must end within
+168 hours and holds nothing once its `until` passes. Never hand-edit an
+entry: one missing a field holds its resource against every charter, owner
+included, until `reserve` or `release` replaces it. While it holds, `lane.sh
 launch` refuses a lane on a reserved host to every charter but its owners
 (exit 12); the owners still take the cap's slots, and lanes already running
 are not stopped, so an exclusive window still drains before it opens. A

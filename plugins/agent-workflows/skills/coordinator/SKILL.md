@@ -144,7 +144,8 @@ event in it. Re-arm the watcher in each pass once it has expired.
    or parked since the last pass; file claims live state contradicts;
    anomalies; free disk on each lane host.
 3. Handle each change as a lane event (below).
-4. Fill each free lane slot (`lane.sh slots`) with the first `ready` line in
+4. Fill each free lane slot (`lane.sh slots`; skip a host whose last two
+   columns name a reservation without your charter) with the first `ready` line in
    the queue, across every chosen theme in the human's order: a gate on the
    top item moves the slot down the queue, never leaves it empty. When no line
    is `ready`, add design-ahead work (Themes), then in-scope issues from the

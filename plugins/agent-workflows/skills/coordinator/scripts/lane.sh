@@ -28,8 +28,10 @@
 # slots. Lanes already running are not touched. lane.sh can only enforce a
 # host: a device or account reservation is a record every coordinator reads
 # with `reservations` before using that resource. A reservation past its
-# `until` holds nothing; reserve and release drop such entries, and release
-# prints the entry it removed. A file with no reservations key has none.
+# `until` holds nothing; reserve and release drop such entries and print
+# what they dropped (pruned), and release prints the entry it removed. An
+# entry missing a field holds its resource against every charter until
+# replaced (exit 12 names it). A file with no reservations key has none.
 #
 # A lane is a sox shell labeled lane=<name>; every such row on the host counts,
 # whatever its status, until the lane is retired. Only launch writes that
@@ -90,6 +92,21 @@ EVERY_SECONDS_MIN=60
 EVERY_SECONDS_MAX=3600
 RESERVATION_HOURS_MAX=168
 OWNERS_MAX=8
+# The one definition of a reservation entry, shared by every reader and
+# writer. An entry that does not fit it is malformed: it holds its resource
+# against every charter until reserve or release replaces it, so a hand edit
+# can never open a reserved host, and no write prunes it.
+# shellcheck disable=SC2016
+RESERVATION_JQ='
+def well_formed: type == "object"
+  and (.owners | type) == "array" and (.owners | length) > 0 and all(.owners[]; type == "string")
+  and (.until | type) == "string" and (.until | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"))
+  and (.why | type) == "string" and (.set_at | type) == "string";
+def entries: (.reservations // {})
+  | if type == "object" then to_entries | sort_by(.key) else error("reservations is not an object") end;
+def lapsed($now): (.value | well_formed) and $now >= .value.until;
+def pruned: ((.[0].reservations // {}) | keys) - ((.[1].reservations // {}) | keys) - [$resource];
+'
 
 usage() {
   sed -n '5,12p' "$0" | sed 's/^# \{0,1\}//' >&2
@@ -177,11 +194,14 @@ cap_now() {
 }
 
 # holding <fleet json>: the reservations that hold now, as resource<TAB>
-# owners<TAB>until<TAB>why<TAB>set_at lines.
+# owners<TAB>until<TAB>why<TAB>set_at lines. A malformed entry holds with
+# owners -, which no charter name can be, and until "malformed".
 holding() {
-  printf '%s\n' "$1" | jq -r --arg now "$(now)" '
-    (.reservations // {}) | to_entries | sort_by(.key)[] | select($now < .value.until)
-    | [.key, (.value.owners | join(",")), .value.until, .value.why, .value.set_at] | @tsv'
+  printf '%s\n' "$1" | jq -r --arg now "$(now)" "$RESERVATION_JQ"'
+    entries[] | select(lapsed($now) | not)
+    | if .value | well_formed then [.key, (.value.owners | join(",")), .value.until, .value.why, .value.set_at]
+      else [.key, "-", "malformed", "not {owners, why, set_at, until}; replace it with lane.sh reserve or release", "-"] end
+    | @tsv'
 }
 
 # host_rows <host>: the host's sox shell rows, one per line, or exit 6 when
@@ -391,7 +411,7 @@ case "$command" in
   slots)
     [ $# -eq 0 ] || usage
     caps=$(on_fleet_host fleet_read)
-    held=$(holding "$caps")
+    held=$(holding "$caps") || fail "$fleet has unreadable reservations" 2
     for each in $(printf '%s\n' "$caps" | jq -r '.hosts | keys[]'); do
       limit=$(cap_now "$caps" "$each")
       reserved=$(printf '%s\n' "$held" | awk -F '\t' -v host="$each" '$1 == host { print $2 "\t" $3 }')
@@ -424,8 +444,13 @@ case "$command" in
     # A caps file that cannot be read (its error already printed) grants no
     # cap, so the launch is refused below as a host with no cap.
     caps=$(on_fleet_host fleet_read) || caps=""
-    refusal=$(holding "$caps" | awk -F '\t' -v host="$host" -v charter="$charter" -v fleet="$fleet" '
-      $1 == host && index("," $2 ",", "," charter ",") == 0 {
+    # Unreadable reservations refuse every launch: the guard never fails open.
+    held=$(holding "$caps") || fail "$fleet has unreadable reservations, so no launch passes them: fix the file" 12
+    refusal=$(printf '%s\n' "$held" | awk -F '\t' -v host="$host" -v charter="$charter" -v fleet="$fleet" '
+      $1 == host && $3 == "malformed" {
+        printf "%s has a malformed reservation in %s (%s): queue the lane", host, fleet, $4
+      }
+      $1 == host && $3 != "malformed" && index("," $2 ",", "," charter ",") == 0 {
         printf "%s is reserved for %s until %s (reservation in %s: %s; set %s): queue the lane", host, $2, $3, fleet, $4, $5
       }')
     [ -z "$refusal" ] || fail "$refusal" 12
@@ -468,28 +493,30 @@ case "$command" in
     check_why
     printf '%s\n' "$until" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$' ||
       fail "--until must be UTC like 2026-10-12T16:00:00Z" 2
-    ahead=$(jq -n --arg until "$until" --arg now "$set_at" '($until | fromdateiso8601) - ($now | fromdateiso8601)')
+    ahead=$(jq -n --arg until "$until" --arg now "$set_at" '($until | fromdateiso8601) - ($now | fromdateiso8601)' 2>/dev/null) ||
+      fail "--until must be a real UTC time like 2026-10-12T16:00:00Z" 2
     [ "$ahead" -gt 0 ] && [ "$ahead" -le $((RESERVATION_HOURS_MAX * 3600)) ] ||
       fail "--until must be after now and at most ${RESERVATION_HOURS_MAX}h ahead" 2
     count=$(printf '%s\n' "$owners" | tr ',' '\n' | grep -c .)
     [ "$count" -ge 1 ] && [ "$count" -le "$OWNERS_MAX" ] || fail "--owners names 1 to $OWNERS_MAX charters" 2
-    edit='.reservations = ((.reservations // {}) | with_entries(select($set_at < .value.until))
+    edit="$RESERVATION_JQ"'.reservations = (entries | map(select(lapsed($set_at) | not)) | from_entries
       | .[$resource] = {owners: ($owners | split(",")), why: $why, set_at: $set_at, until: $until})'
-    report='.[1].reservations[$resource]'
+    report="$RESERVATION_JQ"'{reserved: $resource, entry: .[1].reservations[$resource], pruned: pruned}'
     on_fleet_host fleet_update
     ;;
 
   release)
     [ $# -eq 0 ] && [ -n "$resource" ] || usage
-    edit='if has("reservations") then .reservations |= (del(.[$resource])
-      | with_entries(select($set_at < .value.until))) else . end'
-    report='{released: $resource, was: .[0].reservations[$resource]}'
+    edit="$RESERVATION_JQ"'if has("reservations")
+      then .reservations = (entries | map(select(.key != $resource and (lapsed($set_at) | not))) | from_entries)
+      else . end'
+    report="$RESERVATION_JQ"'{released: $resource, was: .[0].reservations[$resource], pruned: pruned}'
     on_fleet_host fleet_update
     ;;
 
   reservations)
     [ $# -eq 0 ] || usage
-    holding "$(on_fleet_host fleet_read)"
+    holding "$(on_fleet_host fleet_read)" || fail "$fleet has unreadable reservations" 2
     ;;
 
   drift)
