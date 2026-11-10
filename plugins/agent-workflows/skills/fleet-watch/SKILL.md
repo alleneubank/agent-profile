@@ -148,7 +148,7 @@ ambiguous, shared, or data-bearing goes on the waiting list.
 Prune at each rotation, at a window's end, and when the human returns:
 
 - **The watch's charter**, as the coordinator prunes one.
-- **The fleet file:** lapsed rules, past reservations, and resolved known
+- **The fleet file:** lapsed rules and resolved known
   gaps leave; their history goes to the watch's log. A project fact in a
   host row (which charter uses the host or one of its slots) moves to the
   charter it names, and live state (whether a charter is running) leaves for

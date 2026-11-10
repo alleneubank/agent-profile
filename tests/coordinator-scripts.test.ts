@@ -625,6 +625,9 @@ exit "$(cat "${home}/pretrust-exit-$where" 2>/dev/null || echo 0)"
   const pretrusted = () => (existsSync(join(home, "pretrusted")) ? readFileSync(join(home, "pretrusted"), "utf8").split("\n").filter(Boolean) : []);
   const cap = (host: string, n: number, ...more: string[]) =>
     run(LANE, ["cap", "--fleet", caps, "--host", host, "--cap", String(n), "--why", "provisional", ...more]);
+  const reserve = (resource: string, owners: string, until: string, ...more: string[]) =>
+    run(LANE, ["reserve", "--fleet", caps, "--resource", resource, "--owners", owners, "--until", until, "--why", "the human: A/B window", ...more]);
+  const as = (charter: string, args: string[]) => args.map((a, i) => (args[i - 1] === "--charter" ? charter : a));
   const slots = (now?: string) => run(LANE, ["slots", "--fleet", caps], null, now);
   const add = (row: Record<string, unknown>) =>
     writeFileSync(rows, readFileSync(rows, "utf8") + JSON.stringify({ kind: "shell", status: "live", command: "claude", attention: "working", labels: null, ...row }) + "\n");
@@ -633,7 +636,9 @@ exit "$(cat "${home}/pretrust-exit-$where" 2>/dev/null || echo 0)"
   const shells = () => readFileSync(rows, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line));
   const launched = () => (existsSync(join(home, "launched")) ? readFileSync(join(home, "launched"), "utf8").split("\n").filter(Boolean) : []);
   await run(LEASE, ["take", "demo", "--reason", "the human: become the coordinator"]);
-  return { home, caps, run, start, launch, cap, slots, shells, launched, pretrusted, add, drift, typed };
+  mkdirSync(join(coordination, "boss"));
+  await run(LEASE, ["take", "boss", "--reason", "the human: become the coordinator"], TWO);
+  return { home, caps, run, start, launch, reserve, as, cap, slots, shells, launched, pretrusted, add, drift, typed };
 }
 
 describe("lane.sh", () => {
@@ -716,7 +721,7 @@ describe("lane.sh", () => {
     await f.cap("control", 1);
     expect((await f.run(LANE, f.launch("control", "glyphs"))).status).toBe(0);
     expect(f.launched()).toEqual(["new localhost --no-attach --exec -- /lanes/run.sh"]);
-    expect((await f.slots()).stdout).toMatch(/^control\t1\t1\tfull\t\d+\.\d\t\d+\n$/);
+    expect((await f.slots()).stdout).toMatch(/^control\t1\t1\tfull\t\d+\.\d\t\d+\t-\t-\n$/);
   });
 
   it("reports each host's slots, and a temporary cap lapses to its after value", async () => {
@@ -730,9 +735,9 @@ describe("lane.sh", () => {
     writeFileSync(join(f.home, "probe-ae-dev"), "32 8.0 60\n");
     writeFileSync(join(f.home, "probe-pixelproton"), "16 12.0 25\n");
     expect((await f.slots()).stdout).toBe(
-      "ae-dev\t2\t6\tfree\t0.2\t60\nonyx\t-\t2\tunknown\t-\t-\npixelproton\t0\t0\tclosed\t0.8\t25\n",
+      "ae-dev\t2\t6\tfree\t0.2\t60\t-\t-\nonyx\t-\t2\tunknown\t-\t-\t-\t-\npixelproton\t0\t0\tclosed\t0.8\t25\t-\t-\n",
     );
-    expect((await f.slots("2026-10-12T16:00:00Z")).stdout).toContain("ae-dev\t2\t1\tover\t0.2\t60\n");
+    expect((await f.slots("2026-10-12T16:00:00Z")).stdout).toContain("ae-dev\t2\t1\tover\t0.2\t60\t-\t-\n");
   });
 
   it("answers a Claude agent's startup dialogs on the lane host, from its home, before launching", async () => {
@@ -782,6 +787,137 @@ describe("lane.sh", () => {
     expect((await f.cap("onyx", 2, "--until", "tonight", "--after", "1")).status).toBe(2);
     expect((await f.cap("onyx", 2, "--until", "2026-10-12T16:00:00Z")).status).toBe(2);
     expect((await f.run(LANE, ["cap", "--fleet", f.caps, "--host", "onyx", "--cap", "2", "--why", "a\nb"])).status).toBe(2);
+    expect(existsSync(f.caps)).toBe(false);
+  });
+});
+
+describe("lane.sh reservations", () => {
+  it("refuses another charter's launch on a reserved host, naming the reservation, and admits its owner", async () => {
+    const f = await lanes();
+    await f.cap("pixelproton", 4);
+    expect((await f.reserve("pixelproton", "demo", "2026-10-12T04:00:00Z")).status).toBe(0);
+    const refused = await f.run(LANE, f.as("boss", f.launch("pixelproton", "sims")), TWO);
+    expect(refused.status).toBe(12);
+    expect(refused.stderr).toContain(
+      `lane.sh: pixelproton is reserved for demo until 2026-10-12T04:00:00Z (reservation in ${f.caps}: the human: A/B window; set 2026-10-12T02:00:00Z): queue the lane\n`,
+    );
+    expect(f.launched()).toEqual([]);
+    expect((await f.run(LANE, f.launch("pixelproton", "ab"))).status).toBe(0);
+    expect(f.launched()).toHaveLength(1);
+    // The owner still takes the cap's slots like anyone else.
+    await f.cap("pixelproton", 1);
+    expect((await f.run(LANE, f.launch("pixelproton", "ab2"))).status).toBe(7);
+  });
+
+  it("admits every named owner, and no one else", async () => {
+    const f = await lanes();
+    await f.cap("aem5", 4);
+    await f.reserve("aem5", "recall,demo", "2026-10-12T04:00:00Z");
+    expect((await f.run(LANE, f.launch("aem5", "rollout"))).status).toBe(0);
+    expect((await f.run(LANE, f.as("boss", f.launch("aem5", "sims")), TWO)).status).toBe(12);
+  });
+
+  it("holds nothing once its until passes", async () => {
+    const f = await lanes();
+    await f.cap("pixelproton", 4);
+    await f.reserve("pixelproton", "demo", "2026-10-12T04:00:00Z");
+    const after = await f.run(LANE, f.as("boss", f.launch("pixelproton", "sims")), TWO, "2026-10-12T04:00:00Z");
+    expect(after.status).toBe(0);
+    expect((await f.slots("2026-10-12T04:00:00Z")).stdout).toMatch(/^pixelproton\t1\t4\tfree\t-\t-\t-\t-\n$/);
+  });
+
+  it("launches as before from a caps file with no reservations key", async () => {
+    const f = await lanes();
+    writeFileSync(f.caps, JSON.stringify({ version: 1, hosts: { onyx: { cap: 1, why: "old file", set_at: "2026-10-01T00:00:00Z" } } }));
+    expect((await f.run(LANE, f.as("boss", f.launch("onyx", "glyphs")), TWO)).status).toBe(0);
+    expect((await f.run(LANE, ["reservations", "--fleet", f.caps], null)).stdout).toBe("");
+    expect((await f.slots()).stdout).toMatch(/^onyx\t1\t1\tfull\t-\t-\t-\t-\n$/);
+  });
+
+  it("shows holding reservations in slots and reservations, and release removes one", async () => {
+    const f = await lanes();
+    await f.cap("pixelproton", 4);
+    await f.reserve("pixelproton", "demo", "2026-10-12T04:00:00Z");
+    await f.reserve("iphone-15-a1b2", "boss", "2026-10-12T03:00:00Z");
+    expect((await f.slots()).stdout).toMatch(/^pixelproton\t0\t4\tfree\t-\t-\tdemo\t2026-10-12T04:00:00Z\n$/);
+    expect((await f.run(LANE, ["reservations", "--fleet", f.caps], null)).stdout).toBe(
+      "iphone-15-a1b2\tboss\t2026-10-12T03:00:00Z\tthe human: A/B window\t2026-10-12T02:00:00Z\n" +
+        "pixelproton\tdemo\t2026-10-12T04:00:00Z\tthe human: A/B window\t2026-10-12T02:00:00Z\n",
+    );
+    const released = await f.run(LANE, ["release", "--fleet", f.caps, "--resource", "pixelproton"], null);
+    expect(released.status).toBe(0);
+    expect(JSON.parse(released.stdout)).toEqual({
+      released: "pixelproton",
+      was: { owners: ["demo"], why: "the human: A/B window", set_at: "2026-10-12T02:00:00Z", until: "2026-10-12T04:00:00Z" },
+      pruned: [],
+    });
+    expect((await f.run(LANE, f.as("boss", f.launch("pixelproton", "sims")), TWO)).status).toBe(0);
+    // Releasing again is a no-op that says nothing was held.
+    expect(JSON.parse((await f.run(LANE, ["release", "--fleet", f.caps, "--resource", "pixelproton"], null)).stdout).was).toBeNull();
+  });
+
+  it("drops lapsed reservations on the next write", async () => {
+    const f = await lanes();
+    await f.reserve("pixelproton", "demo", "2026-10-12T03:00:00Z");
+    const next = await f.run(LANE, ["reserve", "--fleet", f.caps, "--resource", "onyx", "--owners", "demo", "--until", "2026-10-12T05:00:00Z", "--why", "w"], null, "2026-10-12T04:00:00Z");
+    expect(JSON.parse(next.stdout).pruned).toEqual(["pixelproton"]);
+    expect(Object.keys(JSON.parse(readFileSync(f.caps, "utf8")).reservations)).toEqual(["onyx"]);
+  });
+
+  it("never lets a hand-edited entry open a reserved host, and keeps it until replaced", async () => {
+    const f = await lanes();
+    const good = { owners: ["demo"], why: "w", set_at: "2026-10-12T01:00:00Z", until: "2026-10-12T04:00:00Z" };
+    writeFileSync(f.caps, JSON.stringify({
+      version: 1,
+      hosts: { onyx: { cap: 4, why: "w", set_at: "x" }, ae: { cap: 4, why: "w", set_at: "x" }, nountil: { cap: 4, why: "w", set_at: "x" } },
+      reservations: {
+        "aaa-bad": { why: "no owners", until: "2026-10-12T04:00:00Z" },
+        ae: { ...good, owners: "demo" },
+        nountil: { owners: ["demo"], why: "w", set_at: "x" },
+        onyx: good,
+      },
+    }));
+    // A malformed entry ahead of a good one does not switch the good one off.
+    expect((await f.run(LANE, f.as("boss", f.launch("onyx", "sims")), TWO)).status).toBe(12);
+    // A malformed entry for the host itself refuses every charter, owner included.
+    for (const host of ["ae", "nountil"]) {
+      const refused = await f.run(LANE, f.launch(host, "x"));
+      expect(refused.status).toBe(12);
+      expect(refused.stderr).toContain(`${host} has a malformed reservation`);
+    }
+    expect(f.launched()).toEqual([]);
+    const slots = await f.slots();
+    expect(slots.status).toBe(0);
+    expect(slots.stdout).toContain("ae\t0\t4\tfree\t-\t-\t-\tmalformed\n");
+    expect(slots.stdout).toContain("onyx\t0\t4\tfree\t-\t-\tdemo\t2026-10-12T04:00:00Z\n");
+    expect((await f.run(LANE, ["reservations", "--fleet", f.caps], null)).stdout.split("\n").filter(Boolean)).toHaveLength(4);
+    // A later write prunes none of them; replacing one makes it well formed.
+    const replaced = await f.reserve("ae", "demo", "2026-10-12T04:00:00Z");
+    expect(JSON.parse(replaced.stdout).pruned).toEqual([]);
+    expect(Object.keys(JSON.parse(readFileSync(f.caps, "utf8")).reservations).sort()).toEqual(["aaa-bad", "ae", "nountil", "onyx"]);
+    expect((await f.run(LANE, f.launch("ae", "x"))).status).toBe(0);
+  });
+
+  it("refuses every launch when the reservations section is not an object", async () => {
+    const f = await lanes();
+    writeFileSync(f.caps, JSON.stringify({ version: 1, hosts: { onyx: { cap: 4, why: "w", set_at: "x" } }, reservations: [] }));
+    const refused = await f.run(LANE, f.launch("onyx", "x"));
+    expect(refused.status).toBe(12);
+    expect(refused.stderr).toContain("unreadable reservations");
+    expect((await f.slots()).status).toBe(2);
+    expect(f.launched()).toEqual([]);
+  });
+
+  it("rejects reservations it cannot hold", async () => {
+    const f = await lanes();
+    expect((await f.reserve("pixelproton", "demo", "tonight")).status).toBe(2);
+    expect((await f.reserve("pixelproton", "demo", "2026-10-12T25:00:00Z")).status).toBe(2);
+    expect((await f.reserve("pixelproton", "demo", "2026-10-12T01:00:00Z")).status).toBe(2);
+    expect((await f.reserve("pixelproton", "demo", "2026-10-19T02:00:01Z")).status).toBe(2);
+    expect((await f.reserve("pixelproton", "demo,", "2026-10-12T04:00:00Z")).status).toBe(2);
+    expect((await f.reserve("pixelproton", "a,b,c,d,e,f,g,h,i", "2026-10-12T04:00:00Z")).status).toBe(2);
+    expect((await f.reserve("pixel proton", "demo", "2026-10-12T04:00:00Z")).status).toBe(2);
+    expect((await f.run(LANE, ["reserve", "--fleet", f.caps, "--resource", "onyx", "--owners", "demo", "--until", "2026-10-12T04:00:00Z"], null)).status).toBe(2);
     expect(existsSync(f.caps)).toBe(false);
   });
 });

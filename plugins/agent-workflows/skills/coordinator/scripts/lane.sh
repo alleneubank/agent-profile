@@ -6,15 +6,32 @@
 #   lane.sh launch --fleet PATH [--fleet-host HOST] --host H --charter C --lane L --launcher NAME
 #                  --pretrust none|CONFIG_DIR [--workdir DIR] -- ARGV...
 #   lane.sh cap    --fleet PATH [--fleet-host HOST] --host H --cap N --why TEXT [--until UTC --after N]
+#   lane.sh reserve --fleet PATH [--fleet-host HOST] --resource R --owners C[,C...] --until UTC --why TEXT
+#   lane.sh release --fleet PATH [--fleet-host HOST] --resource R
+#   lane.sh reservations --fleet PATH [--fleet-host HOST]
 #   lane.sh drift  --fleet PATH [--fleet-host HOST] [--every SECONDS --stop-at UTC]
 #
-# The caps live in one JSON file on the fleet host (--fleet, an absolute path
-# there; --fleet-host reaches it by ssh):
+# The caps and reservations live in one JSON file on the fleet host (--fleet,
+# an absolute path there; --fleet-host reaches it by ssh):
 #   {"version":1,"hosts":{"onyx":{"cap":4,"why":"...","set_at":"...",
-#     "until":"2026-10-12T16:00:00Z","after":2}}}
+#     "until":"2026-10-12T16:00:00Z","after":2}},
+#    "reservations":{"pixelproton":{"owners":["sox-lanes"],"why":"...",
+#     "set_at":"...","until":"2026-10-12T20:00:00Z"}}}
 # A host key is the name `sox new` takes; the caller's own host (hostname -s)
 # is reached as localhost. A host with no entry takes no lanes. While `until`
 # has not passed the cap is `cap`, after it `after`.
+#
+# A reservation gives a resource (a host key, a device id, an account) to its
+# owner charters until `until`, at most RESERVATION_HOURS_MAX ahead. While it
+# holds, launch refuses a lane on a reserved host to any other charter (exit
+# 12, naming the reservation); the owners' launches still take the cap's
+# slots. Lanes already running are not touched. lane.sh can only enforce a
+# host: a device or account reservation is a record every coordinator reads
+# with `reservations` before using that resource. A reservation past its
+# `until` holds nothing; reserve and release drop such entries and print
+# what they dropped (pruned), and release prints the entry it removed. An
+# entry missing a field holds its resource against every charter until
+# replaced (exit 12 names it). A file with no reservations key has none.
 #
 # A lane is a sox shell labeled lane=<name>; every such row on the host counts,
 # whatever its status, until the lane is retired. Only launch writes that
@@ -23,8 +40,11 @@
 # charter's lease first (lease.sh check).
 #
 # slots prints one tab-separated line per host: host, lanes, cap, state, load
-# per core, and free memory percent. State is free, full, over, closed (cap 0),
-# or unknown (sox could not count); load and memory are - when the probe fails.
+# per core, free memory percent, the reservation's owners (comma-separated)
+# and its until. State is free, full, over, closed (cap 0), or unknown (sox
+# could not count); load and memory are - when the probe fails, and the last
+# two are - when no reservation holds the host. reservations prints one line
+# per holding reservation: resource, owners, until, why, set_at.
 # launch prints host, backing id, lanes after the launch, and cap.
 #
 # Before it takes a slot, launch answers a Claude Code agent's startup dialogs
@@ -57,7 +77,8 @@
 # lock busy, 6 host has no cap or could not be counted, 7 host at cap,
 # 8 the lane already has a shell, 9 sox failed to launch or label,
 # 10 claude-pretrust refused the directory (the human answers its dialogs),
-# 11 claude-pretrust failed or could not run.
+# 11 claude-pretrust failed or could not run, 12 the host is reserved for
+# another charter.
 # Tests override COORDINATION_HOME, SOX_BIN, LANE_NOW, LANE_HOSTNAME and
 # LANE_LOCK_WAIT_SECONDS, and LANE_SSH for the probe and pretrust.
 set -eu
@@ -69,9 +90,26 @@ LOAD_PER_CORE_MAX=4
 FREE_PERCENT_MIN=5
 EVERY_SECONDS_MIN=60
 EVERY_SECONDS_MAX=3600
+RESERVATION_HOURS_MAX=168
+OWNERS_MAX=8
+# The one definition of a reservation entry, shared by every reader and
+# writer. An entry that does not fit it is malformed: it holds its resource
+# against every charter until reserve or release replaces it, so a hand edit
+# can never open a reserved host, and no write prunes it.
+# shellcheck disable=SC2016
+RESERVATION_JQ='
+def well_formed: type == "object"
+  and (.owners | type) == "array" and (.owners | length) > 0 and all(.owners[]; type == "string")
+  and (.until | type) == "string" and (.until | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"))
+  and (.why | type) == "string" and (.set_at | type) == "string";
+def entries: (.reservations // {})
+  | if type == "object" then to_entries | sort_by(.key) else error("reservations is not an object") end;
+def lapsed($now): (.value | well_formed) and $now >= .value.until;
+def pruned: ((.[0].reservations // {}) | keys) - ((.[1].reservations // {}) | keys) - [$resource];
+'
 
 usage() {
-  sed -n '5,9p' "$0" | sed 's/^# \{0,1\}//' >&2
+  sed -n '5,12p' "$0" | sed 's/^# \{0,1\}//' >&2
   exit 2
 }
 
@@ -104,7 +142,8 @@ on_fleet_host() {
   { printf 'set -eu\n'
     printf 'fleet=%q\nhost=%q\ncap=%q\nwhy=%q\nuntil=%q\nafter=%q\nset_at=%q\nholder=%q\nLOCK_WAIT_SECONDS=%q\n' \
       "$fleet" "$host" "$cap" "$why" "$until" "$after" "$set_at" "$holder" "$LOCK_WAIT_SECONDS"
-    declare -f fail fleet_read fleet_lock fleet_unlock fleet_write_cap
+    printf 'resource=%q\nowners=%q\nedit=%q\nreport=%q\n' "$resource" "$owners" "$edit" "$report"
+    declare -f fail fleet_read fleet_lock fleet_unlock fleet_update
     printf '%s\n' "$1"
   } | ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 "$fleet_host" 'bash -s'
 }
@@ -133,18 +172,18 @@ fleet_unlock() {
   rmdir "$fleet.lock"
 }
 
-fleet_write_cap() {
+# fleet_update: apply the jq program $edit to the fleet file under the lock,
+# then print $report evaluated on [before, after].
+fleet_update() {
   fleet_lock
   tmp="$fleet.tmp.$$"
   trap 'rm -f "$tmp"; fleet_unlock' EXIT
   if [ -f "$fleet" ]; then current=$(cat "$fleet"); else current='{"version":1,"hosts":{}}'; fi
-  printf '%s\n' "$current" | jq --arg host "$host" --argjson cap "$cap" --arg why "$why" --arg set_at "$set_at" \
-    --arg until "$until" --arg after "$after" '
-      .hosts[$host] = ({cap: $cap, why: $why, set_at: $set_at}
-        + (if $until == "" then {} else {until: $until, after: ($after | tonumber)} end))
-    ' > "$tmp" || fail "$fleet is not a caps file" 2
+  printf '%s\n' "$current" | jq --arg host "$host" --arg cap "$cap" --arg why "$why" --arg set_at "$set_at" \
+    --arg until "$until" --arg after "$after" --arg resource "$resource" --arg owners "$owners" \
+    "$edit" > "$tmp" || fail "$fleet is not a caps file" 2
   mv -f "$tmp" "$fleet"
-  jq -c --arg host "$host" '.hosts[$host]' "$fleet"
+  printf '%s\n' "$current" | jq -c -s --arg host "$host" --arg resource "$resource" "$report" - "$fleet"
 }
 
 # cap_now <caps json> <host>: the host's cap at this time, empty when none.
@@ -152,6 +191,17 @@ cap_now() {
   printf '%s\n' "$1" | jq -r --arg host "$2" --arg now "$(now)" '
     .hosts[$host] // empty
     | if (.until // "") != "" and $now >= .until then .after else .cap end'
+}
+
+# holding <fleet json>: the reservations that hold now, as resource<TAB>
+# owners<TAB>until<TAB>why<TAB>set_at lines. A malformed entry holds with
+# owners -, which no charter name can be, and until "malformed".
+holding() {
+  printf '%s\n' "$1" | jq -r --arg now "$(now)" "$RESERVATION_JQ"'
+    entries[] | select(lapsed($now) | not)
+    | if .value | well_formed then [.key, (.value.owners | join(",")), .value.until, .value.why, .value.set_at]
+      else [.key, "-", "malformed", "not {owners, why, set_at, until}; replace it with lane.sh reserve or release", "-"] end
+    | @tsv'
 }
 
 # host_rows <host>: the host's sox shell rows, one per line, or exit 6 when
@@ -296,6 +346,13 @@ drift_check() {
   rm -f "$file.found.$$"
 }
 
+# check_why: --why is the human's word, one line and bounded.
+check_why() {
+  case "$why" in *"
+"*) fail "--why must be one line" 2 ;; esac
+  [ "$(printf '%s' "$why" | wc -c)" -le "$WHY_BYTES_MAX" ] || fail "--why exceeds $WHY_BYTES_MAX bytes" 2
+}
+
 # state <lanes> <cap>
 state() {
   if [ "$2" -eq 0 ]; then echo closed
@@ -310,7 +367,7 @@ command -v jq >/dev/null || fail "jq is required" 2
 command=$1
 shift
 here=$(cd "$(dirname "$0")" && pwd)
-fleet="" fleet_host="" host="" charter="" lane="" launcher="" workdir="" pretrust="" cap="" why="" until="" after="" every="" stop_at=""
+fleet="" fleet_host="" host="" charter="" lane="" launcher="" workdir="" pretrust="" cap="" why="" resource="" owners="" edit="" report="" until="" after="" every="" stop_at=""
 while [ $# -gt 0 ]; do
   [ "$1" = -- ] && { shift; break; }
   [ $# -ge 2 ] || usage
@@ -329,6 +386,8 @@ while [ $# -gt 0 ]; do
     --after) after=$2 ;;
     --every) every=$2 ;;
     --stop-at) stop_at=$2 ;;
+    --resource) resource=$2 ;;
+    --owners) owners=$2 ;;
     *) usage ;;
   esac
   shift 2
@@ -338,18 +397,25 @@ case "$fleet_host" in *[!A-Za-z0-9._-]*|-*) fail "--fleet-host must be an ssh ho
 for name in "$host" "$charter" "$lane" "$launcher"; do
   case "$name" in *[!A-Za-z0-9._-]*|-*) fail "host, charter, lane and launcher must be plain names like onyx" 2 ;; esac
 done
+case "$resource" in *[!A-Za-z0-9._@-]*|-*) fail "--resource must be a plain name like pixelproton" 2 ;; esac
+case "$owners" in *[!A-Za-z0-9._,-]*|-*|,*|*,|*,,*) fail "--owners must be charter names separated by commas" 2 ;; esac
 for path in "$workdir" "$pretrust"; do
   case "$path" in *[!A-Za-z0-9._/-]*|-*) fail "--workdir and --pretrust must be plain paths like Work/repo.worktrees/lane" 2 ;; esac
 done
 set_at=$(now)
 holder="$(hostname -s) pid $$ $set_at"
 
+# The jq programs in $edit and $report bind their $names as jq arguments.
+# shellcheck disable=SC2016
 case "$command" in
   slots)
     [ $# -eq 0 ] || usage
     caps=$(on_fleet_host fleet_read)
+    held=$(holding "$caps") || fail "$fleet has unreadable reservations" 2
     for each in $(printf '%s\n' "$caps" | jq -r '.hosts | keys[]'); do
       limit=$(cap_now "$caps" "$each")
+      reserved=$(printf '%s\n' "$held" | awk -F '\t' -v host="$each" '$1 == host { print $2 "\t" $3 }')
+      [ -n "$reserved" ] || reserved="-\t-"
       if rows=$(lane_rows "$each" 2>/dev/null); then
         lanes=$(printf '%s' "$rows" | grep -c . || true)
         counted="$lanes\t$limit\t$(state "$lanes" "$limit")"
@@ -361,7 +427,7 @@ case "$command" in
       else
         headroom="-\t-"
       fi
-      printf '%s\t%b\t%b\n' "$each" "$counted" "$headroom"
+      printf '%s\t%b\t%b\t%b\n' "$each" "$counted" "$headroom" "$reserved"
     done
     ;;
 
@@ -375,7 +441,20 @@ case "$command" in
     answer_dialogs "$host"
     on_fleet_host fleet_lock
     trap 'on_fleet_host fleet_unlock' EXIT
-    limit=$(cap_now "$(on_fleet_host fleet_read)" "$host")
+    # A caps file that cannot be read (its error already printed) grants no
+    # cap, so the launch is refused below as a host with no cap.
+    caps=$(on_fleet_host fleet_read) || caps=""
+    # Unreadable reservations refuse every launch: the guard never fails open.
+    held=$(holding "$caps") || fail "$fleet has unreadable reservations, so no launch passes them: fix the file" 12
+    refusal=$(printf '%s\n' "$held" | awk -F '\t' -v host="$host" -v charter="$charter" -v fleet="$fleet" '
+      $1 == host && $3 == "malformed" {
+        printf "%s has a malformed reservation in %s (%s): queue the lane", host, fleet, $4
+      }
+      $1 == host && $3 != "malformed" && index("," $2 ",", "," charter ",") == 0 {
+        printf "%s is reserved for %s until %s (reservation in %s: %s; set %s): queue the lane", host, $2, $3, fleet, $4, $5
+      }')
+    [ -z "$refusal" ] || fail "$refusal" 12
+    limit=$(cap_now "$caps" "$host")
     [ -n "$limit" ] || fail "$host has no cap in $fleet: it takes no lanes until lane.sh cap sets one" 6
     rows=$(lane_rows "$host")
     lanes=$(printf '%s' "$rows" | grep -c . || true)
@@ -396,16 +475,48 @@ case "$command" in
     [ $# -eq 0 ] && [ -n "$host" ] && [ -n "$cap" ] && [ -n "$why" ] || usage
     case "$cap" in ''|*[!0-9]*) fail "--cap must be a whole number" 2 ;; esac
     [ "$cap" -le "$CAP_MAX" ] || fail "--cap exceeds $CAP_MAX" 2
-    case "$why" in *"
-"*) fail "--why must be one line" 2 ;; esac
-    [ "$(printf '%s' "$why" | wc -c)" -le "$WHY_BYTES_MAX" ] || fail "--why exceeds $WHY_BYTES_MAX bytes" 2
+    check_why
     if [ -n "$until$after" ]; then
       printf '%s\n' "$until" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$' ||
         fail "--until must be UTC like 2026-10-12T16:00:00Z" 2
       case "$after" in ''|*[!0-9]*) fail "--until needs --after, the cap once it passes" 2 ;; esac
       [ "$after" -le "$CAP_MAX" ] || fail "--after exceeds $CAP_MAX" 2
     fi
-    on_fleet_host fleet_write_cap
+    edit='.hosts[$host] = ({cap: ($cap | tonumber), why: $why, set_at: $set_at}
+      + (if $until == "" then {} else {until: $until, after: ($after | tonumber)} end))'
+    report='.[1].hosts[$host]'
+    on_fleet_host fleet_update
+    ;;
+
+  reserve)
+    [ $# -eq 0 ] && [ -n "$resource" ] && [ -n "$owners" ] && [ -n "$until" ] && [ -n "$why" ] || usage
+    check_why
+    printf '%s\n' "$until" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$' ||
+      fail "--until must be UTC like 2026-10-12T16:00:00Z" 2
+    ahead=$(jq -n --arg until "$until" --arg now "$set_at" '($until | fromdateiso8601) - ($now | fromdateiso8601)' 2>/dev/null) ||
+      fail "--until must be a real UTC time like 2026-10-12T16:00:00Z" 2
+    [ "$ahead" -gt 0 ] && [ "$ahead" -le $((RESERVATION_HOURS_MAX * 3600)) ] ||
+      fail "--until must be after now and at most ${RESERVATION_HOURS_MAX}h ahead" 2
+    count=$(printf '%s\n' "$owners" | tr ',' '\n' | grep -c .)
+    [ "$count" -ge 1 ] && [ "$count" -le "$OWNERS_MAX" ] || fail "--owners names 1 to $OWNERS_MAX charters" 2
+    edit="$RESERVATION_JQ"'.reservations = (entries | map(select(lapsed($set_at) | not)) | from_entries
+      | .[$resource] = {owners: ($owners | split(",")), why: $why, set_at: $set_at, until: $until})'
+    report="$RESERVATION_JQ"'{reserved: $resource, entry: .[1].reservations[$resource], pruned: pruned}'
+    on_fleet_host fleet_update
+    ;;
+
+  release)
+    [ $# -eq 0 ] && [ -n "$resource" ] || usage
+    edit="$RESERVATION_JQ"'if has("reservations")
+      then .reservations = (entries | map(select(.key != $resource and (lapsed($set_at) | not))) | from_entries)
+      else . end'
+    report="$RESERVATION_JQ"'{released: $resource, was: .[0].reservations[$resource], pruned: pruned}'
+    on_fleet_host fleet_update
+    ;;
+
+  reservations)
+    [ $# -eq 0 ] || usage
+    holding "$(on_fleet_host fleet_read)" || fail "$fleet has unreadable reservations" 2
     ;;
 
   drift)
