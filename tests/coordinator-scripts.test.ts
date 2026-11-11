@@ -505,7 +505,7 @@ const LANE = join(SCRIPTS, "lane.sh");
 const JQ_DIR = spawnSync("sh", ["-c", "which -a jq | grep -v /shims/ | head -n 1"], { encoding: "utf8" }).stdout.trim().replace(/\/jq$/, "");
 
 // A stub sox that keeps its shells in rows.jsonl: `new` adds an unlabeled row,
-// `label` sets its labels, `kill` removes it, and `ls` answers for one host
+// `label` prints a row's labels or sets them as sox does (one value per key), `kill` removes it, and `ls` answers for one host
 // with a summary row, incomplete for a host listed in unreachable.
 async function lanes() {
   const home = mkdtempSync(join(tmpdir(), "coordinator-lanes-"));
@@ -535,8 +535,12 @@ case "$1" in
   label)
     [ -f "${home}/label-fails" ] && exit 1
     id=\${2#*/}; shift 2
+    if [ $# -eq 0 ]; then
+      jq -r --arg id "$id" 'select(.backing_id == $id) | .labels // {} | to_entries[] | "\\(.key)=\\(.value)"' "$rows"
+      exit 0
+    fi
     labels=$(for kv in "$@"; do jq -cn --arg k "\${kv%%=*}" --arg v "\${kv#*=}" '{($k):$v}'; done | jq -cs add)
-    jq -c --arg id "$id" --argjson labels "$labels" 'if .backing_id == $id then .labels = $labels else . end' "$rows" > "$rows.tmp"
+    jq -c --arg id "$id" --argjson labels "$labels" 'if .backing_id == $id then .labels = (.labels // {}) + $labels else . end' "$rows" > "$rows.tmp"
     mv "$rows.tmp" "$rows" ;;
   send) printf '%s\\n' "$*" >> "${home}/argv"; cat >> "${home}/typed"; echo >> "${home}/typed" ;;
   kill)
@@ -923,31 +927,39 @@ describe("lane.sh reservations", () => {
 });
 
 describe("lane.sh drift", () => {
-  const coordinator = { host: "localhost", backing_id: "s9.g1", attention: "done", labels: { role: "coordinator", charter: "demo", state: "live" } };
+  // lanes() took demo's lease in s1.g1 and boss's in s2.g1; a coordinator's
+  // shell carries only its role and charter, and its state is in the lease.
+  const coordinator = { host: "localhost", backing_id: "s1.g1", attention: "done", labels: { role: "coordinator", charter: "demo" } };
+  const boss = { ...coordinator, backing_id: "s2.g1", labels: { role: "coordinator", charter: "boss" } };
   const lane = (backing: string, charter = "demo") => ({ host: "onyx", backing_id: backing, labels: { lane: backing, charter } });
 
-  it("reports an over-cap host once, as evidence to each live coordinator with a lane there, and its clearing", async () => {
+  it("reports an over-cap host once, as evidence to each coordinator with a lane there that is not stood down, and its clearing", async () => {
     const f = await lanes();
     await f.cap("onyx", 1);
     writeFileSync(join(f.home, "probe-onyx"), "16 3.0 40\n");
     f.add(coordinator);
-    f.add({ ...coordinator, backing_id: "s8.g1", labels: { role: "coordinator", charter: "other", state: "live" } });
-    f.add({ ...coordinator, backing_id: "s7.g1", labels: { role: "coordinator", charter: "third", state: "live" } });
+    f.add({ ...coordinator, backing_id: "s8.g1", labels: { role: "coordinator", charter: "other" } });
+    f.add({ ...coordinator, backing_id: "s7.g1", labels: { role: "coordinator", charter: "third" } });
+    f.add(boss);
+    writeFileSync(join(f.home, "handoffs", "boss", "queue"), "gated\tforum\t#208\tplan approval\n");
+    expect((await f.run(LEASE, ["state", "boss", "--state", "blocked-on-human"], TWO)).status).toBe(0);
     f.add(lane("a"));
     f.add(lane("b", "other"));
+    f.add(lane("c", "boss"));
 
     const first = await f.drift();
     expect(first.status).toBe(0);
-    expect(first.stdout).toBe("new\tover\tonyx\t2/1 lanes\n");
+    expect(first.stdout).toBe("new\tblocked\tboss\tcontrol/s2.g1\nnew\tover\tonyx\t3/1 lanes\n");
+    expect(first.stderr).toBe("");
     expect(f.typed().sort()).toEqual([
-      "[demo fleet-check → s9.g1; evidence] Fleet drift: over onyx, 2/1 lanes. lane.sh slots shows every host.",
-      "[other fleet-check → s8.g1; evidence] Fleet drift: over onyx, 2/1 lanes. lane.sh slots shows every host.",
+      "[demo fleet-check → s1.g1; evidence] Fleet drift: over onyx, 3/1 lanes. lane.sh slots shows every host.",
+      "[other fleet-check → s8.g1; evidence] Fleet drift: over onyx, 3/1 lanes. lane.sh slots shows every host.",
     ]);
 
     expect((await f.drift()).stdout).toBe("");
     expect(f.typed()).toHaveLength(2);
 
-    await f.cap("onyx", 2);
+    await f.cap("onyx", 3);
     expect((await f.drift()).stdout).toBe("cleared\tover\tonyx\n");
   });
 
@@ -967,16 +979,18 @@ describe("lane.sh drift", () => {
     await f.cap("ae-dev", 4);
     writeFileSync(join(f.home, "probe-onyx"), "16 3.0 40\n");
     writeFileSync(join(f.home, "unreachable"), "ae-dev\n");
-    f.add({ ...coordinator, labels: { role: "coordinator", charter: "demo", state: "blocked-on-human" } });
-    f.add({ ...coordinator, backing_id: "s8.g1", labels: { role: "coordinator", charter: "other", state: "live" } });
-    f.add(lane("a", "other"));
+    f.add(coordinator);
+    writeFileSync(join(f.home, "handoffs", "demo", "queue"), "gated\tforum\t#208\tplan approval\n");
+    expect((await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human"])).status).toBe(0);
+    f.add(boss);
+    f.add(lane("a", "boss"));
     f.add({ host: "onyx", backing_id: "s5.g1", cwd: "/home/ae/Work/alleneubank/x" });
     f.add({ host: "onyx", backing_id: "s6.g1", cwd: "/home/ae/alleneubank/x" });
     f.add({ host: "onyx", backing_id: "s4.g1", cwd: "/home/ae/Work/y", attention: null });
 
     const lines = (await f.drift()).stdout.split("\n").filter(Boolean).sort();
     expect(lines).toEqual([
-      "new\tblocked\tdemo\tcontrol/s9.g1",
+      "new\tblocked\tdemo\tcontrol/s1.g1",
       "new\tbypass\tonyx\ts5.g1 /home/ae/Work/alleneubank/x",
       "new\tunknown\tae-dev\tprobe failed",
       "new\tunknown\tae-dev\tsox could not count its shells",

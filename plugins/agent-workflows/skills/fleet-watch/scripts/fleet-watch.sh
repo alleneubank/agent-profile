@@ -19,7 +19,9 @@
 #              QUOTA     an account's weekly window at >= 90% or >= 97%;
 #              DISK      a caps-file host's home volume at >= 85% used, cleared
 #                only at <= 82% so a host hovering at the line reports once;
-#              HOST UNREACHABLE  a caps-file host failing plain ssh for 15+ min.
+#              HOST UNREACHABLE  a caps-file host failing plain ssh for 15+ min;
+#              SOURCE FAILED  lease.sh list, sox ls or agent-quota could not be
+#                read, so COORDINATOR or QUOTA exceptions are not being checked.
 #            It exits 0 after a pass that printed. DIR keeps what was reported,
 #            so a restart with the same DIR stays quiet until something changes.
 # pass       prints one snapshot: the lease check, lane slots per host, each
@@ -258,14 +260,29 @@ coordination_homes() {
     done
 }
 
+# source_failed <source> <class>: an exception of its own while a check's
+# source cannot be read, so a class that has stopped being checked says so.
+# What that class had reported stands until the source answers again.
+source_failed() {
+  report "source-$1" "SOURCE FAILED $1: $2 exceptions are not being checked"
+}
+
 coordinator_exceptions() { # <registry>
   local homes home leases shells charter held lease_state status shell key file seen=" "
   homes=$(coordination_homes "$1" | sort -u)
   leases=""
   while read -r home; do
-    leases=$leases$(COORDINATION_HOME=$home "$COORDINATOR_SCRIPTS/lease.sh" list)$'\n' || return 0
+    if ! leases=$leases$(COORDINATION_HOME=$home "$COORDINATOR_SCRIPTS/lease.sh" list)$'\n'; then
+      source_failed lease-list COORDINATOR
+      return 0
+    fi
   done <<< "$homes"
-  shells=$(sox_cmd ls localhost --json 2>/dev/null) || return 0
+  resolve source-lease-list
+  if ! shells=$(sox_cmd ls localhost --json 2>/dev/null); then
+    source_failed sox-ls COORDINATOR
+    return 0
+  fi
+  resolve source-sox-ls
   while IFS=$'\t' read -r charter _ held lease_state status _ shell _; do
     [ -n "$charter" ] && [ "$charter" != "$CHARTER" ] && [ "$held" = held ] && [ "$lease_state" = live ] || continue
     key=coordinator-$charter
@@ -292,7 +309,13 @@ quota_exceptions() {
   local quotas account percent resets threshold
   quotas=$(timeout 90 agent-quota --json 2>/dev/null | jq -rR 'fromjson? | .account as $account
       | (.windows // [])[] | select(.name == "weekly" and .used_percent != null)
-      | [$account, (.used_percent | floor), (.resets_at // "-")] | @tsv') || return 0
+      | [$account, (.used_percent | floor), (.resets_at // "-")] | @tsv') || quotas=""
+  # No weekly reading from any account is a failed source too.
+  if [ -z "$quotas" ]; then
+    source_failed agent-quota QUOTA
+    return 0
+  fi
+  resolve source-agent-quota
   while IFS=$'\t' read -r account percent resets; do
     [ -n "$account" ] || continue
     for threshold in $QUOTA_THRESHOLDS; do
