@@ -65,10 +65,11 @@
 #   bypass <host>    an agent shell under ~/Work with no lane, role or attended label
 #   load <host>      load per core above LOAD_PER_CORE_MAX, two checks running
 #   memory <host>    free memory below FREE_PERCENT_MIN, two checks running
-#   blocked <charter> a coordinator labeled state=blocked-on-human
+#   blocked <charter> a coordinator on this host whose lease says blocked-on-human
 #   unknown <host>   sox or the probe could not reach it (unknown, not dead)
 # A newly reported over, load or memory finding goes as evidence (send.sh,
-# role fleet-check) to each live coordinator with a lane on that host. A
+# role fleet-check) to each coordinator with a lane on that host; send.sh
+# leaves a stood-down one alone. A
 # bypass has no known owner and a blocked coordinator already shows in sox
 # attention, so those are only recorded.
 # With --every, drift repeats until --stop-at.
@@ -259,6 +260,29 @@ answer_dialogs() {
   esac
 }
 
+# blocked_coordinators <host> <rows>: a blocked finding for each coordinator
+# shell on this host whose held lease says blocked-on-human. The lease is the
+# only record of a charter's state; lease.sh labels the shell it names with
+# lease.<charter>=<lease path>. Leases are files on this host, so a
+# coordinator on another host is not read.
+blocked_coordinators() {
+  printf '%s\n' "$2" | jq -r 'select(.labels.role == "coordinator") | .backing_id' |
+  while read -r backing; do
+    if ! labels=$(sox_pinned label "$backing" 2>/dev/null); then
+      printf 'unknown\t%s/%s\tsox could not read its labels\n' "$1" "$backing"
+      continue
+    fi
+    # sox label values hold no whitespace, so each line is one whole path.
+    printf '%s\n' "$labels" | awk 'index($0, "lease.") == 1 { sub(/^[^=]*=/, ""); print }' |
+    while read -r lease; do
+      [ -f "$lease" ] && grep -qxF "shell=$backing" "$lease" || continue
+      [ -z "$(sed -n 's/^released_at=//p' "$lease" | head -n 1)" ] || continue
+      [ "$(sed -n 's/^state=//p' "$lease" | head -n 1)" = blocked-on-human ] || continue
+      printf 'blocked\t%s\t%s/%s\n' "$(sed -n 's/^charter=//p' "$lease" | head -n 1)" "$1" "$backing"
+    done
+  done
+}
+
 # findings: this check's raw findings, kind<TAB>subject<TAB>detail, and the
 # rows they came from in $rows_all (each tagged with its fleet host).
 findings() {
@@ -279,9 +303,7 @@ findings() {
         select(.attention != null and (.cwd // "" | contains("/Work/"))
           and (.labels.lane // .labels.role // .labels.attended // "") == "")
         | "bypass\t\(.fleet_host)\t\(.backing_id) \(.cwd)"'
-      printf '%s\n' "$rows" | jq -r '
-        select(.labels.role == "coordinator" and .labels.state == "blocked-on-human")
-        | "blocked\t\(.labels.charter // "?")\t\(.fleet_host)/\(.backing_id)"'
+      [ "$(sox_name "$each")" != localhost ] || blocked_coordinators "$each" "$rows"
     else
       printf 'unknown\t%s\tsox could not count its shells\n' "$each"
     fi
@@ -296,19 +318,28 @@ findings() {
   done
 }
 
-# notify <host> <finding>: evidence to each live coordinator with a lane there.
+# notify <host> <finding>: evidence to each coordinator with a lane there. A
+# session that coordinates several charters carries one charter label and a
+# lease label for each.
+# send.sh refuses a stood-down coordinator from its lease (exit 5), which is
+# the intended outcome and is not reported.
 notify() {
   charters=$(printf '%s' "$rows_all" | jq -r --arg host "$1" '
     select(.fleet_host == $host and (.labels.lane // "") != "") | .labels.charter // .labels.owner // empty' | sort -u)
   for charter in $charters; do
     printf '%s' "$rows_all" | jq -r --arg charter "$charter" '
-      select(.labels.role == "coordinator" and .labels.state == "live" and .labels.charter == $charter)
+      select(.labels.role == "coordinator"
+        and (.labels.charter == $charter or .labels["lease." + $charter] != null))
       | "\(.fleet_host) \(.backing_id)"' |
     while read -r where backing; do
       if [ "$(sox_name "$where")" = localhost ]; then to=$backing; else to="$where/$backing"; fi
-      printf 'Fleet drift: %s. lane.sh slots shows every host.' "$2" |
-        "$here/send.sh" --charter "$charter" --role fleet-check --to "$to" --kind evidence ||
-        echo "lane.sh: evidence to $charter at $to failed" >&2
+      sent=0
+      refusal=$(printf 'Fleet drift: %s. lane.sh slots shows every host.' "$2" |
+        "$here/send.sh" --charter "$charter" --role fleet-check --to "$to" --kind evidence 2>&1 >/dev/null) || sent=$?
+      case "$sent" in
+        0|5) ;;
+        *) echo "lane.sh: evidence to $charter at $to failed (send.sh exit $sent): $refusal" >&2 ;;
+      esac
     done
   done
 }

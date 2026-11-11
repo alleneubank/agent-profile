@@ -93,8 +93,8 @@ describe("fleet-watch.sh", () => {
       writeFileSync(join(bin, name), `#!/bin/bash\n${body}\n`);
       chmodSync(join(bin, name), 0o755);
     };
-    stub("sox", `[ "$1" = ls ] && cat "${home}/shells.jsonl"`);
-    stub("agent-quota", `cat "${home}/quota.jsonl"`);
+    stub("sox", `[ ! -e "${home}/sox-down" ] || exit 1\n[ "$1" = ls ] && cat "${home}/shells.jsonl"`);
+    stub("agent-quota", `[ ! -e "${home}/quota-down" ] || exit 1\ncat "${home}/quota.jsonl"`);
     stub(
       "ssh",
       `cat > /dev/null
@@ -189,6 +189,20 @@ cat "${home}/ssh/$host"`,
     expect(run()).toEqual([
       "CLEARED QUOTA acct-a weekly 98% (>= 97%), resets 2026-11-08T08:00:00Z",
       "CLEARED QUOTA acct-a weekly 95% (>= 90%), resets 2026-11-08T08:00:00Z",
+    ]);
+
+    // A source that cannot be read is its own exception, and what its class
+    // had reported stands until it answers again.
+    writeFileSync(join(home, "sox-down"), "");
+    writeFileSync(join(home, "quota-down"), "");
+    expect(run()).toEqual([
+      "SOURCE FAILED sox-ls: COORDINATOR exceptions are not being checked",
+      "SOURCE FAILED agent-quota: QUOTA exceptions are not being checked",
+    ]);
+    spawnSync("rm", [join(home, "sox-down"), join(home, "quota-down")]);
+    expect(run()).toEqual([
+      "CLEARED SOURCE FAILED sox-ls: COORDINATOR exceptions are not being checked",
+      "CLEARED SOURCE FAILED agent-quota: QUOTA exceptions are not being checked",
     ]);
   });
 });
