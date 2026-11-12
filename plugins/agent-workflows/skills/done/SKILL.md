@@ -10,7 +10,8 @@ the code as things a user or calling agent does and sees, set how much
 verification is enough: drive them, plus a high-risk change's own risk
 scenarios, and nothing beyond them. The human approves scenarios for features;
 the author writes them for fixes. Copy-only changes, and logic whose tests show
-what its callers get, need no scenarios beyond those tests. Work verified but
+what its callers get, need no scenarios beyond those tests; a copy-only
+change's record carries `content`'s check. Work verified but
 not yet landed (local-only, or awaiting a grant) is reported as verified, not
 done.
 

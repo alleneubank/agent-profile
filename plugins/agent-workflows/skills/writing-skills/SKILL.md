@@ -84,6 +84,7 @@ Description rules:
 - When several rules share a shape, mint the concept once and state one weak
   rule over it, instead of enumerating strong variants.
 - Cut repeated explanations aggressively.
+- Wording for the reader follows `content`'s agent branch.
 - Include red flags when the failure mode is predictable.
 
 ## Testing the Skill

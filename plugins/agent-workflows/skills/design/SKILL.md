@@ -24,7 +24,7 @@ surface already solves is answered with that surface.
 
 | Change | Steps |
 | --- | --- |
-| Copy only | None; `done` covers it |
+| Copy only | `content`'s check on each changed state; `done` covers the rest |
 | Existing surface changed | Before and after captures of each changed state, then design QA |
 | New screen, flow, command, or tool | Flow and state inventory, low fidelity, crit, owner approval, annotated spec, build, design QA, guest usability tasks |
 | Redesign or new product | The row above, plus a `BRIEF.md`, tiered tokens, and two or more directions the owner picks from before high fidelity |
@@ -61,7 +61,7 @@ and a builder who must depart from the spec raises it there first.
 5. **Owner approval.** The owner picks a direction or sends it back. Run the
    reaction through the taste loop.
 6. **Annotated spec.** Tokens, layout, components, every state, interactions,
-   accessible labels, and final copy: what design QA checks the build against.
+   accessible labels, and final copy per `content`: what design QA checks the build against.
 7. **Design QA and usability.** `done`'s design reviewer judges the build
    against the spec and the taste rules. Guests get tasks, not instructions;
    their results are agent evidence, not user research, and the record says
