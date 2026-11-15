@@ -136,12 +136,15 @@ without attributing its writer.
 
 ## Log: `~/.handoffs/<charter>/log.md`
 
+One "Waiting on the human" heading, rewritten in place and followed by
+`## Log`, so it reads on its own; detail lives behind each item's link.
+
 ```markdown
 # <charter> log
 
 ## Waiting on the human (as of <UTC time>)
 ### <theme> (<minutes this batch needs>)
-1. <decision or hands-on step, with link or place> - <recommendation>
+1. <decision or hands-on step, two lines at most, with link or place> - <the gap it fills, or the recommendation>
 
 ## Log
 - <UTC time> <state change, with evidence: landed <ref> at <sha>; launched

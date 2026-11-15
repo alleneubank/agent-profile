@@ -92,6 +92,25 @@ guidance is not counted as universally loaded context.
 
 ### Decisions
 
+- 2026-11-15 — A repository's `VISION.md` carries the owner's intent (reason,
+  end goal, taste, what the product must never become) in their own words,
+  and the coordinator reads it and names it in every lane brief. A question
+  reaches the human only when it names what the vision, an approved design,
+  and this profile leave open or in conflict; otherwise the coordinator
+  decides, cites the line, and logs how to undo it. This replaces "an
+  identified design is the recommended option". An answer that settles
+  intent or a design is written back in their words. A new feature, tool, or
+  design fork that nothing covers is gated on intent before launch, and a
+  question that needs discussion goes to a design session, not the
+  coordinator's own. The waiting list is one heading with two-line items.
+  Basis: 67 of 73 answers on 2026-11-09 took the recommended option; four
+  costly builds started on a brief or premise that dropped the human's
+  intent; the vision file was named in no coordinating skill and present in
+  two of the fleet's main repositories (ai-wiki EXP-050, 2026-11-15
+  reassessment). Guardrail: one own call on product behavior that the human
+  reverses stops the rule. The human: "This is the right choice and
+  philosophically makes sense to me. Simple and effective." (2026-11-15,
+  typed). **direction ratified (human); wording pending their merge**
 - 2026-11-07 — The fleet watch works by exception. It arms no event watcher
   and runs no timed pass; it wakes on a message from the human or a
   coordinator, or on a line from `fleet-watch.sh exceptions`: a live

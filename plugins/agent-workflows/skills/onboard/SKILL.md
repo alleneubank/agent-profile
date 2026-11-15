@@ -60,9 +60,13 @@ maintainer approves.
    a support path and contact; a status or incident page; how errors, empty
    states and outages are worded to customers; store listings, metadata and
    share previews; and supported platforms, browsers and locales.
+8. **Why it exists.** `VISION.md` at the root: the reason, the end goal, the
+   owner's taste, and what the product must never become, in the owner's own
+   words with their date, short enough to load with every brief. It heads the
+   brief and does not replace it.
 
 Record a missing item as missing, with who owns it. Never invent a brand,
-policy, or legal text to fill a gap.
+policy, legal text, or vision to fill a gap.
 
 ## Finish
 
