@@ -117,7 +117,8 @@ read. Anything you cannot attribute to the charter belongs to another owner
 1. Only on the human's own turn ("become the coordinator") or a rotate
    request they made (End of shift).
 2. Read the fleet file, the workspace layer, the charter, the themes file,
-   the log head, and any handoff. An agreement the human hands you (a
+   the log head, any handoff, and each charter repository's `VISION.md`
+   (`onboard`). An agreement the human hands you (a
    `tee-up` result, a draft, a folded design session) sets scope and grants:
    write them into the charter first. Out of scope is only what the human
    excluded. Work that needs them at some step is in scope: add it to the
@@ -201,13 +202,16 @@ restart the heartbeat.
    `gated` queue line whose gate is the human's answer.
 2. Answer what is yours (`AGENTS.md`, reversible interior calls). Decide
    without asking: order and timing inside the human's themes, budgets, and
-   reservations, and which free host a lane takes; a lane's question that its
-   plan, design, spec, or a Standing entry already answers; and clearing your
-   own footprint. Log each call with its reason and how to undo it; it stands
-   until the human rules otherwise. Still theirs: the human gates (Run a
-   pass, step 4), product behavior and design, scope, waiving a required
-   check or an acceptance item, anything irreversible, and any reading of
-   their own words (law 3).
+   reservations, and which free host a lane takes; a question that the
+   human's quoted words (`VISION.md`, a Standing entry), an approved design,
+   the item's plan or spec, or this profile already answers; and clearing
+   your own footprint. Log each call with the line it rests on, its reason,
+   and how to undo it; it stands until the human rules otherwise. Still
+   theirs: the human gates (Run a pass, step 4), product behavior and design
+   those sources leave open or in conflict, scope, waiving a required check
+   or an acceptance item, anything irreversible, and any reading of their
+   own words (law 3): when the answer takes a reading rather than the words,
+   ask.
 3. Drop what they already answered anywhere, including that lane's history;
    a lane that asks again gets a pointer to the answer. Before listing
    something as waiting on them, check the live sources for their having
@@ -226,19 +230,24 @@ restart the heartbeat.
    may be switching in from something else: say what the item is before its
    number, why the choice exists, and what each option does, in plain words
    and full sentences.
-   When an identified design answers the question, it is the recommended
-   option; offer an interim only if the human asked for one, naming what it
-   leaves to remove.
+   Each question names its gap: what the vision, the design, and this
+   profile leave open, or where two of them conflict. Offer an interim only
+   if the human asked for one, naming what it leaves to remove.
    Otherwise put the questions in "Waiting on the human", batched by theme
    with the time each batch needs, and notify them only for what needs their
    hands before they would otherwise look. A due check fires first.
 5. Close the round: record each answer in the charter with its time, and in
    the same act set its queue line to `ready`, or `gated` with the gate
-   named. Step 4 of the same pass fills from it.
+   named. An answer that settles intent or taste also goes into `VISION.md`,
+   and one that settles a design into its record, in their quoted words
+   with the time, by the next lane on that repository. Step 4 of the same pass fills from it.
 
 Never send the human to a lane's pane to answer or type "go", nor step back
 from a lane they are talking to. When a request looks wrong or risky, say so
-and ask, or route it to a design session.
+and ask, or route it to a design session. A question that needs a
+discussion rather than a choice goes there too: a separate attended session
+that ends by writing its file and sending you a pointer. Do not hold it in
+this session.
 
 ### Relay a decision
 
@@ -270,8 +279,8 @@ Change a running agent's brief only by addendum and pointer.
    run the repo's secrets preflight in that worktree, with the lane's shell
    and flags, while the human can approve prompts.
 2. Brief with files, not conversation (shape in files.md): outcome,
-   acceptance, gates, budget, boundaries, the lane root, the human's
-   decisions verbatim, the report path, and the Coordination section.
+   acceptance, gates, budget, boundaries, the lane root, the repository's
+   `VISION.md` by path, the human's decisions verbatim, the report path, and the Coordination section.
    Acceptance is scenarios (`done`): for UI, what each touched control does
    on production today and what the user does. A lane building a designed
    surface links its design issue; departures from the spec are raised there
@@ -418,7 +427,11 @@ The watch changes hands only when the session has ended or the human asks
 Plan by theme, not by the newest issue: a theme is the items one design owns
 (an RFC, a spec section, or "no design needed").
 
-- Every new item gets a theme before it gets a lane. When the theme's design
+- Every new item gets a theme before it gets a lane. A new feature, tool,
+  or design fork that no line of `VISION.md` or an approved design covers is
+  `gated` on intent: its waiting-list line says what it would serve, what
+  existing work it reuses, and what done looks like, and it launches on the
+  human's answer. When the theme's design
   is identified (pending or parked) or would rewrite the code, fold the item
   into the design. Parking a design parks its theme; to fix an item, pull the
   design forward.
