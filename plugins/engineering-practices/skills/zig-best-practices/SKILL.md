@@ -81,6 +81,16 @@ Runs on the assertions-and-bounds law in `code-law`; these are the Zig-specific 
 - **C library interop** (raylib, SDL, curl): See [C-INTEROP.md](C-INTEROP.md)
 - **Debugging memory leaks** (GPA, stack traces): See [DEBUGGING.md](DEBUGGING.md)
 
+## Build caching
+
+- A run step declares the files it reads at run time (`addFileInput`, or a
+  declared source tree), so `zig build` can skip it and reruns it when one
+  changes.
+- Keep `has_side_effects` for steps that change something outside the cache;
+  a step that only reads declares its inputs instead.
+- No options module holds an absolute path: a second checkout of the same
+  commit cannot reuse what was built or run against it.
+
 ## Tooling
 
 **zigdoc** — browse std library and dependency docs:
