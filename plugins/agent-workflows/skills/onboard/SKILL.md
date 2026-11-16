@@ -33,6 +33,11 @@ maintainer approves.
    environment variables it reads change, and green results are reused
    across checkouts on a host. A dev shell enters a key as what it produces
    (tool identities, the variables each job reads), not as its source file.
+   Declare inputs by subtraction, so a file nobody classified reruns the
+   job. Turn on the runner's strict environment mode where it has one. An
+   OS-specific job carries the OS in its inputs. No build embeds its checkout
+   path in anything a key covers. Fix the native build's own declarations
+   before adding a runner.
 2. **How to try it.** For someone who did not build it: getting a running
    build, an account, and test funds or data, and where each feature lives.
    This is a guest's entry point and doubles as beta-tester docs. It assumes

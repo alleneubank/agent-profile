@@ -101,3 +101,9 @@ stands until its inputs change: do not rerun it, retry a flake outside the
 change with the whole suite, or wait on gate jobs the change cannot affect.
 A required check that cannot execute remains blocked, never replaced by
 static confidence.
+
+A replayed pass covers only what the check declares it reads, so a check that
+opens a file or reads a variable at run time declares it. Take gate evidence
+from a clean tree at a commit, and edit nothing in that worktree while the
+gate runs. A gate that selects nothing for a change has passed; record that it
+selected nothing.
