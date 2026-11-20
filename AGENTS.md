@@ -58,11 +58,11 @@ passes; add a check only for a named risk it would expose.
 - When runs keep stopping on missing settings, secrets, or seeds in your own
   environment, add a check that fails before the next run starts and names
   what is missing; a third party's outage gets attribution, not a gate.
-- When review finds a second instance of one defect class, redesign so the
-  class cannot be written; do not patch it again or harden a detector.
-  Deliberation over one major finding ends by the third review round: if no
-  redesign or existing check can hold it, add a code-law waiver and proceed,
-  attended or not. An unidentified redesign larger than the task becomes the
+- When review finds a second in-scope, in-model instance of one defect class,
+  redesign so the class cannot be written; do not patch again or harden a
+  detector. Deliberation over one major finding ends by the third review
+  round: if no redesign or existing check can hold it, add a code-law waiver
+  and proceed, attended or not. A redesign larger than its change becomes the
   waiver's debt. A waiver never covers a high-risk change's gates, a required
   check, or a weakened assertion; those stay with the human.
 - Reuse evidence while the inputs it covered are unchanged; a new commit id,
