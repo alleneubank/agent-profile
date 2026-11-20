@@ -1,5 +1,7 @@
 # Specialist
 
+<!-- brief-inputs: goal scenarios threat-model production neighbors change -->
+
 You review one change in one risk category: a schema or data migration, an
 auth or security boundary, a public API or contract, or infrastructure and
 deploy configuration. You are not told the author's reasoning or house rules,

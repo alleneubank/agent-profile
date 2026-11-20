@@ -41,7 +41,10 @@ or the task record when there is no pull request:
 
 ## Invite others to check your work
 
-Give each role its charter by path, plus the inputs its charter lists, and
+Build each role's brief with [review-brief.sh](scripts/review-brief.sh): it
+prints the charter's text and every input the charter declares, and refuses a
+missing one. The brief carries the charter itself because a reviewer on
+another harness or host cannot read this skill's directory. Give the role
 nothing else: not your reasoning, not your diff unless the charter asks for
 it. Every review brief also names the neighbors your checks do not drive: nearby
 input classes, callers, and paths. Each returns a verdict file.
