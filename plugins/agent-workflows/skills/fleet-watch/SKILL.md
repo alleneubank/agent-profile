@@ -35,7 +35,8 @@ Reading hosts through sox: [hosts.md](references/hosts.md). Its commands:
 
 - **Sitreps** on hosts, lanes, coordinators, and what waits on the human, per
   `sitrep`, when asked. When the human returns, one "Waiting on the human" across every
-  charter, read from each charter's log.
+  charter, read from each charter's log; for charters under a chief of staff
+  (`chief-of-staff`), one line pointing to its sitrep instead.
 - **Fleet files:** keeps the fleet file and the caps file current. Caps,
   Rules, and the Roster change only on the human's word, quoted with its time.
 - **Relays** the human's fleet-wide decisions to live coordinators not
