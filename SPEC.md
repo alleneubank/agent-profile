@@ -15,6 +15,8 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   runs under a coordinator's charter. `agent-workflows:coordinator` owns the
   workflow and its reference file shapes; `agent-workflows:fleet-watch` owns
   the fleet-level role above the coordinators and the fleet file shapes;
+  `agent-workflows:chief-of-staff` owns a workspace's intake and routing
+  role above its repository coordinators;
   fleet state and grants stay outside repositories. The profile ships no
   separate loop lifecycle or presence skill.
 - REQ-PROFILE-003 — **Proportional work:** bounded attended changes may use
@@ -92,6 +94,23 @@ guidance is not counted as universally loaded context.
 
 ### Decisions
 
+- 2026-11-20 — A workspace may have a chief of staff above its coordinators
+  (`agent-workflows:chief-of-staff`). It watches, files findings as issues
+  in the owning repository with a pointer to that repository's coordinator,
+  starts coordinators from a set the human names, and writes one sitrep of
+  pointers to the sessions where items wait. It runs no lanes, holds no
+  repository grants, and never asks the human about repository work or
+  relays a coordinator's question. Coordinators are per repository by
+  default; a campaign charter spans repositories only on the human's naming.
+  Basis: the human rejected a round of eight lane questions that send-ops,
+  a charter spanning several repositories, brought them on 2026-11-20:
+  "this gives me not enough context to make these kinds of decisions. There
+  should be a line where each repo gets a coordinator". Design answers
+  (2026-11-20, question tool): "Per repo, campaign by exception"; "Named
+  set, then standing (Recommended)"; "New chief-of-staff skill
+  (Recommended)"; "Yes, pointers only (Recommended)"; the named set and the
+  move of existing items go to the role's onboarding session (ai-wiki
+  EXP-053). **direction ratified (human); wording pending their merge**
 - 2026-11-15 — A repository's `VISION.md` carries the owner's intent (reason,
   end goal, taste, what the product must never become) in their own words,
   and the coordinator reads it and names it in every lane brief. A question

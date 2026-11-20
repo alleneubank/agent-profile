@@ -479,6 +479,12 @@ then pruned.
   through it: file the issue or brief and send a pointer with `send.sh
   --kind request`. Never steer its lanes. A request you receive is work under
   your own charter, not a grant.
+- **A chief of staff** (`chief-of-staff`) above a workspace files findings as
+  issues in your repositories and sends you pointers; treat each as a
+  request. It may start you when your repository has ready work, and its
+  sitrep points the human at your session from your "Waiting on the human",
+  so keep that current. It brings the human none of your questions: ask
+  them yourself.
 - **Shared resources.** Hosts, devices, and other shared resources are
   reserved in the caps file (`lane.sh reserve`) with owner charters and an
   expiry; `lane.sh reservations` lists those holding. `lane.sh launch`
