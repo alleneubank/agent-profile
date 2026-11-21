@@ -125,8 +125,8 @@ guidance is not counted as universally loaded context.
   requester had paraphrased, both blocked on a requirement the issue never
   made. So the brief quotes its scenarios too, which the script cannot
   check. No coordinator or lane has run under these rules.
-  **ratified (human), except quoting the scenarios, which is this session's
-  addition from the forward run; unpublished**
+  The human on quoting the scenarios, typed: "i think keep."
+  **ratified (human)**
 - 2026-11-20 — A workspace may have a chief of staff above its coordinators
   (`agent-workflows:chief-of-staff`). It watches, files findings as issues
   in the owning repository with a pointer to that repository's coordinator,
