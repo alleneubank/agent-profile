@@ -179,8 +179,10 @@ restart the heartbeat.
 
 1. Verify the claim (law 9). "Landing" needs a log line showing it started;
    a launched agent is "launching" until its transcript holds a first turn.
-2. Then exactly one of: land, send back with an addendum quoting the finding
-   verbatim, relaunch, or retire. Retiring tears the lane down in the pass
+2. Then exactly one of: land, send back with an addendum quoting verbatim
+   each finding that is still blocking after `done`'s Respond to findings
+   (out-of-model, out-of-scope, should-fix, and note items are logged, never
+   sent as required work), relaunch, or retire. Retiring tears the lane down in the pass
    that processes it: kill its shell, run each `resources` teardown, then
    use [retire.sh](scripts/retire.sh) on the lane host. It copies kept paths
    into the lane directory's `kept/` under the coordination home, verifies
@@ -231,8 +233,10 @@ restart the heartbeat.
    number, why the choice exists, and what each option does, in plain words
    and full sentences.
    Each question names its gap: what the vision, the design, and this
-   profile leave open, or where two of them conflict. Offer an interim only
-   if the human asked for one, naming what it leaves to remove.
+   profile leave open, or where two of them conflict. Recommend the smallest
+   option that meets the item's acceptance, and say so when an option widens
+   the scope or the threat model. Offer an interim only if the human asked
+   for one, naming what it leaves to remove.
    Otherwise put the questions in "Waiting on the human", batched by theme
    with the time each batch needs, and notify them only for what needs their
    hands before they would otherwise look. A due check fires first.
@@ -506,6 +510,10 @@ Breaking a law, plus:
 - Sending the human to a lane's pane, or staying out of a lane they are
   talking to
 - "Landing now" with no log line proving it started
+- An addendum that makes a note, a nit, or an out-of-model finding required
+  work
+- A review brief written by hand instead of built by `done`'s
+  `review-brief.sh`
 - A decision that lives only in a prompt, memory, or chat
 - A question to the human that is yours to answer, or a limit of your own
   left standing as a rule

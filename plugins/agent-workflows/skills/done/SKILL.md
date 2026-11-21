@@ -41,10 +41,22 @@ or the task record when there is no pull request:
 
 ## Invite others to check your work
 
-Give each role its charter by path, plus the inputs its charter lists, and
+Build each role's brief with [review-brief.sh](scripts/review-brief.sh): it
+prints the charter's text and every input the charter declares, and refuses a
+missing one. The brief carries the charter itself because a reviewer on
+another harness or host cannot read this skill's directory. Give the role
 nothing else: not your reasoning, not your diff unless the charter asks for
 it. Every review brief also names the neighbors your checks do not drive: nearby
 input classes, callers, and paths. Each returns a verdict file.
+
+A review brief quotes the threat model, scope, and acceptance scenarios in
+their source's words (the SPEC's, the issue's, or the human's; else
+`code-law`'s default model), never a paraphrase: the reviewer blocks on a
+scenario as written. It asks whether the change meets them. It does
+not ask open hazard questions ("can any path ...", "anything new?") or list
+surfaces to search; neighbors are the change's own callers and paths. A later
+round's brief asks only whether the earlier blocking findings are closed and
+whether the fix broke a scenario.
 
 | Role | Invite when | Charter |
 | --- | --- | --- |
