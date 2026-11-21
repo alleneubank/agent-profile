@@ -49,9 +49,10 @@ nothing else: not your reasoning, not your diff unless the charter asks for
 it. Every review brief also names the neighbors your checks do not drive: nearby
 input classes, callers, and paths. Each returns a verdict file.
 
-A review brief quotes the threat model and scope in their source's words (the
-SPEC's or the human's, else `code-law`'s default), never a paraphrase, and
-gives the acceptance scenarios. It asks whether the change meets them. It does
+A review brief quotes the threat model, scope, and acceptance scenarios in
+their source's words (the SPEC's, the issue's, or the human's; else
+`code-law`'s default model), never a paraphrase: the reviewer blocks on a
+scenario as written. It asks whether the change meets them. It does
 not ask open hazard questions ("can any path ...", "anything new?") or list
 surfaces to search; neighbors are the change's own callers and paths. A later
 round's brief asks only whether the earlier blocking findings are closed and

@@ -118,7 +118,15 @@ guidance is not counted as universally loaded context.
   verdict), "Keep it (Recommended)"; on the specialist and the script,
   "Blind, inside done (Recommended)". Raise the universal budget to 1,508
   words for the approved redesign sentence. Specialists stay profile-free.
-  **ratified (human); unpublished**
+  Forward run (2026-11-21, the audit's first-round replay, one run per cell,
+  two reviewers): with a script-built brief quoting the issue's scenario,
+  the strict reviewer returned two blockers, as it had with the audit's
+  hand-added model and scope, and the other approved; with scenarios the
+  requester had paraphrased, both blocked on a requirement the issue never
+  made. So the brief quotes its scenarios too, which the script cannot
+  check. No coordinator or lane has run under these rules.
+  **ratified (human), except quoting the scenarios, which is this session's
+  addition from the forward run; unpublished**
 - 2026-11-20 — A workspace may have a chief of staff above its coordinators
   (`agent-workflows:chief-of-staff`). It watches, files findings as issues
   in the owning repository with a pointer to that repository's coordinator,
