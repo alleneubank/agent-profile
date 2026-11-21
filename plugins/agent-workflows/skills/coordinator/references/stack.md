@@ -222,12 +222,14 @@ the pane, and the dialog's default answer exits the agent.
 ## Specialist review
 
 The round's specialist reviews a lane's diff as a one-shot print-mode run of
-the launcher Lane quality picks: the `done` specialist charter as a read-only
-brief, run in a detached worktree
-of the lane's ref, writing a verdict file. Only the prompt keeps it
+the launcher Lane quality picks, run in a detached worktree of the lane's ref,
+writing a verdict file. Its brief is the output of `done`'s
+`scripts/review-brief.sh specialist <inputs-dir>`, unedited: the script prints
+the charter and the inputs it declares and refuses a missing one. A question
+of your own does not go in the brief. Only the prompt keeps it
 read-only, so give it a checkout whose writes cannot land. Remove the
 checkout once its verdict is read.
-A plan review runs the same way with the `done` plan-reviewer charter, on a
+A plan review runs the same way with the script's `plan-reviewer` role, on a
 checkout of the plan's ref.
 
 ## Credentials

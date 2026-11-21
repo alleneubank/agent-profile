@@ -35,7 +35,7 @@ is needed. `tee-up` prepares the agreement; a coordinator's charter executes it.
   requested; guests run when requested and on new features and changed user
   flows, and design reviews on UI changes (REQ-PROFILE-010, REQ-PROFILE-012).
 - REQ-PROFILE-006 — **Measurable context:** universal `AGENTS.md` stays at or
-  below 1,495 whitespace-delimited words, from a 2,325-word baseline. This is a
+  below 1,508 whitespace-delimited words, from a 2,325-word baseline. This is a
   size constraint, not proof of behavior; fresh scenarios judge decision quality.
 - REQ-PROFILE-007 — **Verification proportionality:** verification runs the
   cheapest check that can catch the likely failure of the requested behavior,
@@ -101,7 +101,9 @@ guidance is not counted as universally loaded context.
   coordinator sends back only findings still blocking after `done`'s
   disposition and recommends the smallest option that meets acceptance. Only
   an in-scope, in-model second instance triggers a redesign, and a redesign
-  larger than its change becomes the waiver's debt. `done`'s
+  larger than the change it serves is never a review round: it becomes the
+  waiver's debt or the human's decision. The coordinator's specialist-review
+  step and red flags name the script, so a brief is built, not hand-written. `done`'s
   `review-brief.sh` builds each role's brief from the charter's text and the
   inputs the charter declares, refusing a missing one, because a charter
   given by path does not reach a reviewer on another harness or host. Basis:
@@ -111,13 +113,12 @@ guidance is not counted as universally loaded context.
   eng-wiki `raw/agentic-engineering/2026-11-20-review-scope-field-study.md`
   and `2026-11-20-review-scope-decision.md`. The human's answers (2026-11-20,
   question tool): "Adopt (Recommended)", "Adopt both (Recommended)", "Adopt
-  both edits (Recommended)"; on the script, "The script is fine". The
-  universal budget stays at 1,495 words, so the redesign sentence is shorter
-  than the one approved and drops "or the human's decision". Specialists
-  stay profile-free. No session has run under these rules. **direction
-  ratified (human); the specialist and plan-reviewer charter wording (out of
-  scope line, blocking definition, `needs the human` verdict) rests on
-  "makes sense" and awaits confirmation; unpublished**
+  both edits (Recommended)"; on the script, "The script is fine"; on the
+  charter wording (out of scope line, blocking definition, `needs the human`
+  verdict), "Keep it (Recommended)"; on the specialist and the script,
+  "Blind, inside done (Recommended)". Raise the universal budget to 1,508
+  words for the approved redesign sentence. Specialists stay profile-free.
+  **ratified (human); unpublished**
 - 2026-11-20 — A workspace may have a chief of staff above its coordinators
   (`agent-workflows:chief-of-staff`). It watches, files findings as issues
   in the owning repository with a pointer to that repository's coordinator,

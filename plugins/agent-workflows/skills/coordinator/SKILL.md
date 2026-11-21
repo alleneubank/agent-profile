@@ -512,6 +512,8 @@ Breaking a law, plus:
 - "Landing now" with no log line proving it started
 - An addendum that makes a note, a nit, or an out-of-model finding required
   work
+- A review brief written by hand instead of built by `done`'s
+  `review-brief.sh`
 - A decision that lives only in a prompt, memory, or chat
 - A question to the human that is yours to answer, or a limit of your own
   left standing as a rule
