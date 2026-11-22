@@ -69,7 +69,7 @@ A guest shares your host and uses the build you are already running. Point it
 at the build, not at a setup of its own, and say whether that environment is
 disposable or live and shared, with its funding budget when it is live. Run the specialist through a
 read-only, profile-free launcher, one reviewer per round unless the human asks
-for a second. A read-only Claude reviewer reads only its working directory, so
+for a second. A read-only Claude or Antigravity reviewer reads only its working directory, so
 grant each directory the brief cites with `--add-dir`. Run the plan reviewer read-only on a different provider than the
 plan's author, separately from the specialist, and give it the standard as
 files: the profile's `AGENTS.md` and the charter's standing decisions. After a
