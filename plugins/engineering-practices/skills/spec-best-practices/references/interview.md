@@ -11,7 +11,6 @@ contract.
    - domain model
    - `REQ-*` guarantees and the check that holds each
    - non-goals
-   - acceptance criteria
    - risk tags for high-risk work
 3. Ask focused questions that materially change the spec.
 4. Fold answered decisions into the spec.

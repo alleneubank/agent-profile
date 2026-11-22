@@ -134,6 +134,9 @@ linking the evidence record and stating the review status: who reviewed, at
 which head, or that no review ran. A yes given knowing no review ran is
 recorded as the human's waiver.
 
+Once it lands, dissolve the change's plan, handoff, and journal files
+(`dissolve-docs`) before the item closes.
+
 ## Red flags
 
 - "Done" with a scenario that has no observation, or a behavior change with
