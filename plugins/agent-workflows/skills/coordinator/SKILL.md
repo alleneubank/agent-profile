@@ -136,6 +136,10 @@ read. Anything you cannot attribute to the charter belongs to another owner
 A heartbeat starts a pass. A lane watcher line starts one without step 2:
 the line already names what changed, and it is a batch, so handle every
 event in it. Re-arm the watcher in each pass once it has expired.
+Each response re-reads your whole context, so a pass costs about its number
+of responses. Put the reads a step needs in one response, as independent tool
+calls together or one command across hosts, and handle every event in hand
+before reading again.
 
 1. `lease.sh check <charter>` (law 1).
 2. Take stock through a subagent, given the last pass time and the log and
