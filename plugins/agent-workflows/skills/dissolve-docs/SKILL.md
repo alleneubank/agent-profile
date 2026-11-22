@@ -41,7 +41,7 @@ necessary, or authoritative:
 | Content | Destination |
 | --- | --- |
 | Direction, goals, what "done" means | VISION |
-| Requirements, invariants, acceptance, non-goals | SPEC |
+| Requirements, invariants, non-goals | SPEC |
 | Decided contract questions (behavior, interfaces, invariants) | SPEC (Decisions) |
 | Quality bar, taste calls, decided quality questions | BRIEF (Decisions) |
 | Build / run / operate commands, onboarding | README |
@@ -72,6 +72,8 @@ and authoritative:
   wrong doc moves to the right one while it is in hand.
 - Contradiction check: where a surviving doc disagrees with the system,
   the system wins — fix the doc or flag it with evidence.
+- A standing doc over its budget, or holding superseded text, is cut to
+  what is in force; the superseded text is deleted, not marked.
 - The inventory shrinks: success is fewer files, each with a clear job.
   A doc nobody would consult to operate, extend, or judge the system has
   no job.
