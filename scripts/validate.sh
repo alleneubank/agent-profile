@@ -137,16 +137,22 @@ for pdir in plugin_dirs:
     before = len(errors)  # so "parity ok" only prints when this plugin is clean
     claude = load(pdir / ".claude-plugin" / "plugin.json")
     codex = load(pdir / ".codex-plugin" / "plugin.json")
-    if claude is None or codex is None:
+    agy = load(pdir / ".antigravity-plugin" / "plugin.json")
+    if claude is None or codex is None or agy is None:
         continue
 
-    # claude vs codex plugin.json must agree on the shared fields.
+    # claude, codex, and antigravity plugin.json must agree on the shared fields.
     for field in FIELDS:
-        cv, xv = claude.get(field), codex.get(field)
+        cv, xv, av = claude.get(field), codex.get(field), agy.get(field)
         if cv != xv:
             errors.append(
                 f"{name}: .claude-plugin/plugin.json {field}={cv!r} "
                 f"!= .codex-plugin/plugin.json {field}={xv!r}"
+            )
+        if cv != av:
+            errors.append(
+                f"{name}: .claude-plugin/plugin.json {field}={cv!r} "
+                f"!= .antigravity-plugin/plugin.json {field}={av!r}"
             )
 
     # The plugin name must match its directory (and thus its marketplace key).
@@ -373,17 +379,68 @@ print("release tags ok")
 PY
 }
 
+# Antigravity hook adapter gate (additive). Native Antigravity plugins read
+# hooks.json at the plugin root; verify the adapter keeps delegating to the
+# canonical shell hooks rather than duplicating hook policy.
+check_agy_hooks() {
+  python3 - "$ROOT" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+errors = []
+
+hooks_path = root / "plugins" / "agent-workflows" / "hooks.json"
+adapter_path = root / "plugins" / "agent-workflows" / "hooks" / "agy-hook-adapter.sh"
+
+try:
+    hooks = json.loads(hooks_path.read_text(encoding="utf-8"))
+except (FileNotFoundError, json.JSONDecodeError) as exc:
+    errors.append(f"invalid or missing {hooks_path}: {exc}")
+    hooks = None
+
+if isinstance(hooks, dict):
+    raw = json.dumps(hooks)
+    if "./hooks/agy-hook-adapter.sh SessionStart" not in raw:
+        errors.append("agent-workflows/hooks.json does not wire SessionStart to agy-hook-adapter.sh")
+    if "./hooks/agy-hook-adapter.sh PreToolUse" not in raw:
+        errors.append("agent-workflows/hooks.json does not wire PreToolUse to agy-hook-adapter.sh")
+elif hooks is not None:
+    errors.append("agent-workflows/hooks.json must be a JSON object")
+
+if not adapter_path.is_file():
+    errors.append(f"missing agy hook adapter: {adapter_path}")
+else:
+    src = adapter_path.read_text(encoding="utf-8")
+    for canonical in ("instruction-fingerprint.sh", "verifier-bypass-guard.sh"):
+        if canonical not in src:
+            errors.append(f"agy hook adapter no longer references {canonical}")
+
+if errors:
+    print("agy hooks check FAILED:", file=sys.stderr)
+    for e in errors:
+        print(f"  - {e}", file=sys.stderr)
+    raise SystemExit(1)
+print("agy hooks ok")
+PY
+}
+
 require_json "$ROOT/marketplace.json"
 require_json "$ROOT/.claude-plugin/marketplace.json"
 require_json "$ROOT/plugins/engineering-practices/.codex-plugin/plugin.json"
 require_json "$ROOT/plugins/engineering-practices/.claude-plugin/plugin.json"
+require_json "$ROOT/plugins/engineering-practices/.antigravity-plugin/plugin.json"
 require_json "$ROOT/plugins/agent-workflows/.codex-plugin/plugin.json"
 require_json "$ROOT/plugins/agent-workflows/.claude-plugin/plugin.json"
+require_json "$ROOT/plugins/agent-workflows/.antigravity-plugin/plugin.json"
+require_json "$ROOT/plugins/agent-workflows/hooks.json"
 
 require_json "$ROOT/package.json"
 
 check_manifest_parity
 check_pi_package
+check_agy_hooks
 check_destructive_examples
 python3 "$ROOT/scripts/validate-instructions.py"
 
@@ -398,6 +455,15 @@ if command -v claude >/dev/null 2>&1; then
   claude plugin validate --strict "$ROOT/plugins/agent-workflows" || status=1
 else
   echo "skip: claude plugin validation (claude CLI not found)"
+fi
+
+if command -v agy >/dev/null 2>&1; then
+  # Omit --strict on agent-workflows because Claude/Codex's hooks/hooks.json
+  # intentionally coexists beside Antigravity's root hooks.json.
+  agy plugin validate "$ROOT/plugins/engineering-practices" || status=1
+  agy plugin validate "$ROOT/plugins/agent-workflows" || status=1
+else
+  echo "skip: agy plugin validation (agy CLI not found)"
 fi
 
 if [ -n "${CODEX_VALIDATOR:-}" ] && [ -f "$CODEX_VALIDATOR" ]; then

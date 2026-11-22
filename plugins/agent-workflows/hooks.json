@@ -1,0 +1,25 @@
+{
+  "instruction-fingerprint": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "./hooks/agy-hook-adapter.sh SessionStart",
+        "timeout": 10
+      }
+    ]
+  },
+  "verifier-bypass-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/agy-hook-adapter.sh PreToolUse",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

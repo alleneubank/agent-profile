@@ -1,7 +1,7 @@
 # agent-profile
 
 My agent garden: the instructions and skills my coding agents work by, in
-Claude Code, Codex CLI, pi, and Cursor. I tend it as I go, pulling what stops
+Claude Code, Codex CLI, Antigravity CLI (`agy`), pi, and Cursor. I tend it as I go, pulling what stops
 paying its way and planting what a real task showed was missing, so it should
 get a little better each time I put work into it.
 
@@ -35,8 +35,10 @@ cd ~/.agent-profile
 ./install.sh --fix     # link what applies, then follow the Cursor lines
 ```
 
-`./install.sh --fix` links `AGENTS.md` for Claude Code and Codex. When `codex`
-or `claude` is installed it registers that marketplace; when the CLI is
+`./install.sh --fix` links `AGENTS.md` for Claude Code, Codex, and Antigravity
+(`~/.gemini/config/AGENTS.md`). When `codex`
+or `claude` is installed it registers that marketplace; when `agy` is installed
+it registers `./plugins` in `~/.gemini/config/plugins.json`; when a CLI is
 absent it prints `skipped:` with the CLI's name, does not run it, and still
 exits 0 once every applicable target is in place. `jq` is required only to
 read a marketplace listing for a CLI that is installed. The installer refuses

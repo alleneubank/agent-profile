@@ -1,0 +1,11 @@
+{
+  "name": "engineering-practices",
+  "version": "7.11.0",
+  "description": "Language, tooling, and delivery-practice skills for agentic coding.",
+  "author": {
+    "name": "Allen Eubank"
+  },
+  "repository": "https://github.com/alleneubank/agent-profile",
+  "license": "MIT",
+  "keywords": ["skills", "engineering", "antigravity", "codex", "claude"]
+}

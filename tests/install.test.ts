@@ -118,6 +118,8 @@ describe("install.sh", () => {
     expect(fix.stderr).not.toContain("command not found");
     expect(readlinkSync(join(h.home, ".codex", "AGENTS.md"))).toBe(SOURCE);
     expect(readlinkSync(join(h.home, ".claude", "CLAUDE.md"))).toBe(SOURCE);
+    expect(readlinkSync(join(h.home, ".gemini", "config", "AGENTS.md"))).toBe(SOURCE);
+    expect(fix.stdout).toContain("skipped: agy CLI is not installed\n");
 
     const again = h.run("--fix");
     expect(again.status).toBe(0);
@@ -247,5 +249,48 @@ describe("install.sh", () => {
     expect(again.status).toBe(0);
     expect(again.stdout).toContain("ok: Cursor skills agent-workflows ->");
     expect(again.stdout).toContain("ok: Cursor skills engineering-practices ->");
+  });
+
+  it("registers agent-profile plugins in ~/.gemini/config/plugins.json when agy is installed, preserving existing entries", () => {
+    const h = host();
+    const agyStub = join(h.bin, "agy");
+    writeFileSync(agyStub, "#!/bin/bash\nexit 0\n");
+    chmodSync(agyStub, 0o755);
+
+    const cfgDir = join(h.home, ".gemini", "config");
+    const pluginsJson = join(cfgDir, "plugins.json");
+    mkdirSync(cfgDir, { recursive: true });
+    writeFileSync(
+      pluginsJson,
+      JSON.stringify({
+        inherits: [{ path: "/shared/plugins.json" }],
+        entries: [{ path: "/existing/plugins" }],
+      }) + "\n",
+    );
+
+    const checkBefore = h.run("--check");
+    expect(checkBefore.status).toBe(1);
+    expect(checkBefore.stdout).toContain("missing: agy plugins.json does not include");
+
+    const fix = h.run("--fix");
+    expect(fix.status).toBe(0);
+    expect(fix.stdout).toContain("fixed: Antigravity instructions ->");
+    expect(fix.stdout).toContain("fixed: registered agy plugins");
+    expect(readlinkSync(join(cfgDir, "AGENTS.md"))).toBe(SOURCE);
+
+    const parsed = JSON.parse(readFileSync(pluginsJson, "utf8")) as {
+      inherits?: Array<{ path: string }>;
+      entries?: Array<{ path: string }>;
+    };
+    expect(parsed.inherits).toEqual([{ path: "/shared/plugins.json" }]);
+    expect(parsed.entries).toEqual([
+      { path: "/existing/plugins" },
+      { path: join(ROOT, "plugins") },
+    ]);
+
+    const settled = h.run("--check");
+    expect(settled.status).toBe(0);
+    expect(settled.stdout).toContain("ok: Antigravity instructions ->");
+    expect(settled.stdout).toContain("ok: agy plugins registered");
   });
 });

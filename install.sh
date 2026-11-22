@@ -34,6 +34,8 @@ done
 SOURCE="$ROOT/AGENTS.md"
 CODEX_TARGET="$HOME/.codex/AGENTS.md"
 CLAUDE_TARGET="$HOME/.claude/CLAUDE.md"
+AGY_TARGET="$HOME/.gemini/config/AGENTS.md"
+AGY_PLUGINS_JSON="${AGY_PLUGINS_JSON:-$HOME/.gemini/config/plugins.json}"
 MARKETPLACE_NAME="agent-profile"
 CODEX_CONFIG="${CODEX_CONFIG:-$HOME/.codex/config.toml}"
 
@@ -259,18 +261,102 @@ report_cursor() {
   link_cursor_skills
 }
 
+agy_plugins_manage() {
+  local action="$1"
+  if ! command -v agy >/dev/null 2>&1; then
+    echo "skipped: agy CLI is not installed"
+    return 0
+  fi
+  if ! command -v python3 >/dev/null 2>&1; then
+    if [ "$action" = "check" ]; then
+      echo "missing-tool: cannot check agy plugins.json; requires python3"
+    else
+      echo "blocked: cannot register agy plugins.json; requires python3" >&2
+    fi
+    return 1
+  fi
+  python3 - "$action" "$AGY_PLUGINS_JSON" "$ROOT/plugins" <<'PY'
+import json
+import os
+import pathlib
+import sys
+import tempfile
+
+action, cfg_arg, plugins_dir = sys.argv[1], sys.argv[2], sys.argv[3]
+cfg_path = pathlib.Path(cfg_arg)
+
+if cfg_path.is_symlink():
+    print(f"blocked: agy plugins.json is a symlink: {cfg_path}", file=sys.stderr)
+    raise SystemExit(1)
+
+if cfg_path.exists():
+    try:
+        data = json.loads(cfg_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(f"blocked: agy plugins.json is invalid JSON ({cfg_path}): {exc}", file=sys.stderr)
+        raise SystemExit(1)
+    if not isinstance(data, dict):
+        print(f"blocked: agy plugins.json must be a JSON object: {cfg_path}", file=sys.stderr)
+        raise SystemExit(1)
+else:
+    data = None
+
+entries = data.get("entries") if isinstance(data, dict) else None
+if entries is not None and not isinstance(entries, list):
+    print(f"blocked: agy plugins.json entries must be a list: {cfg_path}", file=sys.stderr)
+    raise SystemExit(1)
+
+present = any(isinstance(item, dict) and item.get("path") == plugins_dir for item in (entries or []))
+if present:
+    print(f"ok: agy plugins registered ({plugins_dir})")
+    raise SystemExit(0)
+
+if action == "check":
+    if data is None:
+        print(f"missing: agy plugins.json does not exist: {cfg_path}")
+    else:
+        print(f"missing: agy plugins.json does not include {plugins_dir}")
+    raise SystemExit(1)
+
+merged = dict(data) if data is not None else {}
+merged_entries = list(entries) if entries is not None else []
+merged_entries.append({"path": plugins_dir})
+merged["entries"] = merged_entries
+
+cfg_path.parent.mkdir(parents=True, exist_ok=True)
+fd, tmp_name = tempfile.mkstemp(prefix=f".{cfg_path.name}.", dir=cfg_path.parent)
+tmp_path = pathlib.Path(tmp_name)
+try:
+    with os.fdopen(fd, "w", encoding="utf-8", newline="") as handle:
+        handle.write(json.dumps(merged, indent=2, ensure_ascii=False) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.chmod(tmp_path, 0o644)
+    os.replace(tmp_path, cfg_path)
+except Exception:
+    tmp_path.unlink(missing_ok=True)
+    raise
+
+print(f"fixed: registered agy plugins ({plugins_dir})")
+PY
+}
+
 if [ "$MODE" = "check" ]; then
   check_target "Codex instructions" "$CODEX_TARGET" || status=1
   check_target "Claude instructions" "$CLAUDE_TARGET" || status=1
+  check_target "Antigravity instructions" "$AGY_TARGET" || status=1
   check_marketplace "codex" codex_marketplace_ok || status=1
   check_marketplace "claude" claude_marketplace_ok || status=1
+  agy_plugins_manage check || status=1
   report_cursor || status=1
   exit "$status"
 fi
 
 fix_target "Codex instructions" "$CODEX_TARGET" || status=1
 fix_target "Claude instructions" "$CLAUDE_TARGET" || status=1
+fix_target "Antigravity instructions" "$AGY_TARGET" || status=1
 fix_marketplace "codex" codex_marketplace_ok codex plugin marketplace add "$ROOT" || status=1
 fix_marketplace "claude" claude_marketplace_ok claude plugin marketplace add "$ROOT" || status=1
+agy_plugins_manage fix || status=1
 report_cursor || status=1
 exit "$status"
