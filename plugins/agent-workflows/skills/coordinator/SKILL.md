@@ -465,11 +465,10 @@ then pruned.
 ## Lane quality
 
 - Specialist review and its three-round cap follow `AGENTS.md` and `done`.
-  Each round gets one reviewer: the first launcher in the fleet file's order
-  that has found material problems in this workspace. A second runs only when
-  the human asks. A plan reviewer also comes from a different provider than
-  the plan's author; log each plan it approves and lead the next sitrep with
-  it.
+  Each round gets one reviewer: the first in the fleet file's Roster order
+  whose provider differs from the author's. A second runs only when the
+  human asks. Log each plan a reviewer approves and lead the next sitrep
+  with it.
 - Land through the workspace's fail-closed landing path; without one, chain
   every step so a failure stops the push.
 - Once the human names what a release (a tip included) contains, freeze it:
