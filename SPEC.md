@@ -101,8 +101,8 @@ guidance is not counted as universally loaded context.
   round's one reviewer is the first in the fleet file's Roster order whose
   provider differs from the author's; the sentence choosing the launcher
   that had found material problems in the workspace contradicted that rule.
-  Basis: ai-wiki EXP-040 and EXP-023, closed 2026-11-23. **proposed;
-  ratified on merge**
+  Basis: ai-wiki EXP-040 and EXP-023, closed 2026-11-23. **ratified
+  (human)**
 
 - 2026-11-20 — Bound what a review can demand. A review brief quotes the
   threat model and scope in their source's words and asks whether the change
