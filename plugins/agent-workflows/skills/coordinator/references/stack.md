@@ -147,11 +147,20 @@ grok 1.0.41-fork, and kimi 2.1.1:
 
 | Harness (launchers) | Name at launch | Interactive | Headless |
 |---|---|---|---|
-| Claude (`yoloclaude`, `syoloclaude`, `yolo<model>`) | `-n <name>`; recorded as the session title, headless too | `yoloclaude -n <name> "Read <brief> and carry it out."` | `yoloclaude -p -n <name> "<pointer>"` |
+| Claude (`yoloclaude`, `syoloclaude`, `yolo<model>`) | `-n <name>`; recorded as the session title, headless too | `yoloclaude -n <name> --add-dir <dir> -- "Read <brief> and carry it out."` | `yoloclaude -p -n <name> --add-dir <dir> -- "<pointer>"` |
 | pi (`pigrok`, `pik3`, `piglm`, ...) | `-n <name>` | `pigrok -n <name> "<pointer>"` | `pigrok -p -n <name> "<pointer>"` |
 | Codex (`yoloastra`, `syoloastra`, ...) | none; `resume`, `queue`, and `archive` accept a name once the session has one | `yoloastra "<pointer>"` | `yoloastra exec "<pointer>"` |
 | Grok | none; `-s <uuid>` fixes the session id instead | `grok "<pointer>"` | `grok -p "<pointer>"` |
 | Kimi | none | `kimi` (no initial-prompt argument) | `kimi -p "<pointer>"` |
+| Antigravity (`yoloneon`, `yolocarbon`, ...) | none | `yoloneon --add-dir <dir> --prompt-interactive "<pointer>"` | `yoloneon --effort medium --add-dir <dir> -p "<pointer>"` |
+
+The prompt goes last, and its position matters. Claude Code's `--add-dir`
+takes every following argument as another directory, so the Claude pointer
+always follows `--`; the Claude launchers in `~/bin` refuse a line whose `--add-dir`
+value is not a directory. Antigravity's `-p` and `--prompt-interactive` take
+the prompt as their own value, so every other flag comes before them; agy
+refuses a line where a flag follows them. Checked 2026-11-23 against claude
+2.1.330 and agy 1.5.13.
 
 For a harness with no name flag, the sox label and the brief directory are
 the lane's name: find its session with `recall live` by cwd, and record the
