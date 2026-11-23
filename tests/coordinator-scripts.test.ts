@@ -1,5 +1,5 @@
 import { execFile, spawn, spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -23,8 +23,6 @@ function fleet(sendExit = 0) {
   const home = mkdtempSync(join(tmpdir(), "coordinator-scripts-"));
   const coordination = join(home, "handoffs");
   mkdirSync(join(coordination, "demo"), { recursive: true });
-  // A charter whose only item waits on the human, so blocked-on-human is true.
-  writeFileSync(join(coordination, "demo", "queue"), "gated\tforum\t#208\tplan approval\n");
   const sox = join(home, "sox");
   writeFileSync(
     sox,
@@ -226,28 +224,6 @@ describe("lease.sh", () => {
     expect((await f.run(LEASE, ["state", "demo", "--state", "live (watch 2)"], ONE)).status).toBe(2);
     expect((await f.run(LEASE, ["state", "demo", "--state", "parked", "--fleet", "/handoffs/fleet.md"], ONE)).status).toBe(2);
     expect(readFileSync(f.lease)).toEqual(before);
-  });
-
-  it("refuses blocked-on-human while the queue has a ready item, or when the queue is missing or malformed", async () => {
-    const f = fleet();
-    const queue = join(f.coordination, "demo", "queue");
-    await f.take(ONE);
-    const blocked = () => f.run(LEASE, ["state", "demo", "--state", "blocked-on-human"], ONE);
-
-    rmSync(queue);
-    expect((await blocked()).status).toBe(2);
-    writeFileSync(queue, "# state\ttheme\titem\tnote\nready\ttraining\tdraft\nblocked\tforum\t#208\n");
-    expect((await blocked()).stderr).toContain("line 3:");
-    writeFileSync(queue, "# state\ttheme\titem\tnote\ngated\tforum\t#208\tplan approval\nready\ttraining\tdraft\n\ndone\tbugs\t#320\n");
-    const refused = await blocked();
-    expect(refused.status).toBe(6);
-    expect(refused.stderr).toContain("1 ready item(s)");
-    expect(readFileSync(f.lease, "utf8")).toContain("state=live\n");
-
-    writeFileSync(queue, "gated\tforum\t#208\tplan approval\r\nrunning\ttraining\tdraft\r\n");
-    expect((await blocked()).status).toBe(0);
-    expect(readFileSync(f.lease, "utf8")).toContain("state=blocked-on-human\n");
-    expect((await f.run(LEASE, ["state", "demo", "--state", "live"], ONE)).status).toBe(0);
   });
 
   it("requires the current holder and a released watch for parked", async () => {
@@ -458,7 +434,6 @@ describe("send.sh", () => {
     const f = fleet();
     const work = join(f.home, "work-handoffs");
     mkdirSync(join(work, "other"), { recursive: true });
-    writeFileSync(join(work, "other", "queue"), "gated\tforum\t#9\tmerge approval\n");
     f.shells([{ host: "localhost", backing: ONE.shell, command: "claude", attention: "done" }]);
     const inWork = (args: string[]) => f.run(LEASE, args, ONE, "", undefined, work);
     expect((await inWork(["take", "other", "--reason", "the human: coordinate other from Work"])).status).toBe(0);
@@ -941,7 +916,6 @@ describe("lane.sh drift", () => {
     f.add({ ...coordinator, backing_id: "s8.g1", labels: { role: "coordinator", charter: "other" } });
     f.add({ ...coordinator, backing_id: "s7.g1", labels: { role: "coordinator", charter: "third" } });
     f.add(boss);
-    writeFileSync(join(f.home, "handoffs", "boss", "queue"), "gated\tforum\t#208\tplan approval\n");
     expect((await f.run(LEASE, ["state", "boss", "--state", "blocked-on-human"], TWO)).status).toBe(0);
     f.add(lane("a"));
     f.add(lane("b", "other"));
@@ -980,7 +954,6 @@ describe("lane.sh drift", () => {
     writeFileSync(join(f.home, "probe-onyx"), "16 3.0 40\n");
     writeFileSync(join(f.home, "unreachable"), "ae-dev\n");
     f.add(coordinator);
-    writeFileSync(join(f.home, "handoffs", "demo", "queue"), "gated\tforum\t#208\tplan approval\n");
     expect((await f.run(LEASE, ["state", "demo", "--state", "blocked-on-human"])).status).toBe(0);
     f.add(boss);
     f.add(lane("a", "boss"));

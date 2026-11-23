@@ -16,7 +16,6 @@
 # died keeps the state it last wrote, so read the two together.
 #
 # Exit: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the watch, 5 lease busy,
-# 6 blocked-on-human refused: the charter's queue still has a ready item,
 # 7 sox could not label the shell the lease names.
 #
 # The lease is $COORDINATION_HOME/<charter>/lease (~/.handoffs by default),
@@ -27,9 +26,7 @@
 # a live one. Every write first labels the shell the lease names with
 # lease.<charter>=<absolute lease path>; send.sh finds a target's leases
 # through that label, whatever coordination home each lives under.
-# blocked-on-human is written only when ~/.handoffs/<charter>/queue lists no ready item: one
-# tab-separated line per item, `<state>\t<theme>\t<item>[\t<note>]`, state
-# one of ready, running, gated, parked, done; `#` lines are comments. The file is key=value
+# The file is key=value
 # lines in a fixed order. Writes take a lock directory and replace the file by
 # rename, so a reader never sees half a lease and two takes never both
 # succeed. Tests override COORDINATION_HOME, SOX_BIN and LEASE_NOW.
@@ -103,25 +100,6 @@ write() {
 # holds: 0 when the caller holds an unreleased watch.
 holds() {
   [ -z "$(field released_at)" ] && [ "$(field session)" = "$session" ] && [ "$(field shell)" = "$shell" ]
-}
-
-# ready_count: the queue's ready items. Fails on a missing, oversized or
-# malformed queue, so blocked-on-human cannot be written past unread work.
-ready_count() {
-  queue="$dir/queue"
-  [ -f "$queue" ] || fail "no queue at $queue: list the charter's items before writing blocked-on-human" 2
-  [ "$(wc -c < "$queue")" -le 1048576 ] || fail "queue exceeds 1 MiB: $queue" 2
-  awk -F '\t' '
-    /^#/ || /^[ \t\r]*$/ { next }
-    {
-      sub(/\r$/, "")
-      if (NF < 3 || $1 !~ /^(ready|running|gated|parked|done)$/) {
-        printf "line %d: want <ready|running|gated|parked|done>\\t<theme>\\t<item>\n", NR > "/dev/stderr"
-        bad = 1
-      } else if ($1 == "ready") ready++
-    }
-    END { if (bad) exit 2; print ready + 0 }
-  ' "$queue" || fail "malformed queue: $queue" 2
 }
 
 # read_live_shells: set live_shells to this host's sox rows, or leave
@@ -238,10 +216,6 @@ case "$command" in
       [ -n "$(field released_at)" ] || fail "release the watch before writing parked" 4
     else
       holds || fail "a released watch cannot write $state" 4
-    fi
-    if [ "$state" = blocked-on-human ]; then
-      ready=$(ready_count)
-      [ "$ready" -eq 0 ] || fail "$ready ready item(s) in $dir/queue: launch them, or mark each gated with its gate" 6
     fi
     prior_state=$(field state)
     write "$(field charter)" "$(field watch)" "$(field session)" "$(field shell)" "$(field harness)" \

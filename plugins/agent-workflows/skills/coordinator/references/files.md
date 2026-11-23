@@ -122,8 +122,7 @@ appointed this watch), once released `released_at` and `handoff`, and
 `lease.<charter>=<absolute lease path>`, which is how `send.sh` finds a
 target's lease whatever coordination home the charter uses. Exit codes: 0 ok,
 2 usage, 3 no lease, 4 caller does not hold the watch, 5 another write is in
-progress (retry), 6 blocked-on-human refused (a ready queue item), 7 sox could
-not label the shell (the lease is unchanged).
+progress (retry), 7 sox could not label the shell (the lease is unchanged).
 
 The lease is the only record of the charter's state: `live` (written by
 take), `blocked-on-human`, or `parked`, set with
@@ -183,9 +182,7 @@ done	bugs	#339	landed fb27ca7
 ```
 
 States are `ready`, `running`, `gated`, `parked`, and `done`; the note names
-the lane, the gate, or the landing. Narrative stays in the log. `lease.sh
-state blocked-on-human` refuses while any line is `ready` (exit 6) and
-when the queue is missing or malformed.
+the lane, the gate, or the landing. Narrative stays in the log.
 
 A stocktake script, when the workspace has one, reads live sources only and
 prints running, finished, and parked work per lane; the subagent compares it

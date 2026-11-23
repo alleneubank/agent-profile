@@ -94,6 +94,16 @@ guidance is not counted as universally loaded context.
 
 ### Decisions
 
+- 2026-11-23 — Two coordinator rules leave. `lease.sh state` no longer
+  reads the queue: its refusal of `blocked-on-human` while a line is `ready`
+  (exit 6) never fired from 14.10.0 on, and coordinators passed it by gating
+  lines without a named gate or leaving startable work unmarked. A review
+  round's one reviewer is the first in the fleet file's Roster order whose
+  provider differs from the author's; the sentence choosing the launcher
+  that had found material problems in the workspace contradicted that rule.
+  Basis: ai-wiki EXP-040 and EXP-023, closed 2026-11-23. **proposed;
+  ratified on merge**
+
 - 2026-11-20 — Bound what a review can demand. A review brief quotes the
   threat model and scope in their source's words and asks whether the change
   meets its acceptance scenarios, with no open hazard questions; a later
