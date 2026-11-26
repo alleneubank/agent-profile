@@ -98,6 +98,43 @@ describe("verifier-bypass guard (tool_call)", () => {
     expect(result).toBeUndefined();
   });
 
+  it("allows text that only mentions a bypass", async () => {
+    const { pi, handlers } = makeStub();
+    agentProfile(pi);
+    const handler = handlers.get("tool_call")!;
+    const mentions = [
+      "cat > report.md <<'EOF'\nwe never run git commit --no-verify\nEOF",
+      'gh pr create --body "hooks pass; git commit --no-verify was not used"',
+      "echo 'git -c core.hooksPath=/dev/null commit is denied'",
+      'git commit -m "docs: explain why --no-verify is denied"',
+    ];
+    for (const command of mentions) {
+      expect(
+        await handler(bashCall(command), { cwd: process.cwd() }),
+        command,
+      ).toBeUndefined();
+    }
+  });
+
+  it("blocks a bypass wherever git is invoked in the command", async () => {
+    const { pi, handlers } = makeStub();
+    agentProfile(pi);
+    const handler = handlers.get("tool_call")!;
+    const bypasses = [
+      "cd repo && git commit -m 'wip' --no-verify",
+      "GIT_AUTHOR_NAME=a env git push --no-verify origin main",
+      "git add . \\\n  && git commit --no-verify -F - <<EOF\nmessage\nEOF",
+      'git -c "core.hooksPath=/dev/null" commit -m x',
+      "(git commit --no-verify)",
+    ];
+    for (const command of bypasses) {
+      expect(
+        await handler(bashCall(command), { cwd: process.cwd() }),
+        command,
+      ).toEqual(expect.objectContaining({ block: true }));
+    }
+  });
+
   it("allows ordinary commands", async () => {
     const { pi, handlers } = makeStub();
     agentProfile(pi);
