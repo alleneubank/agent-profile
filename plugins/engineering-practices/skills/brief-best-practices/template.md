@@ -1,67 +1,50 @@
 # BRIEF — <surface name>
 
-> Law doc for <surface>, present-tense, no narrated history — git is the changelog. The Boundary
-> and ratified Decisions amend only with human confirmation; the driver appends provisional
-> Decisions, marked and dated. Working memory lives in the coordinator's log or a handoff, not here;
-> floor waivers are dated Decisions below.
+> What acceptable quality means for <surface>, in the present tense. Keep only
+> the sections this surface needs; delete the rest. The Boundary and ratified
+> Decisions change only with the human's confirmation.
 
 ## Bar
 
-<One sentence: what "shippable" means for this surface. The north-star "done.">
+<One sentence: what "shippable" means for this surface.>
 
 ## Dimensions
 
-The few axes "good" decomposes into. When this document doesn't cover a decision, resolve it in
-favor of these.
+The few axes "good" decomposes into. A decision this document does not cover
+is resolved in their favor.
 
-- **<Dimension 1>** — <what it means here>
-- **<Dimension 2>** — <…>
-- **<Dimension 3>** — <…>
+- **<Dimension>** — <what it means here>
 
-## Floors
+## Floors (where a dimension has a real threshold)
 
-The minimum on each dimension, *with how it's measured*. The gate, not the ceiling.
+- **<Dimension>:** <the minimum, and the check, tool, or metric that shows it>
 
-| Dimension | Floor (threshold + measurement) |
-|---|---|
-| <Dimension 1> | <minimum bar, and the check/tool/metric that proves it> |
-| <Dimension 2> | <…> |
-| <Dimension 3> | <…> |
+A dimension with no honest threshold gets a sentence or an example, not an
+invented number.
 
-## Oracle
+## How it is checked
 
-The independent verifier — what runs, who executes or judges, and **why it can't
-be gamed** (maker ≠ terminal judge). For an operable surface, name the exact
-artifact/environment, roles, representative tasks, evidence, severity floor, and
-task or time budget of its guest run (`done`).
+<The objective checks that establish the floors. Name an independent run or
+judge (a `done` guest, a specialist) only where the user asked for one or the
+change is high-risk.>
 
-- **Pre-ship:** <the harness, bug-bash participant, or specialized judge that runs the Floors before ship>
-- **Post-ship (live systems only):** <the telemetry/signals that confirm it stays good>
+## Never
 
-## Never — instant fail
-
-- <Outcome that is always unacceptable, regardless of everything else>
-- <…>
-- Weakening a floor, or removing a failing item without a dated waiver Decision and a replacement.
-- Asking the human to lower the bar.
+- <An outcome that is unacceptable whatever else is true>
 
 ## Decisions
 
-Calls already made, so the agent never re-asks. **This section grows** — every answered question
-becomes a permanent entry. Include the tradeoff/priority policy and standing assumptions. Mark
-each entry `ratified` (human-confirmed) or `provisional` (driver call via the ladder — dated,
-with rationale, ratified or overturned at the boundary).
+Calls already made, so they are not asked again. Each is `ratified` (the
+human confirmed it) or `provisional` (the driver's call), dated, with one line
+of rationale.
 
-- **Priority / tradeoffs:** <e.g. "security > latency; security may force a redesign, latency may not">
-- **Assumptions:** <standing assumptions about the environment; revisit if they break>
-- <Decision> — <the call, and one line of rationale> (<date>, ratified)
-- <Decision> — <…> (<date>, provisional — <consult verdict if one ran>)
-- <Floor waiver> — <floor, why it is infeasible, the nearest-feasible alternative in force> (<date>, provisional)
+- **Priority:** <e.g. "security > latency; security may force a redesign">
+- <Decision> — <rationale> (<date>, ratified)
+- <Requirement found infeasible> — <why, its consequences, and what holds in
+  its place> (<date>, provisional until the human rules)
 
 ## Boundary — requires the human
 
-The loop never crosses these; they batch to the human handoff.
-
 - Publish: <push / PR / merge / deploy / release>
 - Credentials: <live secrets, biometric-gated actions>
-- Direction: <genuinely undecided product/architecture calls — accumulate as `blocked: needs N decisions`>
+- Direction: <undecided product or architecture calls>

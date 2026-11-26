@@ -21,4 +21,4 @@ contract.
 Prefer questions about data models, invariants, edge cases, security,
 operability, compatibility, and scope boundaries. Avoid questions that can be
 answered by reading the repo, or already answered in the surface's Decisions
-or the doctrine.
+or the repository's instructions.

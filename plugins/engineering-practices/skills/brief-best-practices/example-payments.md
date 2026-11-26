@@ -1,12 +1,7 @@
 # BRIEF — peer-to-peer transfer flow (worked example)
 
-> Illustrative filled brief for a money-transfer surface — the seven slots on a non-visual,
-> high-stakes informatics system. Content here is illustrative, not a real system spec.
-
-> Law doc for the transfer flow, present-tense, no narrated history — git is the changelog. The
-> Boundary and ratified Decisions amend only with human confirmation; the driver appends
-> provisional Decisions, marked and dated. Working memory lives in the coordinator's log or a handoff,
-> not here; floor waivers are dated Decisions below.
+> Illustrative filled brief for a money-transfer surface: a non-visual,
+> high-stakes system. Content here is illustrative, not a real system spec.
 
 ## Bar
 
@@ -49,7 +44,6 @@ moves funds the sender did not authorize** — or it does not ship.
 - An unbounded retry, or a retry without an idempotency key.
 - A secret in a log line, error message, or trace.
 - Weakening a floor, or shipping a failing path without a dated waiver Decision and a replacement.
-- Asking the human to lower the bar.
 
 ## Decisions
 
@@ -62,10 +56,10 @@ moves funds the sender did not authorize** — or it does not ship.
 
 ## Boundary — requires the human
 
-The loop never crosses these; they batch to the human handoff.
+These stay with the human.
 
 - Publish: deploy to production, database migrations, feature-flag flips that expose the flow to users.
-- Credentials: any live-key access (production DB, signing keys, KMS) — the loop verifies against
+- Credentials: any live-key access (production DB, signing keys, KMS) — verification runs against
   staging/forked state, never production secrets.
 - Direction: limit policy, fee structure, regulatory/compliance calls — accumulate as
   `blocked: needs N decisions` rather than guessing.

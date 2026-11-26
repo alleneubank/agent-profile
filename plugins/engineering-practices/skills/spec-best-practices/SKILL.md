@@ -49,7 +49,7 @@ No acceptance checklist: the named checks passing is acceptance. A change's acce
 
 **Retroactive specs are first-class**: documenting existing behavior is valid and encouraged. Read the implementation, extract requirements from actual behavior, note inconsistencies as open items (not silent omissions), name the existing checks that hold each guarantee.
 
-**External-API integrations**: before locking requirements for an integration with an external provider, run a recall sweep for prior findings on that provider/API and fetch the provider's current docs — do not spec against remembered API shapes; deprecations and legacy endpoints invalidate them. Treat unexplained existing config (keys, scopes, endpoints) as an investigation trigger, not dead code.
+**External-API integrations**: before locking requirements for an integration with an external provider, search recorded sessions for prior findings on that provider/API (the `recall` skill, where installed) and fetch the provider's current docs — do not spec against remembered API shapes; deprecations and legacy endpoints invalidate them. Treat unexplained existing config (keys, scopes, endpoints) as an investigation trigger, not dead code.
 
 **Mutation policy**: the spec is the human+agent contract — do not reshape the agreed outcome without direction. A new app, service, or product capability outside that outcome changes scope; internal implementation choices within it remain the driver's. A reversible interior call that refines spec territory may land as a dated provisional Decisions entry, ratified at the boundary. When spec/implementation drift is found, investigate against existing authorization; surface unresolved contract changes for the human instead of silently changing the expected behavior.
 
@@ -57,7 +57,7 @@ No acceptance checklist: the named checks passing is acceptance. A change's acce
 
 ## Lifecycle
 
-**Creation (SPEC gate)**: the gate passes when the colocated `SPEC.md` carries `REQ-*` guarantees, each naming its check or marked `unchecked`, and non-goals — plus risk tags whenever high-risk items exist. Determine placement, read the existing file and identify gaps (or create at the correct colocated path), and ensure every required element is present before PLAN begins.
+**Creation**: a new `SPEC.md` is ready when the colocated file carries `REQ-*` guarantees, each naming its check or marked `unchecked`, and non-goals — plus risk tags whenever high-risk items exist. Determine placement, read the existing file and identify gaps (or create at the correct colocated path), and ensure every required element is present before implementation begins.
 
 **Maintenance**: update spec when behavior changes; append new `REQ-*` IDs; delete a superseded or removed guarantee, and a Decisions entry no longer in force, in the change that supersedes it; replace `unchecked` with the check once it runs, and update a guarantee in the change that renames or removes its check; cross-check spec against implementation whenever both are in context and surface drift.
 

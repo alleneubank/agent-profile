@@ -28,5 +28,6 @@ agreement, distinguishing proposals from human-ratified boundaries.
 
 Revise the brief when the quality agreement changes, not after every iteration.
 Put live progress in the existing task record. Remove obsolete briefs when
-the governed surface is removed. The adjacent templates and examples are
-illustrations for tasks that need that structure, not required document forms.
+the governed surface is removed. The adjacent [template](template.md) and
+[example](example-payments.md) illustrate a brief that needs that structure;
+they are not required forms.
