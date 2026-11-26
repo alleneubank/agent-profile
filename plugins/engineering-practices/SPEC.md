@@ -163,8 +163,22 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   5.2 without the profile, two runs per arm: no skill gave unbounded queues
   and no assertions in both runs; the full skill and a wider trim both gave
   bounded queues and assertions in both, and the wider trim lost only
-  units-last naming in one run, so naming stays. Not run on other models.
+  units-last naming in one run, so naming stays. The same task on Codex
+  (gpt-5.6-sol, no profile, two runs per arm): no skill left the queue
+  unbounded in both runs; the old and trimmed skill bounded it in both.
   (2026-11-26, human approved the trim; pilot only)
+- The Go, Python, TypeScript, React, Playwright, and Nix skills keep only
+  house decisions, gotchas, and where to read the installed tool's truth;
+  `react-patterns.md` and `playwright-patterns.md` are removed, descriptions
+  trigger on writing or changing files, not reading them, and no skill
+  force-loads another. Nix keeps only facts verified on nix 2.33.3. Basis:
+  30 days of loads (python 2,741, typescript 1,662, react 647, playwright
+  318, go 156, nix 115); a cold read put 75–85% of their text at what a
+  current model does unprompted; on the frozen task the old and trimmed
+  TypeScript skill gave the same outcomes on Codex (bounded queue in one of
+  two runs each) and the old skill added nothing over `code-law` on Fable
+  5.2. Only TypeScript was run; the other five rest on the read.
+  (2026-11-26, human approved; pilot only)
 
 ## Acceptance criteria
 

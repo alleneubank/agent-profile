@@ -5,44 +5,10 @@ description: Use when writing or modifying Playwright tests (.spec.ts, .test.ts 
 
 # Playwright Best Practices
 
-## CLI Context: Prevent Context Overflow
-
-When running Playwright tests from Claude Code or any CLI agent, always use minimal reporters to prevent verbose output from consuming the context window.
-
-**Use `--reporter=line` or `--reporter=dot` for CLI test runs.** Configure `playwright.config.ts` to default to minimal reporters when `CI` or `CLAUDE` env vars are set — see `playwright-patterns.md` for the config snippet.
-
-## Locator Priority (Most to Least Resilient)
-
-Always prefer user-facing attributes:
-
-1. `page.getByRole('button', { name: 'Submit' })` — accessibility roles
-2. `page.getByLabel('Email')` — form control labels
-3. `page.getByPlaceholder('Search...')` — input placeholders
-4. `page.getByText('Welcome')` — visible text (non-interactive)
-5. `page.getByAltText('Logo')` — image alt text
-6. `page.getByTitle('Settings')` — title attributes
-7. `page.getByTestId('submit-btn')` — explicit test contracts
-8. CSS/XPath — last resort, avoid
-
-## Core Rules
-
-- **Web-first assertions**: always `await expect(locator).toBeVisible()`, never `expect(await locator.isVisible()).toBe(true)` — web-first matchers auto-wait and retry
-- **Test isolation**: each test creates its own data; never share state between tests
-- **Auth state reuse**: save authenticated state via setup project + `storageState`; never log in via UI in every test
-- **Fixtures over beforeEach**: fixtures encapsulate setup + teardown, run on-demand, and compose
+- **Use `--reporter=line` or `--reporter=dot` for CLI test runs** from an agent; the default reporter's verbose output consumes the context window.
 
 ## Anti-Patterns
 
-- `page.waitForTimeout(ms)` — use auto-waiting locators instead
-- `page.locator('.class')` — use role/label/testid
-- XPath selectors — fragile, use user-facing attributes
-- Shared state between tests — each test creates own data
-- UI login in every test — use setup project + storageState
-- Manual assertions without await — use web-first assertions
 - Asserting a `page.route` handler fired — a change detector; assert the DOM the user sees (`testing-best-practices`)
-- Hardcoded waits — rely on Playwright's auto-waiting
-- Retry loops around assertions — web-first assertions already retry
 - Registering `page.route` mocks after navigation — set them up before `goto`
-- Default reporter in CI/agent — use `--reporter=line` or `--reporter=dot`
-
-See `playwright-patterns.md` for Page Object Model, fixtures, network mocking, and configuration examples.
+- Retry loops around assertions — web-first assertions already retry

@@ -4,10 +4,6 @@ Electrobun builds cross-platform desktop apps with TypeScript and Bun. This skil
 
 Docs: https://blackboard.sh/electrobun/docs/
 
-## Pair with TypeScript Best Practices
-
-Always load `typescript-best-practices` alongside this skill.
-
 ## Version and Freshness
 
 Electrobun APIs evolve quickly. Before relying on advanced options or platform-specific behavior, verify against current docs and CLI output.
