@@ -55,8 +55,6 @@ no longer be written or another check covers it.
   the conversation, the change's history (`new`, `v2`, `fixed`, `updated`,
   `refactored`), or the author's reasoning. When a plain form and a clever
   form are both correct, the plain form ships.
-- Types first: define types and data models before logic; make illegal
-  states unrepresentable; schema changes drive implementation.
 - Assert the invariants code relies on. Programmer errors (violated
   invariants) are asserted and crash; operating errors (bad input,
   timeouts) are handled and reported — never confuse the two. Assertions
@@ -78,11 +76,6 @@ no longer be written or another check covers it.
   and data planes size their structures from the bounds at startup and do not
   allocate on the hot path; a structure that is full says so instead of
   growing.
-- Optimize for the reader's cognitive load. Keep each function at one level of
-  abstraction; order statements with their data flow; keep relevant details
-  close and hide only details whose abstraction reduces what the reader must
-  hold. Abstraction and indirection are costs too, so add them only when the
-  resulting contract is clearer.
 - Prefer immutability and pure functions; isolate side effects at system
   boundaries; push `if`s up and `for`s down — parents own control flow and
   state, leaves stay pure. Every branch accounts for its complement: a guard
@@ -125,19 +118,12 @@ no longer be written or another check covers it.
   ordering or safety constraint. Replace narration of what code does with clearer
   names or structure, and replace enforceable assumptions with assertions.
   Public API comments state the contract, not implementation details.
-- Declare variables at the smallest scope, computed closest to use. A value the
-  environment, operator, or caller must choose belongs in configuration; a fixed
-  domain invariant belongs in a clearly named constant or type.
+- A value the environment, operator, or caller must choose belongs in
+  configuration; a fixed domain invariant belongs in a clearly named constant
+  or type.
 
 ## Interfaces and abstraction
 
-- Prefer platform-supported design over a custom wrapper, and derivation from a
-  source of truth over cached local state and the cleanup machinery it needs.
-- Make the correct call easy and misuse hard. Prefer compiler-enforced contracts,
-  then runtime checks, then documentation. Return fully initialized values, use
-  domain types for constrained values and units, and group parameters that form
-  one concept into a value object. Put lifetime collaborators in construction and
-  pass per-call work to the operation.
 - Choose defaults by the cost of a mistake. Destructive or irreversible behavior
   is explicit opt-in; environment-specific targets that cannot be chosen safely
   are required rather than guessed. A convenient default is valid only when its
@@ -148,8 +134,6 @@ no longer be written or another check covers it.
   abstraction becomes clear. Build for current and planned use cases, not merely
   possible ones. A test seam is justified by its real consumer, but speculative
   generality is not.
-- Wrap an external API when doing so clearly bounds change or gives the domain a
-  better contract; do not wrap familiar standard types by reflex.
 - When a CLI, API, control plane, or automation surface is operated by agents,
   load `agent-operability`. Its inspect/plan/apply/verify contract is the public
   expression of this skill's deterministic, idempotent, atomic, observable,

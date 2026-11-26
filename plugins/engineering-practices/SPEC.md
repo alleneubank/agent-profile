@@ -39,9 +39,10 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   workflows and important error classes while keeping the suite small; hermetic
   runs prefer ephemeral state and shared environments require idempotent,
   state-tolerant flows.
-- **REQ-DOCTRINE-004 — Code structure:** `code-law` governs cognitive load,
-  hard-to-misuse interfaces, safe defaults, narrow failure regions, precise
-  naming and comments, and evidence-based abstraction.
+- **REQ-DOCTRINE-004 — Code structure:** `code-law` governs safe defaults,
+  narrow failure regions, precise naming and comments, and evidence-based
+  abstraction. Readability is REQ-DOCTRINE-016; misuse resistance is held by
+  construction, the skill's opening rule.
 - **REQ-DOCTRINE-016 — Human reader:** `code-law` names the reader as a human
   maintainer without the authoring conversation, sets the bar at prose-like
   readability with reviewer struggle as a code defect, and forbids task,
@@ -155,6 +156,15 @@ rules while naming the tradeoffs and exceptions that change an agent's decision.
   issue #8169), in which a file-by-file read of every unit test found 234 of
   1,212 files grading rendered props, mocks, or constants; #8176 deleted them.
   (2026-09-24, provisional)
+- `code-law` drops five craft bullets a current model follows unprompted
+  (types first, cognitive load, smallest variable scope, platform over
+  wrapper, hard-to-misuse calls, wrapping external APIs); the bullets
+  scenarios 6 and 12 exercise stay. Basis: a pilot on one frozen task, Fable
+  5.2 without the profile, two runs per arm: no skill gave unbounded queues
+  and no assertions in both runs; the full skill and a wider trim both gave
+  bounded queues and assertions in both, and the wider trim lost only
+  units-last naming in one run, so naming stays. Not run on other models.
+  (2026-11-26, human approved the trim; pilot only)
 
 ## Acceptance criteria
 
