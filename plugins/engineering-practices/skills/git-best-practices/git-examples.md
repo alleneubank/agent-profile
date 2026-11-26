@@ -78,22 +78,3 @@ instead of { token, expiry }. All clients must update their parsers.
 </example>
 
 </examples>
-
-## Branch Discovery Fallback
-
-Use when `gh` is unavailable or the repo has no remote:
-
-```bash
-# Infer default branch from local refs
-git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@'
-
-# Last resort: check local branches and fail loudly if unknown
-if git rev-parse --verify main >/dev/null 2>&1; then
-  echo main
-elif git rev-parse --verify master >/dev/null 2>&1; then
-  echo master
-else
-  echo "ERROR: unable to determine default branch (main/master not found)." >&2
-  exit 1
-fi
-```

@@ -1,6 +1,6 @@
 ---
 name: e2e
-description: Use when running or repairing a scripted end-to-end test suite.
+description: Use when diagnosing or repairing failures in a scripted end-to-end test suite.
 ---
 
 # E2E Testing
@@ -13,20 +13,13 @@ that work.
 
 ## Failure Taxonomy
 
-Treat these as diagnostic hypotheses, not labels inferred from pass/fail history:
+Classify each failure as **flaky** (test or environment nondeterminism without a
+product defect), **outdated** (the test asserts behavior that was intentionally
+changed), or **bug** (the code does not match the spec). Treat these as
+diagnostic hypotheses, not labels inferred from pass/fail history:
 
-**A. Flaky** (test or environment nondeterminism without a product defect)
-- Uncontrolled test clocks, shared fixtures, stale selectors, missing waits, or
-  infrastructure variance
 - A retry may provide evidence, but a pass on retry does not prove flakiness; an
   intermittent product race remains a product bug
-
-**B. Outdated** (test no longer matches implementation)
-- Test asserts old behavior that was intentionally changed; selectors reference removed elements
-- Symptom: consistent failure, app works correctly
-
-**C. Bug** (implementation doesn't match spec)
-- Test correctly asserts spec'd behavior, code is wrong
 - **Only classify as bug when a spec exists to validate against**
 - If no spec exists, classify as "unverified failure" and report to the user
 
@@ -44,8 +37,7 @@ exonerate the product.
   fixture, clock, selector, and synchronization defects belong to the harness
 
 **Outdated fixes:**
-- Update test assertions to match current (correct) behavior
-- Update selectors to match current DOM/API
+- Update assertions and selectors to match current (correct) behavior
 - **Never change source code** - the implementation is correct, the test is stale
 - Before updating, check what the test asserts. A selector or DOM update to a test that does assert user-visible behavior is an ordinary update; a test that asserts which calls fired rather than what the user sees is a change detector, and re-syncing it to the new call sequence launders it — rewrite it against the observable outcome or delete it
 
@@ -77,38 +69,14 @@ Run the repo's own e2e command (its package or task-runner script, with a
 minimal reporter) once any required dev server or Tilt environment is up and
 its services and test users respond; log leftover state instead of failing on
 it. The colocated `SPEC.md`, and the supporting `*.spec.md` files it links, is
-the source of truth for bug decisions. Parse failures into:
-
-| Test | File | Error | Category |
-|---|---|---|---|
-| `login flow` | `auth.spec.ts:42` | timeout waiting for selector | TBD |
+the source of truth for bug decisions.
 
 For each failure: read the test and source it exercises, check the corresponding
 contract, locate the source of nondeterminism or mismatch, then assign a category
 (flaky / outdated / bug / unverified). Retry outcome is evidence, not the
-classification rule. Fix by category, re-run, and report:
-
-```
-## E2E Results
-
-**Run**: `yarn test:e2e` on <date>
-**Result**: X/Y passed
-
-### Fixed
-- FLAKY: `auth.spec.ts:42` - replaced waitForTimeout with getByRole wait
-- OUTDATED: `profile.spec.ts:88` - updated selector after header redesign
-- BUG: `transfer.spec.ts:120` - fixed amount validation per SPEC.md#transfers
-
-### Remaining Failures
-- UNVERIFIED: `settings.spec.ts:55` - no spec, needs user decision
-
-### Evidence
-- Artifact/environment: <tested revision, build and target>
-- `artifacts/transfer-trace.zip` - actual transfer outcome and error path
-- `artifacts/transfer-result.png` - visible result, not proof of settlement
-
-### Regression Coverage
-- <existing or added behavior check; omit additional tests when redundant>
-```
+classification rule. Fix by category, re-run, and report: the command and
+tested revision, pass count, each fix with its category and file, remaining
+unverified failures, and the evidence artifacts with what each does and does
+not prove.
 
 See `testing-best-practices` for condition waits and flake diagnosis.

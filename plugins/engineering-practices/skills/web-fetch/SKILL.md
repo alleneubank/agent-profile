@@ -14,13 +14,7 @@ Fetch web content in this order:
 
 ## Prerequisites
 
-Verify required tools before extracting:
-
-```bash
-command -v curl >/dev/null || echo "curl is required"
-command -v html2markdown >/dev/null || echo "html2markdown is required for HTML extraction"
-command -v bun >/dev/null || echo "bun is required for fetch.ts fallback"
-```
+Needs `curl`, `html2markdown` (selector extraction), and `bun` (fallback script).
 
 Rendering JavaScript-built pages needs Chrome or Chromium: the macOS app,
 `google-chrome`/`chromium` on PATH, or `CHROME_PATH`. Headless Linux hosts get
@@ -60,30 +54,6 @@ fi
 | github.com (docs) | `article` | `nav,.sidebar` |
 | Generic | `article,main,[role=main]` | `nav,header,footer,script,style` |
 
-Example:
-
-```bash
-curl -sL "<url>" \
-  | html2markdown \
-      --include-selector "#content-container" \
-      --exclude-selector "nav,header,footer"
-```
-
-## Finding the Right Selector
-
-When a site isn't in the patterns list:
-
-```bash
-# Check what content containers exist
-curl -s "<url>" | grep -o '<article[^>]*>\|<main[^>]*>\|id="[^"]*content[^"]*"' | head -10
-
-# Test a selector
-curl -sL "<url>" | html2markdown --include-selector "<selector>" | head -30
-
-# Check line count
-curl -sL "<url>" | html2markdown --include-selector "<selector>" | wc -l
-```
-
 ## Universal Fallback Script
 
 When selectors produce poor or empty output, run the bundled parser:
@@ -99,38 +69,15 @@ with a throwaway profile, which runs its scripts and dumps the finished DOM.
 Use a driven browser (playwriter) only when the page needs a signed-in session
 or interaction such as clicking tabs.
 
-If already in the skill directory:
-
-```bash
-bun fetch.ts "<url>"
-```
-
-## Options Reference
-
-```bash
---include-selector "CSS"  # Keep only matching elements
---exclude-selector "CSS"  # Remove matching elements
---domain "https://..."    # Convert relative links to absolute
-```
+`fetch.ts` picks the largest of `article`, `main`, `[role=main]`, `.content`,
+`#content` and strips navigation itself; it does not detect markdown-native
+endpoints, so check the content type first.
 
 ## Troubleshooting
 
-**Empty output with selectors**: The page might be markdown-native. Check headers first:
+**Empty output with selectors**: the page may be markdown-native; check
+`curl -sIL "<url>" | grep -i '^content-type:'`.
 
-```bash
-curl -sIL "<url>" | grep -i '^content-type:'
-```
-
-**Wrong content selected**: The site may have multiple article/main regions:
-
-```bash
-curl -s "<url>" | grep -o '<article[^>]*>'
-```
-
-**`html2markdown` not found**: Install it, then retry selector-based extraction.
-
-**`bun` or script deps missing**: Run `bun install` from this skill directory.
-
-**Missing code blocks**: Check if the site uses non-standard code formatting.
+**`bun` or script deps missing**: run `bun install` from this skill directory.
 
 **Client-rendered content**: If HTML only has "Loading..." placeholders or a "requires JavaScript" notice, run `fetch.ts`, which renders it; force rendering with `--render` when the page has some static text but the content is still missing.

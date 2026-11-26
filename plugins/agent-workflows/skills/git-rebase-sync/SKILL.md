@@ -7,18 +7,7 @@ description: Use when syncing a feature branch onto the latest origin base branc
 
 Use this skill when you need to sync a feature branch onto the latest `origin/{base_branch}` via **git rebase**, including deliberate conflict resolution. Invoking this skill is the order to rebase: the local rebase runs behind a backup tag as reversible interior work — print each history-rewriting command as a status line, do not wait for confirmation. Pushes follow per-ref publish semantics (step 9).
 
-## Goals
-- Rebase the current branch onto a specified base branch (often the repo default branch like `dev` or `main`).
-- Resolve conflicts deliberately, without guesswork.
-- Keep safety rails: backup ref, `--force-with-lease`, per-ref push semantics.
-
-## Hard Rules
-- Do not create or switch to a different feature branch. Operate on the current branch unless the user explicitly asks otherwise.
-- Print each history-rewriting command (`git rebase ...`, `git push --force*`) as a one-line status before running it.
-- Create a local backup ref (prefer an annotated tag) before starting the rebase. Do not push backup refs unless the user explicitly asks.
-- Prefer `git push --force-with-lease`, never plain `--force`.
-- Push per step 9; shared and deploy-tracked refs stay with the user.
-- Resolve conflicts as step 7 describes. Do not invent product behavior.
+Operate on the current branch: do not create or switch to a different feature branch unless the user explicitly asks. Print each history-rewriting command (`git rebase ...`, `git push --force*`) as a one-line status before running it.
 
 ## Workflow
 
@@ -36,10 +25,10 @@ Use this skill when you need to sync a feature branch onto the latest `origin/{b
   - `git status`
 - If `git status` indicates an in-progress merge/rebase/cherry-pick, do not stack a rebase on top: investigate what it is and finish or abort it first; surface it to the user only if its state is genuinely unclear.
 
-### 3) Create a local backup ref (do not push)
+### 3) Create a local backup ref
 - Create an annotated tag at current `HEAD`:
   - `git tag -a {branch_name}-rebase-backup-$(date +%Y%m%d-%H%M%S) -m "pre-rebase backup" HEAD`
-- Record the tag name as `{backup_ref}` for recovery.
+- Record the tag name as `{backup_ref}` for recovery. Do not push backup refs unless the user explicitly asks.
 
 ### 4) Choose rebase mode (normal vs preserve merges)
 - Check whether the branch contains merge commits:
@@ -81,7 +70,7 @@ When conflicts happen:
    - Identify conflicted files (from status output).
 2. Resolve each conflicted file:
    - Investigate first: open the file, read the surrounding code and both sides' intent — most conflicts are located facts, not judgment calls.
-   - Prefer minimal, mechanical resolutions: keep upstream changes unless the feature branch deliberately supersedes them; re-run generators (lockfiles, codegen) instead of hand-editing when appropriate.
+   - Do not invent product behavior. Prefer minimal, mechanical resolutions: keep upstream changes unless the feature branch deliberately supersedes them; re-run generators (lockfiles, codegen) instead of hand-editing when appropriate.
    - Check the brief's Decisions and the doctrine for a standing answer before treating intent as ambiguous.
    - If intent is genuinely forked, consult an independent model carrying the evidence and candidate resolutions, then decide provisionally and log the call.
 3. Apply the resolution, then stage only resolved files:
@@ -90,11 +79,6 @@ When conflicts happen:
    - `git rebase --continue`
 5. Accumulate any calls that genuinely need the user into one numbered batch delivered at the end — never ask serially. If a conflict is too risky to resolve even provisionally, abort the rebase (`git rebase --abort` is safe) and report an honest block: what was tried, why it cannot converge, and the batched questions.
 
-Helpful commands during conflicts:
-- Inspect current conflict hunks: `git diff`
-- See the commit being replayed: `git show`
-- If you need to back out: `git rebase --abort` (this is safe and should be preferred over destructive resets)
-
 ### 8) Post-rebase verification
 - Show the new commit range:
   - `git log --oneline --decorate origin/{base_branch}..HEAD`
@@ -102,7 +86,7 @@ Helpful commands during conflicts:
 - Run appropriate repo checks (tests, typecheck, lint) if available.
 
 ### 9) Push updated branch(es) — per-ref semantics
-- If the branch already exists on origin, rebasing rewrites history, so pushing requires force-with-lease.
+- If the branch already exists on origin, rebasing rewrites history, so pushing requires `--force-with-lease`, never plain `--force`.
 - `--update-refs` only moves **local** refs. A normal `git push` updates the current branch only — each stacked branch (from step 5) that also exists on origin must be force-pushed **individually**.
 - Discover which refs deploy pipelines track (CI/CD config, repo docs) before pushing.
 - Establish ownership for **each** ref about to be pushed — the current branch and every moved stacked branch individually, before its push:

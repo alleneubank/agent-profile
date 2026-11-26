@@ -18,9 +18,6 @@ attribution does.
 - **Never kill before attributing.** Every target needs a named reason its
   owner is gone (see Ownership evidence). "It is old" and "it looks stale"
   are not reasons.
-- **Prefer the project's sanctioned teardown** over hand-killing PIDs and
-  containers. A stack's own `down` command knows about halves you have not
-  found yet.
 - **Never remove one compose-managed member as an isolated fix.** Tear down the
   complete attributed project as a group; leaving hand-selected members behind
   wedges the project.
@@ -31,10 +28,6 @@ attribution does.
   live after it was approved, the approval is void — stop, say which
   evidence changed, and re-ask. Approval granted on a wrong premise is not
   authorization.
-- **Data reclaim is always opt-in and separate.** Never fold volume/image
-  pruning, database deletion, or a factory reset into process cleanup. Inventory
-  exact targets and the data they hold, then obtain explicit authorization for
-  that deletion alone.
 - **Shared hosts belong to other people too.** Confirm before clearing
   anything you did not start.
 
@@ -132,8 +125,10 @@ are **not** touching and why — that list is as useful as the kill list.
 
 ### 5) Tear down stacks with their own command
 
-Discover the sanctioned teardown before improvising (`package.json` scripts,
-`Makefile`, the project's README):
+Prefer the project's sanctioned teardown over hand-killing PIDs and containers:
+a stack's own `down` command knows about halves you have not found yet.
+Discover it before improvising (`package.json` scripts, `Makefile`, the
+project's README):
 
 ```bash
 # example shape: supervisor down -> compose down -> generated runtime cleanup
@@ -182,7 +177,9 @@ proves it disposable or separate authorization names that data-bearing target.
 
 ### Data reclaim is a separate boundary
 
-After compute cleanup, inventory retained data without deleting it:
+Data reclaim is always opt-in and separate: never fold volume/image pruning,
+database deletion, or a factory reset into process cleanup. After compute
+cleanup, inventory retained data without deleting it:
 
 ```bash
 docker volume ls --filter "label=com.docker.compose.project=<project>"
@@ -199,8 +196,10 @@ prune—and verify what remains afterward.
 
 ### 6) Kill with verify-before-signal, then escalate
 
-PIDs get reused. Re-confirm identity immediately before signalling, in the
-same command that signals:
+A candidate list may come from a process listing (step 2), but each signal goes
+to one individually verified PID, never to the listing's selector. PIDs get
+reused: re-confirm identity immediately before signalling, in the same command
+that signals:
 
 ```bash
 cmd=$(ps -p "$PID" -o command= 2>/dev/null || true)
@@ -236,33 +235,18 @@ do not corroborate.
 ### 8) Name the leak, not just the mess
 
 A sweep that does not identify why the host filled up guarantees a repeat.
-Report the mechanism when the evidence supports one:
+Report the mechanism when the evidence supports one, and file it or point at
+the existing issue:
 
-- **Ungraceful supervisor death** — foreground child processes started by a
-  supervisor reparent to init when it is killed rather than shut down. Every
-  long-running child is an orphan-in-waiting; random-port services accumulate
-  invisibly because they never collide.
-- **Host-scaled sizing with no cap** — connection pools, thread pools, and
-  heaps sized to host cores/RAM. Fine for one stack, fatal for four
-  concurrently. The fix is per-instance sizing plus a host-wide concurrency
-  cap, not a bigger sweep.
+- **Ungraceful supervisor death** — a killed supervisor's foreground children
+  reparent to init; random-port services accumulate because they never collide.
+- **Host-scaled sizing with no cap** — pools and heaps sized to host cores/RAM,
+  fine for one stack and fatal for four. The fix is per-instance sizing plus a
+  host-wide concurrency cap, not a bigger sweep.
 - **No lifecycle/TTL** — nothing expires a stack whose branch was deleted.
-
-File it or point at the existing issue. Repeated identical sweeps are the
-symptom of an unfixed structural leak.
 
 ## Red flags
 
-- Killing by age, name pattern, or process count without attribution
-- Removing selected `com.docker.compose.*` containers while leaving other
-  project members behind
-- Clearing the compose half and leaving the cluster + registry half up
-- Running the `down` level when only `clean` deletes the cluster
-- Bundling `docker volume prune` into a process cleanup
-- Running `compose down -v`, `docker volume rm`, a database purge, or a factory
-  reset under process-cleanup authority
-- Re-issuing a hung `docker`/`kubectl` call on a starved daemon
-- Declaring victory from the 1-minute load average alone
 - Reusing a previous sweep's exclusion rule (a path prefix, a PID list)
   instead of re-deriving it — which instance holds the live socket changes
   between sessions, and last time's rule will eventually cut live work

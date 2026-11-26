@@ -41,17 +41,6 @@ tilt logs "$RESOURCE" --port "$TILT_PORT" --since 5m --tail 200
 
 ## Resource Status
 
-```bash
-# All resources with status
-tilt get uiresources -o json | jq '.items[] | {name: .metadata.name, runtime: .status.runtimeStatus, update: .status.updateStatus}'
-
-# Single resource detail
-tilt get uiresource/<name> -o json
-
-# Wait for ready
-tilt wait --for=condition=Ready uiresource/<name> --timeout=120s
-```
-
 **One bounded wait, not a poll loop.** When waiting for a resource to
 converge, use a single blocking `tilt wait --for=<condition> --timeout=<t>`
 per resource — never a series of `tilt get` status polls. The only re-check
@@ -79,14 +68,6 @@ tilt logs "$RESOURCE" --since 5m --json
 
 Use full-stream terminal logs only for a short attended repro, not as the durable
 Tilt session.
-
-## Trigger and Lifecycle
-
-```bash
-tilt trigger <resource>             # Force update
-tilt up                             # Start
-tilt down                           # Stop and clean up
-```
 
 ## Tiltfile Args — Never Open the Editor
 
@@ -235,17 +216,7 @@ without a restart, so restarting is not a fix for any of them. Restart `tilt up`
 only for Tilt version upgrades, port/host changes, crashes, or cluster context
 switches.
 
-After editing, verify the existing Tilt run picked up the change:
-
-```bash
-RESOURCE=<resource>
-tilt get uiresource/"$RESOURCE" -o json | jq '.status.updateStatus'
-tilt wait --for=condition=Ready uiresource/"$RESOURCE" --timeout=120s
-tilt logs "$RESOURCE" --since 2m --tail 100
-```
-
 ## References
 
-- [TILTFILE_API.md](TILTFILE_API.md) - Tiltfile authoring
-- [CLI_REFERENCE.md](CLI_REFERENCE.md) - Complete CLI with JSON patterns
+- [CLI_REFERENCE.md](CLI_REFERENCE.md) - read for log filters, enable/disable, trigger, wait forms, and more jq patterns
 - https://docs.tilt.dev/

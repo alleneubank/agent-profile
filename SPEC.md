@@ -94,6 +94,29 @@ guidance is not counted as universally loaded context.
 
 ### Decisions
 
+- 2026-11-26 — Periodic review for the current model generation. `AGENTS.md`
+  is unchanged: each rule a cold read would have cut traces to a dated
+  decision here, and a 116-session sample showed none missed for length.
+  Changed: the verifier-bypass guard denies only a git invocation carrying
+  the bypass (all three sampled denials were prose in heredocs or PR bodies);
+  `skill-usage.sh` accepts Recall's Antigravity source; the coordinator
+  reloads its skill after a compaction, since Claude Code re-attaches at most
+  a skill's first 5,000 tokens; `gh` moves its flag catalogues to a
+  reference; `git-best-practices`, `git-rebase-sync`, `host-tidy`, `tilt`,
+  `web-fetch`, and `e2e` lose text that restated the tool's own help or their
+  own rules, `TILTFILE_API.md` is removed, and `e2e` triggers on diagnosing
+  or repairing failures. Shipped-campaign narrative and acceptance
+  checklists leave this file. Basis for the tool-skill trims: a frozen git
+  task on Codex (gpt-5.6-sol, no profile, two runs per arm): with no skill,
+  one run pushed to `main` and both used a stash and one unconventional
+  commit; the old and trimmed `git-best-practices` both gave separate
+  conventional commits, a pushed `wip/` branch, and all eight PR-body
+  sections in both runs. Only `git-best-practices` was run; the other six
+  rest on a cold read. The human's answers (2026-11-26, question tool):
+  fixes, the three trims, "Eval on Codex first (Recommended)", "Dissolve
+  narrative", and for `AGENTS.md` "No change (Recommended)". **ratified
+  (human); wording pending their merge**
+
 - 2026-11-23 — Two coordinator rules leave. `lease.sh state` no longer
   reads the queue: its refusal of `blocked-on-human` while a line is `ready`
   (exit 6) never fired from 14.10.0 on, and coordinators passed it by gating

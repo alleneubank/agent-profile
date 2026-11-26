@@ -52,14 +52,6 @@ unlabeled, and invisible to later sessions.
 - Target one logical change per commit in final PR-ready state
 - Mention uncommitted leftovers after committing
 
-### Force Push
-
-Use `--force-with-lease` exclusively to protect against overwriting upstream changes:
-
-```bash
-git push --force-with-lease origin feat/my-branch
-```
-
 ### Rebasing a Stack
 
 When rebasing a branch that other branches are stacked on (e.g. phased `NN-description` chains), use `git rebase --update-refs` so the stacked branches follow the rewrite instead of being orphaned on the old commits. `--update-refs` moves **local** refs only — each moved branch that also exists on the remote still needs its own `--force-with-lease` push (per-ref publish semantics), and any branch checked out in another worktree is skipped. For the full conflict-resolution and safety workflow, use the `git-rebase-sync` skill. When the branches form a GitHub stack (`gh stack view --json` succeeds), use `gh stack rebase` / `gh stack sync` instead so the stack's PR bases stay in step; see the `gh` skill.
@@ -72,21 +64,6 @@ Subject line rules:
 - Lowercase, imperative mood, no trailing period
 - Under 72 characters
 - Scope is optional but preferred when a clear subsystem exists
-
-Common types:
-
-| Type | Use for |
-|------|---------|
-| `feat` | New functionality |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `refactor` | Restructuring without behavior change |
-| `perf` | Performance improvement |
-| `chore` | Maintenance, dependencies, tooling |
-| `test` | Adding or updating tests |
-| `ci` | CI/CD pipeline changes |
-| `build` | Build system changes |
-| `style` | Formatting, whitespace (no logic change) |
 
 ### Commit Bodies
 
@@ -114,8 +91,6 @@ git branch --show-current
 git branch -r --list 'origin/main' 'origin/master' 'origin/production'
 ```
 
-If `gh` is unavailable or the repo has no remote, see the fallback commands in git-examples.md.
-
 Store the discovered branch name and reference it throughout. Use the actual branch name in all subsequent commands.
 
 ### Branch Naming
@@ -136,20 +111,10 @@ Include the ticket ID when an issue exists. Omit when there is no ticket.
 
 Use repository branch flow policy first. If policy is undocumented, a common baseline is:
 
-```
-{production-branch} (production deploys)
- └── {default-branch} (staging/testnet deploys, PR target)
-      ├── feat/add-feature-TICKET
-      ├── fix/bug-description-TICKET
-      └── hotfix/* (branches off production branch for hotfixes)
-```
-
 - Feature and fix branches start from the default branch
 - Hotfix branches start from the production branch
 - PRs target the default branch unless the repo uses a single-branch flow
 - When default branch and production branch are the same, all PRs target that branch directly
-
-The deploy annotations in the diagram are the publish map for the AGENTS.md publish law.
 
 ### Merge Strategy
 
