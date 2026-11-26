@@ -452,7 +452,7 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
 - REQ-CENSUS-005 — **Coverage**: local mode requires one complete local
   endpoint; default mode requires complete local-plus-fleet coverage. Expected
   and successful hosts MUST match, covered sources MUST equal the request (all
-  five by default), population counters MUST be internally consistent, and the
+  six by default), population counters MUST be internally consistent, and the
   all-time control MUST contain both sessions and attributed invocations. Every
   invocation row MUST contain at least one distinct session and MUST fit inside
   the considered-session population. If multiple reported names canonicalize
@@ -489,7 +489,7 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
 2. `npm run check` and `./scripts/validate.sh` pass without changing either
    plugin's `3.0.0` version.
 3. A real all-time and recent-window query succeeds only after every configured
-   host and all five sources report complete coverage.
+   host and all six sources report complete coverage.
 
 ## Decisions
 

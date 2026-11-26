@@ -15,7 +15,14 @@ import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const SOURCE_SCRIPT = fileURLToPath(new URL("../scripts/skill-usage.sh", import.meta.url));
-const ALL_SOURCES = ["claude_code", "codex", "pi_agent", "grok", "kimi_code"];
+const ALL_SOURCES = [
+  "claude_code",
+  "codex",
+  "pi_agent",
+  "grok",
+  "kimi_code",
+  "antigravity_cli",
+];
 
 interface CensusRow {
   skill_name: string;

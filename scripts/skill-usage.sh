@@ -140,7 +140,7 @@ output_format = sys.argv[5]
 local_only = sys.argv[6] == "true"
 source_args = sys.argv[7:]
 
-ALL_SOURCES = ("claude_code", "codex", "pi_agent", "grok", "kimi_code")
+ALL_SOURCES = ("claude_code", "codex", "pi_agent", "grok", "kimi_code", "antigravity_cli")
 SOURCE_ALIASES = {
     "claude-code": "claude_code",
     "claude_code": "claude_code",
@@ -155,6 +155,8 @@ SOURCE_ALIASES = {
     "kimi": "kimi_code",
     "kimi-code": "kimi_code",
     "kimi_code": "kimi_code",
+    "antigravity-cli": "antigravity_cli",
+    "antigravity_cli": "antigravity_cli",
 }
 POPULATION_FIELDS = (
     "considered_sessions",
