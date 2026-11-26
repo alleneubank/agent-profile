@@ -375,30 +375,12 @@ guidance is not counted as universally loaded context.
   school of thought, and an as-built record backfilled when a change first
   reaches an established surface without one. **ratified (human)**
 
-### Acceptance
+## Pi package
 
-- [ ] `scripts/validate-instructions.py` checks the default catalog, retired
-  references, local Markdown links, and universal word budget.
-- [ ] `tests/gate-routing-scenarios.md` compares baseline and candidate
-  decisions for bounded attended work, a tee-up agreement, absent-human continuation,
-  unchanged evidence, high-risk work, and honest blocked terminals; no material
-  or critical regression remains.
-- [ ] `npm run check` and `./scripts/validate.sh` pass on the final state.
-- [ ] A bounded baseline/candidate comparison covers UI persistence, service
-  integration, and concentrated logic, preserving useful unit tests/TDD and
-  rejecting false completion. Candidate artifacts identify the tested state;
-  screenshots do not substitute for checks of invisible effects.
-
-## Goal
-
-Make the agent-profile repo installable and usable as a pi package: `pi install git:...` (or `pi -e` for development) loads both plugins' skills and provides pi-native equivalents of the plugins' Claude/Codex hooks. No claude/codex manifests or hook scripts are modified — pi reads them; the shell scripts remain the single source of truth for hook policy.
-
-## Context
-
-- Repo layout: `plugins/engineering-practices/` and `plugins/agent-workflows/`, each with `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and `skills/` (Agent Skills standard). `agent-workflows` additionally ships `hooks/hooks.json` + two scripts.
-- Pi adapter hooks in scope: `SessionStart` (instruction-fingerprint → additionalContext) and `PreToolUse` on `Bash`/`shell` (verifier-bypass guard → deny JSON). `SubagentStart` has no pi analogue. The separately installed missionctl plugin owns its own `SessionStart` loop-context hook.
-- pi's hook model: in-process extension events (`session_start`, `tool_call`, ...). There is no hooks.json consumer in pi core; the extension is the consumer.
-- pi's skill loader already accepts Claude Code skill frontmatter (upstream #7468), so skills port untouched.
+`pi install` loads both plugins' skills and `extensions/pi-hooks.ts`, which
+runs the plugins' canonical hook scripts on pi's in-process events. pi has no
+hooks.json consumer and no native subagents, so `SubagentStart` has no pi
+analogue.
 
 ## Requirements
 
@@ -422,13 +404,6 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
 
 - Shelled: the adapter/plugin-host extension (revive only on the evidence trigger: bulk third-party plugin imports into pi).
 - Not now: recall/silo/canton/infra/linear manifests (later units), subagents, statusline, MCP, a `/plugin` review command, dedup machinery, dotfiles `pi/settings.json` retirement (unit 3).
-
-## Acceptance
-
-1. `npm run check` green (tsc `--noEmit` + `vitest run`), floors exercising real hook scripts.
-2. `./scripts/validate.sh` green including the new pi gate.
-3. Clean-host E2E: skills load, the fingerprint hook fires, no `extension_error` events (evidence in REQ-PI-007).
-4. Claude/Codex parity gate still green after all changes (proof of invariant 3).
 
 ## Cross-harness skill usage census
 
@@ -482,15 +457,6 @@ Make the agent-profile repo installable and usable as a pi package: `pi install 
 - Unmatched Recall names are visible without reducing the declared catalog's
   never-fired population.
 
-### Acceptance
-
-1. Fake-Recall wrapper tests prove REQ-CENSUS-001..006 and fail closed on every
-   incomplete-coverage class.
-2. `npm run check` and `./scripts/validate.sh` pass without changing either
-   plugin's `3.0.0` version.
-3. A real all-time and recent-window query succeeds only after every configured
-   host and all six sources report complete coverage.
-
 ## Decisions
 
 Dated entries; provisional statuses ratify only with human confirmation at the publish boundary. D1 ratified in-session by the human.
@@ -505,7 +471,6 @@ Dated entries; provisional statuses ratify only with human confirmation at the p
 - D8 2026-08-28 — **Agent-profile does not vendor or register missionctl.** Dotfiles installs the independently versioned executable through mise and the lifecycle adapter through missionctl's marketplace. **ratified (human)**
 - D9 2026-08-30 — **Skill usage is Recall-owned and fail-closed across the complete fleet.** The wrapper owns only current-catalog canonicalization and presentation; no skill is archived in this campaign. `afk` remains public and `writing-plans` remains a candidate only. **ratified (human)**
 
-Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into this SPEC + README + git history (dissolve-docs, 2026-08-11).
 - 2026-10-26 — Merge gates are keyed on inputs (`onboard`), and lane briefs
   ask for the repo's gate at the final head, not a full rerun (coordinator
   `files.md`); a full fresh run is for release candidates. Basis: a one-line
@@ -585,19 +550,6 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
 - Defer plugin version bumps and all publication to a separately authorized
   release action. (2026-09-03, provisional)
 
-### Acceptance
-
-1. `plugins/agent-workflows/skills/done/SKILL.md` validates, and its guest
-   charter produces per-scenario results plus behavior-evidence findings
-   rather than a static diff review.
-2. No always-loaded instruction requires generic reviewer approval to finish an
-   ordinary operable-surface change.
-3. Engineering-practice scenarios cover risk-driven QA, causal flake diagnosis,
-   legitimate test seams, property applicability, and prefactoring.
-4. Gate-routing scenarios distinguish harness-only, guest, specialist-review,
-   and human-boundary work, including exhausted task budgets.
-5. `npm run check` and `./scripts/validate.sh` pass after the final mutation.
-
 ## Agentic engineering mechanics
 
 ### Requirements
@@ -651,13 +603,3 @@ Campaign status: unit 1 shipped and E2E'd; this repo's LOOP.md dissolved into th
   soak-only prerequisite above. The exact law amendment is ratified for this
   isolated candidate; experiment execution and fleet adoption remain pending.
   (2026-09-20, ratified by the user's "apply it"; no behavioral improvement measured)
-
-### Acceptance
-
-1. `tests/agentic-engineering-scenarios.md` receives a fresh-context run with no
-   material-or-higher finding.
-2. All skill descriptions use trigger-shaped `Use when...` language, while
-   validated provenance metadata remains legal.
-3. Ordinary cleanup examples contain no implicit volume deletion or factory
-   reset path.
-4. `npm run check` and `./scripts/validate.sh` pass after the final mutation.

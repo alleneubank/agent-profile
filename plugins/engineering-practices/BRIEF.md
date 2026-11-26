@@ -79,9 +79,6 @@ wiki mirror, a list of absolutes, or a harness-specific procedure.
 - Agent operability has one dedicated skill; evidence freshness remains in
   testing guidance, and the external wiki remains provenance rather than a
   runtime dependency. (2026-09-03, ratified)
-- Engineering-practices 4.1.0 and agent-workflows 4.1.0 publication plus fleet
-  rollout are authorized for the current agentic-engineering campaign.
-  (2026-09-03, ratified)
 
 ## Boundary — requires the human
 
