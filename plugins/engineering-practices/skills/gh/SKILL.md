@@ -174,7 +174,7 @@ cmp evidence.zip.sha256 fresh-download/evidence.zip.sha256
 - Published assets in public repositories can be downloaded without login
   (2.96+); private repositories and drafts retain their access requirements.
 
-References: [media attachment rules](https://github.com/cli/cli/blob/v2.100.0/skills/gh/SKILL.md#attaching-images-and-videos),
+References: [media attachment rules](https://github.com/cli/cli/blob/v2.101.0/skills/gh/SKILL.md#attaching-images-and-videos),
 [release creation](https://cli.github.com/manual/gh_release_create),
 [release upload](https://cli.github.com/manual/gh_release_upload), and
 [draft visibility](https://docs.github.com/en/rest/releases/releases#list-releases).

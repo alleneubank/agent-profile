@@ -75,11 +75,14 @@ Runs on the assertions-and-bounds law in `code-law`; these are the Zig-specific 
 - Use `std.log.scoped(.module_name)` for namespaced logging; define a module-level `const log` constant.
 - Larger cohesive files are idiomatic — tests alongside implementation, comptime generics at file scope.
 
-## Advanced Topics
+## Current facts
 
-- **Generic containers** (queues, stacks, trees): See [GENERICS.md](GENERICS.md)
-- **C library interop** (raylib, SDL, curl): See [C-INTEROP.md](C-INTEROP.md)
-- **Debugging memory leaks** (GPA, stack traces): See [DEBUGGING.md](DEBUGGING.md)
+The fleet pins the Zig version (`zig version`); std APIs change between
+releases, so read the installed std source (`zig env` prints `std_dir`) before
+relying on a remembered name. Renames that bite on 0.16: the leak-checking
+allocator is `std.heap.DebugAllocator` (no `GeneralPurposeAllocator`), the C
+calling convention is `callconv(.c)`, and `std.ArrayList` methods take the
+allocator.
 
 ## Build caching
 
@@ -93,21 +96,10 @@ Runs on the assertions-and-bounds law in `code-law`; these are the Zig-specific 
 
 ## Tooling
 
-**zigdoc** — browse std library and dependency docs:
-```bash
-zigdoc std.mem.Allocator   # std lib symbol
-zigdoc vaxis.Window        # project dependency
-zigdoc @init               # create AGENTS.md with API patterns
-```
-
-**ziglint** — static analysis with `.ziglint.zon` config:
-```bash
-ziglint                    # lint current directory
-ziglint --ignore Z001      # suppress specific rule
-```
+`ziglint` (static analysis, configured by `.ziglint.zon`) runs where the
+project pins it.
 
 ## References
 
-- Language Reference: https://ziglang.org/documentation/0.15.2/
-- Standard Library: https://ziglang.org/documentation/0.15.2/std/
-- Zig Guide: https://zig.guide/
+- Language reference and std docs for the pinned version:
+  `https://ziglang.org/documentation/<zig version>/`

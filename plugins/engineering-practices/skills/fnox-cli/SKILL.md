@@ -14,7 +14,7 @@ failure is often an `op` failure one layer down.
 
 ## Law 1 — A secret value never enters the transcript
 
-fnox prints the value on **stdout**, plain, with no masking anywhere.
+fnox prints the value on **stdout**, plain. `fnox get` never masks it.
 
 ```bash
 fnox get KEY | wc -c                  # length only — the one safe inspection
@@ -24,15 +24,19 @@ TOKEN="$(fnox get KEY)"; curl -H "Authorization: Bearer $TOKEN" ...   # same too
 
 `fnox get` appends a newline, so `wc -c` reports the value's length plus one.
 
-**`fnox exec` does not mask, and this is where it differs from `op run`.**
-`op run` rewrites a leaked value in the child's output as `<concealed by
-1Password>`; fnox passes it through untouched on both streams. Verified on
-1.34.0 against a throwaway value: a child that echoes `$KEY` prints it
-verbatim, with no substitution on either stream.
+**`fnox exec` does not mask by default, and this is where it differs from
+`op run`.** `op run` rewrites a leaked value in the child's output as
+`<concealed by 1Password>`; fnox passes it through untouched on both streams
+(verified on 1.34.0 against a throwaway value). From 1.50.0, `fnox exec
+--redact` (or `redact_exec = true`, or `FNOX_EXEC_REDACT=1`) replaces values
+with `[REDACTED]`, but only on a stream that is piped or redirected, never on
+a terminal, and not for a value shorter than three characters or one the
+child transforms before printing.
 
 So `fnox exec` is the right default for *running a program* — it keeps the
 value out of argv and out of your own commands — but it is not a safety net.
-A child that echoes a secret leaks it, and no flag will stop that.
+Pass `--redact` when the child's output is captured; a child that echoes a
+secret to a terminal, or encodes it first, still leaks it.
 
 Never `fnox export`, `fnox get` bare, or anything else that puts a value on a
 terminal. `fnox list` and `fnox check` show keys, types, provider keys, and
@@ -144,10 +148,7 @@ password field), `Item/field`, or a full `op://VAULT/ITEM/FIELD` URI. Prefer
 the full URI: it is the only one that states the vault at the point of use, so
 a reader does not have to look up the provider to know what is being read.
 
-`provider add` accepts: `1password, age, aws, aws-kms, aws-ps, azure-ac,
-azure-kms, azure-sm, gcp, gcp-kms, fido2, bitwarden, doppler, foks,
-bitwarden-sm, infisical, keepass, keeper-sm, keychain, password-store,
-passwordstate, plain, proton-pass, vault, yubikey`.
+`fnox provider add --help` lists the provider types.
 
 ## Mechanics
 
@@ -209,4 +210,4 @@ error check` is the gate — or set `if_missing = "error"` on the secret in
 | `No configuration file found in ... or any parent` | Running outside the project | cd into the tree that owns `fnox.toml` |
 | Resolution prompts for approval every call | Daemon disabled or not running | `fnox daemon status`; check `[daemon] enabled` |
 | Wrong environment's secret resolved, no error | Provider vault unpinned across accounts | Add `account = ` to the provider — see `op-cli` Law 3 |
-| Child program leaked the secret | `fnox exec` does not mask, unlike `op run` | Fix the child; fnox cannot conceal for you |
+| Child program leaked the secret | `fnox exec` masks only with `--redact`, and only piped or redirected output | Fix the child; add `--redact` where its output is captured |
