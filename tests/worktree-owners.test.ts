@@ -1,5 +1,5 @@
 import { execFile, spawn } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -12,7 +12,8 @@ const scratch: string[] = [];
 afterEach(() => { for (const path of scratch.splice(0)) rmSync(path, { recursive: true, force: true }); });
 
 async function fixture() {
-  const home = mkdtempSync(join(tmpdir(), "worktree-owners-"));
+  // The script reports physical paths; macOS's default TMPDIR is a symlink.
+  const home = realpathSync(mkdtempSync(join(tmpdir(), "worktree-owners-")));
   scratch.push(home);
   const repo = join(home, "repo");
   const bin = join(home, "bin");
