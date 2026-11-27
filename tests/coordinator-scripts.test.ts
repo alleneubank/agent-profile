@@ -297,6 +297,34 @@ describe("retire.sh", () => {
     expect(readFileSync(join(root, "RECORD.md"), "utf8")).toBe("# l1 record\n");
   });
 
+  it("prunes the record of a linked worktree with a submodule under the root, freeing its branch", async () => {
+    const { f, root, retire } = lane();
+    const git = (cwd: string, ...args: string[]) => {
+      const result = spawnSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "protocol.file.allow=always", ...args], {
+        cwd, encoding: "utf8", env: { PATH: process.env.PATH ?? "/usr/bin:/bin", HOME: f.home, GIT_CONFIG_NOSYSTEM: "1" },
+      });
+      expect(result.status, result.stderr).toBe(0);
+      return result.stdout;
+    };
+    const library = join(f.home, "library");
+    const main = join(f.home, "main");
+    for (const repo of [library, main]) {
+      mkdirSync(repo);
+      git(repo, "init", "-q", "-b", "main");
+      git(repo, "commit", "-q", "--allow-empty", "-m", "start");
+    }
+    git(main, "submodule", "add", "-q", library, "library");
+    git(main, "commit", "-q", "-m", "add library");
+    git(main, "worktree", "add", "-q", "-b", "lane-l1", join(root, "main"));
+    git(join(root, "main"), "submodule", "update", "-q", "--init");
+    expect(git(main, "worktree", "list")).toContain("[lane-l1]");
+
+    expect((await retire()).status).toBe(0);
+    expect(existsSync(root)).toBe(false);
+    expect(git(main, "worktree", "list")).not.toContain("lane-l1");
+    git(main, "branch", "-q", "-D", "lane-l1");
+  });
+
   it("rejects deleting without opt-in, keeping anywhere else, an unknown lane, and paths through a symlink", async () => {
     const { f, root, retire } = lane();
     writeFileSync(join(root, "RECORD.md"), "# l1 record\n");

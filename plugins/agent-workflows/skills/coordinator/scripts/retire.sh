@@ -8,7 +8,11 @@
 # nothing kept stays under ~/Work. Use --keep . for the whole root. Every kept
 # path must exist; on failure the root survives, and a partial kept/ stays for
 # inspection, not reuse. Stop all writers first.
-# Exit: 0 retired, 2 usage, 3 copy/verification failure (root kept).
+# A linked git worktree under the root (submodules included) has its record
+# in the main repository pruned after the root is deleted, so its branch is
+# no longer checked out there.
+# Exit: 0 retired, 2 usage, 3 copy/verification failure (root kept),
+# 4 root deleted but a worktree record remains (named on stderr).
 set -e
 shopt -s dotglob nullglob
 
@@ -83,7 +87,31 @@ if [ ${#kept[@]} -gt 0 ]; then
     verify "$root/$path" "$destination/$path" 0 || fail "verification failed: $path; root kept" 3
   done
 fi
+# worktree_records: the administrative directory of each linked worktree under
+# the root, read from its .git file before the root goes. A submodule's .git
+# file points at a modules/ directory, which has no commondir file.
+worktree_records() {
+  local file gitdir
+  find "$root" -maxdepth "$WORKTREE_DEPTH_MAX" -name .git -type d -prune -o -name .git -type f -print |
+    while IFS= read -r file; do
+      gitdir=$(sed -n 's/^gitdir: //p' "$file")
+      case "$gitdir" in '') continue ;; /*) ;; *) gitdir=$(dirname "$file")/$gitdir ;; esac
+      [ -f "$gitdir/commondir" ] || continue
+      (cd "$gitdir" && pwd -P)
+    done
+}
+
+WORKTREE_DEPTH_MAX=8
+records=$(worktree_records)
 rm -rf "$root"
+remaining=""
+while IFS= read -r record; do
+  [ -n "$record" ] || continue
+  common=$(cd "$record" && cd "$(cat commondir)" && pwd -P) &&
+    git --git-dir="$common" worktree prune || true # a failed prune shows as a remaining record
+  [ ! -e "$record" ] || remaining="$remaining $record"
+done <<< "$records"
+[ -z "$remaining" ] || fail "$root deleted, but these worktree records remain (git worktree prune in their repository):$remaining" 4
 if [ ${#kept[@]} -gt 0 ]; then
   printf '%s\tretired\tkept in %s\n' "$root" "$destination"
 else
