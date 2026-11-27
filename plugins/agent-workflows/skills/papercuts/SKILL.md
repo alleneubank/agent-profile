@@ -19,7 +19,7 @@ papercut.sh "zmx run -d held the ssh call open; ran it under nohup instead"
 ```
 
 The script records the time, host, repository, and branch in this host's
-queue, `~/.handoffs/sharpening/papercuts.md`.
+queue, `~/Work/.handoffs/sharpening/papercuts.md`.
 
 - Report friction in the setup: tools, harness, instructions, skills, docs,
   environment. A defect in the product you are building belongs in the task

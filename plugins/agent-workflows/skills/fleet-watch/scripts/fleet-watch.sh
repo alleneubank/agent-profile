@@ -14,7 +14,7 @@
 #            when a condition starts and one CLEARED line when it ends:
 #              COORDINATOR GONE / LIMIT-STOPPED  a live lease on this host whose
 #                shell is gone or stopped on a usage limit; leases are read under
-#                ~/.handoffs and every coordination home the charter registry
+#                ~/Work/.handoffs and every coordination home the charter registry
 #                (fleet.md beside the caps file) names on this host;
 #              QUOTA     an account's weekly window at >= 90% or >= 97%;
 #              DISK      a caps-file host's home volume at >= 85% used, cleared
@@ -252,17 +252,24 @@ resolve() { # <key>
 }
 
 # coordination_homes <registry>: the default coordination home and the home of
-# each charter file the registry places on this host (<home>/<charter>/<file>).
+# each charter file the registry places on this host (<home>/<charter>/<file>),
+# each as its physical path, so a home reached through an alias (~/.handoffs ->
+# Work/.handoffs) is listed once.
 coordination_homes() {
   local here host path
   here=$(hostname -s)
-  printf '%s\n' "${COORDINATION_HOME:-$HOME/.handoffs}"
-  sed -n 's/^|[^|]*| *\([^:| ]*\):\([^ |]*\).*/\1 \2/p' "$1" |
-    while read -r host path; do
-      [ "$host" = "$here" ] || [ "$host" = localhost ] || continue
-      path=${path/#\~/$HOME}
-      dirname "$(dirname "$path")"
-    done
+  {
+    printf '%s\n' "${COORDINATION_HOME:-$HOME/Work/.handoffs}"
+    sed -n 's/^|[^|]*| *\([^:| ]*\):\([^ |]*\).*/\1 \2/p' "$1" |
+      while read -r host path; do
+        [ "$host" = "$here" ] || [ "$host" = localhost ] || continue
+        path=${path/#\~/$HOME}
+        dirname "$(dirname "$path")"
+      done
+  } | while read -r path; do
+    [ -d "$path" ] || continue # a home that does not exist holds no leases
+    (cd "$path" && pwd -P)
+  done
 }
 
 # source_failed <source> <class>: an exception of its own while a check's

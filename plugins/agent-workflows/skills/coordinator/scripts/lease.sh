@@ -18,7 +18,7 @@
 # Exit: 0 ok, 2 usage, 3 no lease, 4 caller does not hold the watch, 5 lease busy,
 # 7 sox could not label the shell the lease names.
 #
-# The lease is $COORDINATION_HOME/<charter>/lease (~/.handoffs by default),
+# The lease is $COORDINATION_HOME/<charter>/lease (~/Work/.handoffs by default),
 # the only record of a charter's state. The caller is this Claude Code
 # session (CLAUDE_CODE_SESSION_ID) in the sox shell `sox which` names, so a
 # caller cannot claim another's identity by passing it. take writes live;
@@ -133,7 +133,7 @@ if [ "${1:-}" = list ]; then
   [ $# -eq 1 ] || usage
   LC_ALL=C
   read_live_shells
-  for lease in "${COORDINATION_HOME:-$HOME/.handoffs}"/*/lease; do
+  for lease in "${COORDINATION_HOME:-$HOME/Work/.handoffs}"/*/lease; do
     [ -f "$lease" ] || continue
     if [ -n "$(field released_at)" ]; then held=released; else held=held; fi
     printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$(field charter)" "$(field watch)" "$held" \
@@ -146,7 +146,7 @@ fi
 command=$1 charter=$2
 shift 2
 case "$charter" in ''|*[!A-Za-z0-9._-]*|.*) fail "charter must be a plain name like op-forward" 2 ;; esac
-dir="${COORDINATION_HOME:-$HOME/.handoffs}/$charter"
+dir="${COORDINATION_HOME:-$HOME/Work/.handoffs}/$charter"
 lease="$dir/lease"
 
 reason="" handoff="" state=""

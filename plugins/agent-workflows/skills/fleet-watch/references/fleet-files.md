@@ -3,7 +3,7 @@
 The fleet watch keeps these on the control host; every coordinator reads
 them. Keep them out of repos.
 
-## Fleet file: `~/.handoffs/fleet.md` on the control host
+## Fleet file: `~/Work/.handoffs/fleet.md` on the control host
 
 One file for the whole fleet, whichever host a charter runs on. It holds
 machine facts every charter shares and names no project: which hosts or slots
@@ -35,7 +35,7 @@ each charter.
   (agent-workflows <version>: <what changed in launching, mail, or the lease>)
 
 ## Reservations
-In the caps file: `lane.sh reservations --fleet ~/.handoffs/fleet.json`.
+In the caps file: `lane.sh reservations --fleet ~/Work/.handoffs/fleet.json`.
 
 ## Charters
 | Charter | Charter file (host:path) |
@@ -59,7 +59,7 @@ coordinator that dies keeps the state it last wrote, so a `live` state with a
 registry; its charter and log keep its history. Lane counts are read live
 (`lane.sh slots`), never stored here.
 
-## Caps file: `~/.handoffs/fleet.json` on the control host
+## Caps file: `~/Work/.handoffs/fleet.json` on the control host
 
 Each lane host's cap, set only by `lane.sh cap` on the human's word (or a
 provisional call they granted), with the reason. A host with no entry takes
@@ -79,7 +79,7 @@ launch` refuses a lane on a reserved host to every charter but its owners
 are not stopped, so an exclusive window still drains before it opens. A
 device or account reservation is a record each coordinator reads with `lane.sh
 reservations`; `lane.sh slots` shows a host's in its last two columns. Pass
-`--fleet ~/.handoffs/fleet.json` (absolute) to every `lane.sh` call, and
+`--fleet ~/Work/.handoffs/fleet.json` (absolute) to every `lane.sh` call, and
 `--fleet-host <control host>` from any other host.
 
 ```json

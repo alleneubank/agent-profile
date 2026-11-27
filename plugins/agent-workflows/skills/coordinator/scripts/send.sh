@@ -13,7 +13,7 @@
 # relays. The target must be a live shell where an agent has reported an
 # attention state; a bare shell would run the line as a command. sox refuses
 # the write if the target's foreground changes after the check. The receipt
-# goes to $COORDINATION_HOME/<charter>/sent.log (~/.handoffs by default) on
+# goes to $COORDINATION_HOME/<charter>/sent.log (~/Work/.handoffs by default) on
 # this host.
 #
 # A target on this host that a lease names as its coordinator's shell is
@@ -53,7 +53,7 @@ sox_pinned() {
 }
 
 here=$(cd "$(dirname "$0")" && pwd)
-coordination=${COORDINATION_HOME:-$HOME/.handoffs}
+coordination=${COORDINATION_HOME:-$HOME/Work/.handoffs}
 charter="" role="" to="" kind="" wake=""
 while [ $# -gt 0 ]; do
   if [ "$1" = --wake-stood-down ]; then

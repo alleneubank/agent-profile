@@ -59,7 +59,7 @@
 #
 # drift checks the fleet with no agent: every capped host plus this one,
 # through sox and an ssh probe (a host key is also its ssh alias). It writes
-# ~/.handoffs/fleet-drift.txt, one line per finding (kind, subject, detail,
+# ~/Work/.handoffs/fleet-drift.txt, one line per finding (kind, subject, detail,
 # first seen, reported or pending), and prints what appeared or cleared:
 #   over <host>      more lanes than the cap
 #   bypass <host>    an agent shell under ~/Work with no lane, role or attended label
@@ -349,7 +349,7 @@ notify() {
 # drift_check: one pass. A load or memory finding is reported on its second
 # consecutive check; every other kind on its first.
 drift_check() {
-  file="${COORDINATION_HOME:-$HOME/.handoffs}/fleet-drift.txt"
+  file="${COORDINATION_HOME:-$HOME/Work/.handoffs}/fleet-drift.txt"
   previous=""
   [ -f "$file" ] && previous=$(cat "$file")
   # Run in this shell, not a substitution, so notify sees $rows_all.
