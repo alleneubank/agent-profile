@@ -223,13 +223,13 @@ restart the heartbeat.
    a lane that asks again gets a pointer to the answer. Before listing
    something as waiting on them, check the live sources for their having
    done it.
-4. If they are at the keyboard (an attended pass, a turn of theirs minutes
-   ago, or a question they just asked you) and no timed check falls due before
-   an answer could arrive, ask in one round through the harness's decision
-   interface. The round carries every open question, not only the one that
-   prompted it, in queue order and in as few questions as the harness
-   allows; where it caps questions per call, send several calls in the same
-   round. No item drops out to fit an option limit: when a question covers
+4. Run `sox presence` first. If it says they are here (where it does not
+   exist: they said they are here and have not left since) and no timed
+   check falls due before an answer could arrive, ask in one round through
+   the harness's decision interface. The round carries every open question,
+   not only the one that prompted it, in queue order and in as few questions
+   as the harness allows; where it caps questions per call, send several
+   calls in the same round. No item drops out to fit an option limit: when a question covers
    more items than it has options, name every item in its text and let the
    options act on the whole set (all now, choose in a reply, none now). If
    they put the round off ("not now"), the rest wait for their next round.

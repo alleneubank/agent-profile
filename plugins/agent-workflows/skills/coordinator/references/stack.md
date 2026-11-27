@@ -11,7 +11,7 @@ The coordinator runs on Claude Code (SKILL.md); these are its tools.
 
 | Need | Tool | Notes |
 |---|---|---|
-| Decision round | AskUserQuestion | Holds the session until answered, and heartbeats and monitors wait behind it: use it only when the human typed in this session recently and no timed check falls due first. |
+| Decision round | AskUserQuestion | Holds the session until answered, and heartbeats and monitors wait behind it: use it only when `sox presence` says the human is here and no timed check falls due first. While they are away, a hook denies it to a session holding a watch. |
 | Heartbeat | CronCreate | Session-only, fires only while the session is idle, recurring jobs expire after 7 days. Check `CronList` against the lease each pass. |
 | Lane watcher (law 10) | Monitor | Runs the [lane watcher](#lane-watcher) command with a 30-minute timeout (the cap); each stdout line wakes the session. On expiry or exit, re-arm in the next pass. Other event watchers work the same way and must emit on every terminal state, failures included. |
 | Reaching the human away from the terminal | PushNotification | Skipped when they are at the terminal; reaches their phone only through Remote Control. Use for their hands, not progress. |
