@@ -85,11 +85,16 @@ One command streams every lane's attention changes on every host and prints a
 line only for the ones a coordinator acts on:
 
 ```sh
-cd /tmp && env SOX_HOME=$HOME/.sox sox watch --all --json --label owner=<charter> --timeout 1790 2>/dev/null \
+cd /tmp && end=$((SECONDS+1790)); while [ $SECONDS -lt $end ]; do env SOX_HOME=$HOME/.sox sox watch --all --json --label owner=<charter> --timeout $((end-SECONDS)) 2>/dev/null; sleep 2; done \
   | jq -c --unbuffered 'select((.kind == "attention" and .previous != null and .state != "working") or (.kind == "host" and .status != "connected")) | {lane: .labels.lane, target, host, state, previous, status, reason}' \
   | bash -c 'while IFS= read -r l; do e=$((SECONDS+120)); while [ $SECONDS -lt $e ] && IFS= read -r -t $((e-SECONDS)) m; do l="$l $m"; done; printf "%s\n" "$l" | jq -cs .; done'
 ```
 
+- `sox watch` in a pipe can exit long before its `--timeout` (0xsend/sox#1443:
+  one run ended after 41 s of a 30-minute window), and the pipeline then ends
+  silently. The loop reopens it until the window ends. A change during the
+  2-second gap shows only in the reopened stream's snapshot, which the filter
+  drops: a pass after each wake reads every lane's state.
 - The last stage batches: the first event opens a 120-second window, and
   every event in it arrives as one line, a JSON array. Lanes often finish
   close together, and each line costs a full pass.
