@@ -19,6 +19,9 @@
 #              QUOTA     an account's weekly window at >= 90% or >= 97%;
 #              DISK      a caps-file host's home volume at >= 85% used, cleared
 #                only at <= 82% so a host hovering at the line reports once;
+#              DISK FLOOR  the same volume at >= 90% used, the fleet's 10% free
+#                floor, cleared at <= 87%, so a host already raised for DISK
+#                that keeps filling is reported again when it crosses the floor;
 #              HOST UNREACHABLE  a caps-file host failing plain ssh for 15+ min;
 #              SOURCE FAILED  lease.sh list, sox ls or agent-quota could not be
 #                read, so COORDINATOR or QUOTA exceptions are not being checked.
@@ -51,6 +54,8 @@ QUOTA_THRESHOLDS="97 90"
 HOST_DOWN_S=900
 DISK_USED_PERCENT_RAISE=85
 DISK_USED_PERCENT_CLEAR=82
+DISK_FLOOR_USED_PERCENT_RAISE=90
+DISK_FLOOR_USED_PERCENT_CLEAR=87
 
 usage() {
   sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//' >&2
@@ -347,6 +352,11 @@ host_exceptions() { # <fleet>
     elif [ "$used" -le "$DISK_USED_PERCENT_CLEAR" ]; then
       resolve "disk-$host"
     fi # between the two, what was reported stands
+    if [ "$used" -ge "$DISK_FLOOR_USED_PERCENT_RAISE" ]; then
+      report "disk-floor-$host" "DISK FLOOR $host ${used}% used (>= ${DISK_FLOOR_USED_PERCENT_RAISE}%: under the fleet's 10% free floor)"
+    elif [ "$used" -le "$DISK_FLOOR_USED_PERCENT_CLEAR" ]; then
+      resolve "disk-floor-$host"
+    fi
   done
 }
 

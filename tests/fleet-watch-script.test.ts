@@ -163,6 +163,7 @@ cat "${home}/ssh/$host"`,
       "QUOTA acct-a weekly 95% (>= 90%), resets 2026-11-08T08:00:00Z",
       "HOST UNREACHABLE down by plain ssh for 15+ min",
       "DISK full 90% used (>= 85%)",
+      "DISK FLOOR full 90% used (>= 90%: under the fleet's 10% free floor)",
       "DISK hover 85% used (>= 85%)",
     ]);
 
@@ -181,6 +182,7 @@ cat "${home}/ssh/$host"`,
       "QUOTA acct-a weekly 98% (>= 97%), resets 2026-11-08T08:00:00Z",
       "CLEARED HOST UNREACHABLE down by plain ssh for 15+ min",
       "CLEARED DISK full 90% used (>= 85%)",
+      "CLEARED DISK FLOOR full 90% used (>= 90%: under the fleet's 10% free floor)",
     ]);
 
     // hover is back at the line it never cleared from: only the quota changes print.
@@ -190,6 +192,10 @@ cat "${home}/ssh/$host"`,
       "CLEARED QUOTA acct-a weekly 98% (>= 97%), resets 2026-11-08T08:00:00Z",
       "CLEARED QUOTA acct-a weekly 95% (>= 90%), resets 2026-11-08T08:00:00Z",
     ]);
+
+    // hover, still raised for DISK, keeps filling: crossing the floor reports again.
+    host("hover", 91);
+    expect(run()).toEqual(["DISK FLOOR hover 91% used (>= 90%: under the fleet's 10% free floor)"]);
 
     // A source that cannot be read is its own exception, and what its class
     // had reported stands until it answers again.
