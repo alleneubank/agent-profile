@@ -5,7 +5,7 @@
 # metadata into the lane directory's kept/ folder under the coordination home,
 # $COORDINATION_HOME/<charter>/<lane>/kept (~/Work/.handoffs by default), then
 # compared before the root is deleted. There is no other destination, so
-# nothing kept stays under ~/Work. Use --keep . for the whole root. Every kept
+# nothing kept stays in the lane root. Use --keep . for the whole root. Every kept
 # path must exist; on failure the root survives, and a partial kept/ stays for
 # inspection, not reuse. Stop all writers first.
 # A linked git worktree under the root (submodules included) has its record

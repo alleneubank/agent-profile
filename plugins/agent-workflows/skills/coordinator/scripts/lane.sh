@@ -62,7 +62,8 @@
 # ~/Work/.handoffs/fleet-drift.txt, one line per finding (kind, subject, detail,
 # first seen, reported or pending), and prints what appeared or cleared:
 #   over <host>      more lanes than the cap
-#   bypass <host>    an agent shell under ~/Work with no lane, role or attended label
+#   bypass <host>    an agent shell under ~/Work, outside the coordination home
+#                    ~/Work/.handoffs, with no lane, role or attended label
 #   load <host>      load per core above LOAD_PER_CORE_MAX, two checks running
 #   memory <host>    free memory below FREE_PERCENT_MIN, two checks running
 #   blocked <charter> a coordinator on this host whose lease says blocked-on-human
@@ -302,7 +303,8 @@ findings() {
         printf 'over\t%s\t%s/%s lanes\n' "$each" "$lanes" "$limit"
       fi
       printf '%s\n' "$rows" | jq -r '
-        select(.attention != null and (.cwd // "" | contains("/Work/"))
+        select(.attention != null
+          and (.cwd // "" | contains("/Work/") and (contains("/Work/.handoffs/") or endswith("/Work/.handoffs") | not))
           and (.labels.lane // .labels.role // .labels.attended // "") == "")
         | "bypass\t\(.fleet_host)\t\(.backing_id) \(.cwd)"'
       [ "$(sox_name "$each")" != localhost ] || blocked_coordinators "$each" "$rows"
