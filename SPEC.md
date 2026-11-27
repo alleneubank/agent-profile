@@ -626,3 +626,70 @@ Dated entries; provisional statuses ratify only with human confirmation at the p
   soak-only prerequisite above. The exact law amendment is ratified for this
   isolated candidate; experiment execution and fleet adoption remain pending.
   (2026-09-20, ratified by the user's "apply it"; no behavioral improvement measured)
+
+## Coordinator session hooks
+
+`plugins/agent-workflows/hooks/coordinator-session.sh` holds two fleet rules
+by construction for sessions that hold a coordinator-type watch (coordinator,
+fleet-watch, or chief-of-staff): no blocking question while the human is away
+(issue #73), and a reload after compaction.
+
+### Requirements
+
+- REQ-COORD-HOOK-001 — **Scope:** a session holds a watch when an unreleased
+  lease under the coordination home (`$COORDINATION_HOME`, `~/.handoffs` by
+  default) records the hook input's `session_id`, as `lease.sh take` writes it.
+  Every other session, and a released watch, gets no output from either event.
+- REQ-COORD-HOOK-002 — **Question widget** (`PreToolUse`, matcher
+  `AskUserQuestion`): presence comes from `sox presence --json`, whose stdout
+  carries `"state":"here"` or `"state":"away"`; the exit status alone cannot
+  tell away from a sox without the command, which also exits 1.
+
+  | Presence | Decision |
+  |---|---|
+  | `here` | allow |
+  | `away` | deny |
+  | sox has the command (`sox help presence` exits 0) but the call failed, timed out, or printed no state | deny |
+  | no sox, or no presence command; inside `COORDINATOR_QUIET_HOURS` | deny |
+  | no sox, or no presence command; outside the window, or the variable unset or malformed | allow |
+
+  A denial is the documented `hookSpecificOutput` JSON with
+  `permissionDecision: "deny"`; its reason tells the agent to add the question
+  to "Waiting on the human" in its charter's `log.md` and continue with other
+  ready work.
+- REQ-COORD-HOOK-003 — **Quiet hours:** `COORDINATOR_QUIET_HOURS` is
+  `HH:MM-HH:MM <IANA zone>` (for example `22:00-07:00 America/New_York`); the
+  window may cross midnight, and a zone without a file under
+  `/usr/share/zoneinfo` (other than `UTC`) makes the value malformed. It is
+  set in private configuration, never in this repository.
+- REQ-COORD-HOOK-004 — **After compaction** (`SessionStart`, matcher
+  `compact`, and `"source":"compact"` in the input): `additionalContext` tells
+  the agent to invoke its role skill again, re-read the charter, log, lease,
+  and lane state, assume nothing is armed, and prune the charter. The unmatched
+  instruction-fingerprint `SessionStart` hook still runs on every source.
+- REQ-COORD-HOOK-005 — **Boundedness:** each sox call has its own deadline
+  (presence 2 s, help 1 s) inside the 5 s hook timeout.
+- REQ-COORD-HOOK-006 — **Harnesses:** Claude Code only. `lease.sh` requires a
+  Claude Code session id, so Codex, Antigravity, and pi sessions never hold a
+  watch; the agy adapter and the pi extension skip both events.
+
+### Invariants
+
+- Malformed input, an unreadable coordination home, or a host without sox
+  presence and quiet hours never removes the widget.
+- The hook writes no state and starts nothing that outlives it.
+
+### Decisions
+
+- 2026-11-27 — The lease is the role signal; no new marker. Its limit: a lease
+  kept under a coordination home other than `$COORDINATION_HOME` is not seen,
+  and that session keeps the widget. **provisional (driver)**
+- 2026-11-27 — A sox that has the presence command but cannot answer counts as
+  away, telling "errored after working" apart from "not installed" by
+  `sox help presence`, not by a stored record. **provisional (driver)**
+- 2026-11-27 — Observed on Claude Code 2.1.332 (`claude -p` with stream-json
+  input and `--permission-prompt-tool stdio`, where the widget exists): the
+  JSON deny reason reaches the model as the tool result
+  `PreToolUse:AskUserQuestion hook error: <reason>`; after `/compact` the
+  `additionalContext` is attached after the compaction summary and the model
+  quoted it on its next turn. **provisional (driver)**

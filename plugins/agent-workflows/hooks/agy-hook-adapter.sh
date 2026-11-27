@@ -9,6 +9,8 @@
 #
 #   SessionStart                -> hooks/instruction-fingerprint.sh SessionStart
 #   PreToolUse (run_command)    -> hooks/verifier-bypass-guard.sh
+#   coordinator-session.sh      -> skipped: only Claude Code sessions hold a
+#                                  coordinator lease
 #
 # Fail-open by design: a parse failure, missing python3, or script error never
 # blocks session start or unrelated commands.

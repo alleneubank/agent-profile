@@ -8,6 +8,7 @@
  *   hooks.json SessionStart            -> session_start  (instruction fingerprint)
  *   hooks.json PreToolUse (Bash/shell) -> tool_call      (verifier-bypass guard)
  *   hooks.json SubagentStart           -> (skipped: pi has no native subagents)
+ *   hooks.json coordinator-session.sh  -> (skipped: only Claude Code sessions hold a coordinator lease)
  *
  * Both hooks fail open by design: a script error, timeout, missing output, or
  * parse failure never blocks a tool call or pi startup (SPEC REQ-PI-002/003/004).
