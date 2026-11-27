@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { chmodSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -62,12 +62,12 @@ esac
   return { coordination, run, missingSox: join(home, "no-such-sox") };
 }
 
-function question(session: string) {
+function question(session: string, text = "Tea or coffee?") {
   return JSON.stringify({
     session_id: session,
     hook_event_name: "PreToolUse",
     tool_name: "AskUserQuestion",
-    tool_input: { questions: [{ question: "Tea or coffee?" }] },
+    tool_input: { questions: [{ question: text, header: "Drink", options: [{ label: "Tea" }, { label: "Coffee" }] }] },
   });
 }
 
@@ -97,6 +97,33 @@ describe("coordinator-session hook: the question widget", () => {
     expect(reason).toContain("Waiting on the human");
     expect(reason).toContain(join(coordination, "demo", "log.md"));
     expect(reason).toContain("continue with other ready work");
+    expect(reason).toContain("Only if nothing else in the charter can proceed");
+    expect(reason).toContain("[nothing else ready: <why>]");
+  });
+
+  it("opens a question that states the exception while away, and records it in the charter log", () => {
+    const { coordination, run, missingSox } = fixture();
+    const log = join(coordination, "demo", "log.md");
+    const stated = "[nothing else ready: every lane waits on the deploy go] Deploy now?";
+    for (const options of [{ presence: "away" }, { presence: "error" }, { sox: missingSox, quietHours: INSIDE }]) {
+      expect(run("PreToolUse", question(COORDINATOR, stated), options)).toMatchObject({ status: 0, stdout: "" });
+    }
+    const entries = readFileSync(log, "utf8").split("\n").filter((line) => line.startsWith("- "));
+    expect(entries).toHaveLength(3);
+    for (const entry of entries) {
+      expect(entry).toContain(COORDINATOR);
+      expect(entry).toContain("every lane waits on the deploy go");
+    }
+    expect(entries[0]).toContain("sox presence says the human is away");
+    expect(entries[2]).toContain("COORDINATOR_QUIET_HOURS");
+  });
+
+  it("denies an exception without a reason or not at the start of the question, and records nothing", () => {
+    const { coordination, run } = fixture();
+    for (const text of ["[nothing else ready: ] Deploy?", "[nothing else ready:    ] Deploy?", "Deploy? [nothing else ready: buried]"]) {
+      denial(run("PreToolUse", question(COORDINATOR, text), { presence: "away" }).stdout);
+    }
+    expect(existsSync(join(coordination, "demo", "log.md"))).toBe(false);
   });
 
   it("allows a coordinator's question while sox presence says here, even inside quiet hours", () => {
@@ -105,14 +132,18 @@ describe("coordinator-session hook: the question widget", () => {
     expect(result).toMatchObject({ status: 0, stdout: "" });
   });
 
-  it("leaves sessions without an unreleased lease alone", () => {
-    const { run } = fixture();
+  it("leaves sessions without an unreleased lease alone, exception or not", () => {
+    const { coordination, run } = fixture();
     for (const session of [LANE, PARKED]) {
-      expect(run("PreToolUse", question(session), { presence: "away", quietHours: INSIDE })).toMatchObject({
-        status: 0,
-        stdout: "",
-      });
+      for (const text of ["Tea?", "[nothing else ready: stuck] Tea?"]) {
+        expect(run("PreToolUse", question(session, text), { presence: "away", quietHours: INSIDE })).toMatchObject({
+          status: 0,
+          stdout: "",
+        });
+      }
     }
+    expect(existsSync(join(coordination, "demo", "log.md"))).toBe(false);
+    expect(existsSync(join(coordination, "old", "log.md"))).toBe(false);
   });
 
   it("denies when sox has a presence command that fails or hangs, within the hook's timeout", () => {

@@ -648,28 +648,36 @@ fleet-watch, or chief-of-staff): no blocking question while the human is away
   | Presence | Decision |
   |---|---|
   | `here` | allow |
-  | `away` | deny |
-  | sox has the command (`sox help presence` exits 0) but the call failed, timed out, or printed no state | deny |
-  | no sox, or no presence command; inside `COORDINATOR_QUIET_HOURS` | deny |
+  | `away` | deny, unless the exception is stated |
+  | sox has the command (`sox help presence` exits 0) but the call failed, timed out, or printed no state | deny, unless the exception is stated |
+  | no sox, or no presence command; inside `COORDINATOR_QUIET_HOURS` | deny, unless the exception is stated |
   | no sox, or no presence command; outside the window, or the variable unset or malformed | allow |
 
   A denial is the documented `hookSpecificOutput` JSON with
   `permissionDecision: "deny"`; its reason tells the agent to add the question
   to "Waiting on the human" in its charter's `log.md` and continue with other
-  ready work.
-- REQ-COORD-HOOK-003 — **Quiet hours:** `COORDINATOR_QUIET_HOURS` is
+  ready work, and names the exception.
+- REQ-COORD-HOOK-003 — **Exception:** for a charter where nothing else can
+  proceed, a question whose text starts with `[nothing else ready: <reason>]`
+  (a reason with at least one non-space character and no quote, backslash, or
+  bracket) opens while the human is away, in every deny row above. The hook
+  appends one line with the UTC time, why the human counts as away, the
+  session id, and the reason to the charter's `log.md`; the human also sees
+  the tag in the widget. A failed append is reported on stderr and does not
+  block the question.
+- REQ-COORD-HOOK-004 — **Quiet hours:** `COORDINATOR_QUIET_HOURS` is
   `HH:MM-HH:MM <IANA zone>` (for example `22:00-07:00 America/New_York`); the
   window may cross midnight, and a zone without a file under
   `/usr/share/zoneinfo` (other than `UTC`) makes the value malformed. It is
   set in private configuration, never in this repository.
-- REQ-COORD-HOOK-004 — **After compaction** (`SessionStart`, matcher
+- REQ-COORD-HOOK-005 — **After compaction** (`SessionStart`, matcher
   `compact`, and `"source":"compact"` in the input): `additionalContext` tells
   the agent to invoke its role skill again, re-read the charter, log, lease,
   and lane state, assume nothing is armed, and prune the charter. The unmatched
   instruction-fingerprint `SessionStart` hook still runs on every source.
-- REQ-COORD-HOOK-005 — **Boundedness:** each sox call has its own deadline
+- REQ-COORD-HOOK-006 — **Boundedness:** each sox call has its own deadline
   (presence 2 s, help 1 s) inside the 5 s hook timeout.
-- REQ-COORD-HOOK-006 — **Harnesses:** Claude Code only. `lease.sh` requires a
+- REQ-COORD-HOOK-007 — **Harnesses:** Claude Code only. `lease.sh` requires a
   Claude Code session id, so Codex, Antigravity, and pi sessions never hold a
   watch; the agy adapter and the pi extension skip both events.
 
@@ -677,7 +685,8 @@ fleet-watch, or chief-of-staff): no blocking question while the human is away
 
 - Malformed input, an unreadable coordination home, or a host without sox
   presence and quiet hours never removes the widget.
-- The hook writes no state and starts nothing that outlives it.
+- The hook writes only the exception line in the charter's log, and starts
+  nothing that outlives it.
 
 ### Decisions
 
@@ -693,3 +702,13 @@ fleet-watch, or chief-of-staff): no blocking question while the human is away
   `PreToolUse:AskUserQuestion hook error: <reason>`; after `/compact` the
   `additionalContext` is attached after the compaction summary and the model
   quoted it on its next turn. **provisional (driver)**
+- 2026-11-27 — The exception is stated in the question text, not an
+  environment variable or a new tool field: the hook already receives it, the
+  agent must write the tag on purpose, and the human reads the reason in the
+  widget as well as in the log. Human's ruling on PR #89: "build an exception
+  into it since this will get annoying without it in exceptional cases when i
+  do need to attend." **ratified (human)**
+- 2026-11-27 — Accepted by the human, not gaps: nothing wakes a coordinator
+  when the human returns (the fleet watch announces it for now), and a
+  coordinator session the human is typing in is denied while presence says
+  away. **ratified (human)**

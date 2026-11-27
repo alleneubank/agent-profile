@@ -244,7 +244,9 @@ restart the heartbeat.
    for one, naming what it leaves to remove.
    Otherwise put the questions in "Waiting on the human", batched by theme
    with the time each batch needs, and notify them only for what needs their
-   hands before they would otherwise look. A due check fires first.
+   hands before they would otherwise look. A due check fires first. Only
+   when nothing else in the charter can proceed, ask while they are away,
+   starting the question with `[nothing else ready: <why>]`.
 5. Close the round: record each answer in the charter with its time, and in
    the same act set its queue line to `ready`, or `gated` with the gate
    named. An answer that settles intent or taste also goes into `VISION.md`,

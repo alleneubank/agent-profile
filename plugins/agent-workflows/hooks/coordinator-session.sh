@@ -22,6 +22,11 @@
 #      window and an IANA zone such as "22:00-07:00 America/New_York", decides;
 #      unset or malformed means no quiet hours, so the question is allowed.
 #
+# Exception: while the human is away, a question whose text starts with
+# "[nothing else ready: <reason>]" opens anyway, for a charter where nothing
+# else can proceed. The hook appends the reason, time, and session to the
+# charter's log.md, and the human sees the tag in the widget.
+#
 # Fail-open by design outside step 2: malformed hook input, an unreadable
 # coordination home, or a host without sox presence never removes the widget.
 # Tests override COORDINATION_HOME and SOX_BIN.
@@ -32,6 +37,7 @@ input="$(cat 2>/dev/null)" || input=""
 
 readonly PRESENCE_TIMEOUT_SECONDS=2
 readonly PRESENCE_HELP_TIMEOUT_SECONDS=1
+readonly EXCEPTION_TAG='[nothing else ready: '
 readonly QUIET_HOURS_FORMAT='^([0-9]{2}):([0-9]{2})-([0-9]{2}):([0-9]{2})[[:space:]]+([A-Za-z0-9_+/-]+)$'
 
 session="$(printf '%s' "$input" | sed -n -E 's/.*"session_id"[[:space:]]*:[[:space:]]*"([A-Za-z0-9._-]+)".*/\1/p' | head -n 1)"
@@ -123,9 +129,26 @@ json_string() {
     printf '%s' "${text//\"/\\\"}"
 }
 
+# stated_exception: the reason in the first question text that starts with
+# the exception tag, empty when none does. A reason ends at the closing
+# bracket, a quote, or a backslash, so it stays one line of plain text.
+stated_exception() {
+    local pattern='"question"[[:space:]]*:[[:space:]]*"\[nothing else ready: ([^]"\\]*[^][:space:]"\\][^]"\\]*)\]'
+    [[ "$input" =~ $pattern ]] && printf '%s' "${BASH_REMATCH[1]}"
+}
+
+# deny_question <why away>: allow the question when it states the exception,
+# recording it in the charter log; otherwise deny it.
 deny_question() {
-    local reason
-    reason="Do not open a question now: $1. Add it to the \"Waiting on the human\" list in $charter_dir/log.md and continue with other ready work; ask it in a decision round once the human is here."
+    local exception reason
+    exception="$(stated_exception)"
+    if [[ -n "$exception" ]]; then
+        printf '\n- %s question widget opened while away (%s) by session %s, nothing else ready: %s\n' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$session" "$exception" >> "$charter_dir/log.md" ||
+            echo "coordinator-session: could not record the exception in $charter_dir/log.md" >&2
+        exit 0
+    fi
+    reason="Do not open a question now: $1. Add it to the \"Waiting on the human\" list in $charter_dir/log.md and continue with other ready work; ask it in a decision round once the human is here. Only if nothing else in the charter can proceed, retry with the question's text starting with \"${EXCEPTION_TAG}<why>]\"; the reason is recorded in that log."
     printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}\n' \
         "$(json_string "$reason")"
     exit 0
