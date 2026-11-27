@@ -979,7 +979,7 @@ describe("lane.sh drift", () => {
     expect(recorded).toContain("load\tonyx\t55.0 per core\t2026-10-12T02:00:00Z\treported\n");
   });
 
-  it("lists a blocked coordinator without sending it anything, an unlabeled agent under ~/Work as a bypass, and an unreachable host as unknown", async () => {
+  it("lists a blocked coordinator without sending it anything, an unlabeled agent under ~/Work outside the coordination home as a bypass, and an unreachable host as unknown", async () => {
     const f = await lanes();
     await f.cap("onyx", 4);
     await f.cap("ae-dev", 4);
@@ -991,6 +991,7 @@ describe("lane.sh drift", () => {
     f.add(lane("a", "boss"));
     f.add({ host: "onyx", backing_id: "s5.g1", cwd: "/home/ae/Work/alleneubank/x" });
     f.add({ host: "onyx", backing_id: "s6.g1", cwd: "/home/ae/alleneubank/x" });
+    f.add({ host: "onyx", backing_id: "s7.g1", cwd: "/home/ae/Work/.handoffs/boss" });
     f.add({ host: "onyx", backing_id: "s4.g1", cwd: "/home/ae/Work/y", attention: null });
 
     const lines = (await f.drift()).stdout.split("\n").filter(Boolean).sort();
