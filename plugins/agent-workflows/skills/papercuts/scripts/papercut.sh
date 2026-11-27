@@ -13,7 +13,7 @@
 # With nothing queued it prints nothing and exits 0.
 #
 # Exit: 0 recorded or taken, 2 usage, 3 report too long.
-# Tests override SHARPENING_HOME; it defaults to ~/.handoffs/sharpening.
+# Tests override SHARPENING_HOME; it defaults to ~/Work/.handoffs/sharpening.
 set -eu
 
 REPORT_CHARS_MAX=1000
@@ -23,7 +23,7 @@ usage() {
   exit 2
 }
 
-home=${SHARPENING_HOME:-$HOME/.handoffs/sharpening}
+home=${SHARPENING_HOME:-$HOME/Work/.handoffs/sharpening}
 queue="$home/papercuts.md"
 now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 

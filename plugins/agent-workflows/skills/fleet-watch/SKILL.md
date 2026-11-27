@@ -22,9 +22,9 @@ PATH on every host; it launches no lanes, so law 11 never arises. Where this
 skill is silent, the coordinator's procedures apply to the watch's own
 charter.
 
-Its files on the control host: the charter `~/.handoffs/fleet-watch/charter.md`
+Its files on the control host: the charter `~/Work/.handoffs/fleet-watch/charter.md`
 (Standing: the human's grants and rules for the watch; decisions since the
-last prune), the log `~/.handoffs/fleet-watch/log.md`, whose `## Inbox` takes
+last prune), the log `~/Work/.handoffs/fleet-watch/log.md`, whose `## Inbox` takes
 messages while no one holds the watch, and the fleet's shared files it keeps:
 the fleet file and the caps file ([fleet-files.md](references/fleet-files.md)).
 Reading hosts through sox: [hosts.md](references/hosts.md). Its commands:
@@ -76,7 +76,7 @@ Reading hosts through sox: [hosts.md](references/hosts.md). Its commands:
    shell: once its final message is in, retire it with `sox kill
    <host>/<shell>` unless the human started it.
 4. Start the exception monitor as a background job:
-   `fleet-watch.sh exceptions --fleet ~/.handoffs/fleet.json --state
+   `fleet-watch.sh exceptions --fleet ~/Work/.handoffs/fleet.json --state
    ~/Work/fleet-watch/exceptions`. Run one pass; a charter without a
    Standing section is pruned in it.
 
@@ -105,7 +105,7 @@ A message or a monitor line wakes the watch; no timer does.
    list; a quota or disk line gets the nudges below; an unreachable host gets
    a diagnosis.
 3. When the wake needs the fleet's picture, run `fleet-watch.sh pass --fleet
-   ~/.handoffs/fleet.json`: the lease, lane slots per host, each
+   ~/Work/.handoffs/fleet.json`: the lease, lane slots per host, each
    coordinator's attention and transcript age, load and disk per host. Check
    the nudge conditions it shows.
 4. Log only what changed, and restart the monitor.

@@ -25,7 +25,7 @@ from the pinned profile), so a brief names them bare. Each script's header is
 its reference. The caller is `CLAUDE_CODE_SESSION_ID` in the shell `sox which`
 names; the target's foreground comes from `sox ls <host>`, and `sox send
 --expect-fg` refuses if it changes before the write. Receipts go to
-`~/.handoffs/<charter>/sent.log` on the sending host.
+`~/Work/.handoffs/<charter>/sent.log` on the sending host.
 They need bash 3.2 or later and coreutils; `lane.sh` needs jq and, from a
 host other than the fleet's, ssh.
 `lease.sh state <c> --state <word>` writes the state in the lease (exit 5
@@ -34,7 +34,7 @@ After stopping a lane's writers and resources, run on its host:
 `retire.sh --root <lane root> --delete --charter <c> --lane <l> --keep <relative path>`.
 Repeat `--keep` for separate paths, or use `--keep .` for the whole root;
 omit `--keep` when nothing is kept. Kept paths land in
-`~/.handoffs/<c>/<l>/kept/`, the only destination, so the lane directory must
+`~/Work/.handoffs/<c>/<l>/kept/`, the only destination, so the lane directory must
 exist on that host. A missing kept path refuses before anything is copied.
 Copy or verification failure leaves the root and the partial `kept/`; inspect
 and remove that partial copy before retrying.

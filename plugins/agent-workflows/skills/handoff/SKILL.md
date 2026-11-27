@@ -5,7 +5,7 @@ description: Use when preserving enough task context for another agent or future
 
 # Handoff
 
-Create a concise, standalone handoff in `~/.handoffs/` when work is incomplete,
+Create a concise, standalone handoff in `~/Work/.handoffs/` when work is incomplete,
 blocked, or ready for another agent to pick up.
 
 A ship/pivot/wait moment is a session boundary: right after a merge, release,
@@ -23,7 +23,7 @@ handoff references their Decisions rather than forking them.
    - uncommitted and staged change summary
    - recent relevant commits
    - task requested, decisions made, and current terminal state
-2. Write to `~/.handoffs/handoff-<repo>-<shortname>-<timestamp>.md`.
+2. Write to `~/Work/.handoffs/handoff-<repo>-<shortname>-<timestamp>.md`.
 3. Front-load the next action: the title and opening lines answer "what do I do now."
 4. Include concrete file paths, commands, identifiers, and constraints.
 

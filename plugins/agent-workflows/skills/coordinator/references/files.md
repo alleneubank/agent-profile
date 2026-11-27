@@ -8,17 +8,17 @@ ssh quoting.
 
 ## Fleet file and caps file
 
-`~/.handoffs/fleet.md` (hosts, rules, Roster, devices, the
-charter registry: charter and charter file only) and `~/.handoffs/fleet.json` (lane caps and
+`~/Work/.handoffs/fleet.md` (hosts, rules, Roster, devices, the
+charter registry: charter and charter file only) and `~/Work/.handoffs/fleet.json` (lane caps and
 reservations) on the control
 host are the fleet's, kept by the fleet watch; their shapes are in the
 fleet-watch skill's [fleet-files.md](../../fleet-watch/references/fleet-files.md).
 A coordinator reads both, writes only its own charter's reservations
-(`lane.sh reserve --owners <charter>`; its state goes in its lease), and passes `--fleet ~/.handoffs/fleet.json`
+(`lane.sh reserve --owners <charter>`; its state goes in its lease), and passes `--fleet ~/Work/.handoffs/fleet.json`
 (absolute) to every `lane.sh` call, with `--fleet-host <control host>` from
 any other host.
 
-## Charter: `~/.handoffs/<charter>/charter.md`
+## Charter: `~/Work/.handoffs/<charter>/charter.md`
 
 ```markdown
 # <charter> coordinator charter
@@ -112,7 +112,7 @@ text before it replaces the charter.
 The charter on the control host is the only authority. Lanes get briefs and
 addenda; a charter copied to a lane host is a hint, never a source.
 
-## Lease: `~/.handoffs/<charter>/lease`
+## Lease: `~/Work/.handoffs/<charter>/lease`
 
 Written only by `scripts/lease.sh` (take, release, state); read with `show`,
 `list`, and `check`. `key=value` lines: `charter`, `watch`, `session`,
@@ -133,7 +133,7 @@ session and shell. A successor's take revokes the prior caller. `show` and
 a coordinator that dies keeps the state it last wrote. Never remove a lock
 without attributing its writer.
 
-## Log: `~/.handoffs/<charter>/log.md`
+## Log: `~/Work/.handoffs/<charter>/log.md`
 
 One "Waiting on the human" heading, rewritten in place and followed by
 `## Log`, so it reads on its own; detail lives behind each item's link.
@@ -150,7 +150,7 @@ One "Waiting on the human" heading, rewritten in place and followed by
   <lane> on <host/sN.gM>; ...>
 ```
 
-## Themes: `~/.handoffs/<charter>/themes.md`
+## Themes: `~/Work/.handoffs/<charter>/themes.md`
 
 ```markdown
 # <charter> themes (portfolio review <UTC time>)
@@ -168,7 +168,7 @@ Decisions for the human: <pointer into Waiting on the human>
 A theme's lane limit caps lanes within the charter's budgets; it never raises
 them.
 
-## Queue: `~/.handoffs/<charter>/queue`
+## Queue: `~/Work/.handoffs/<charter>/queue`
 
 One tab-separated line per item, in the human's order (theme order, then
 item order), the first `ready` line next:
@@ -188,13 +188,13 @@ A stocktake script, when the workspace has one, reads live sources only and
 prints running, finished, and parked work per lane; the subagent compares it
 with these files.
 
-## Lane directory: `~/.handoffs/<charter>/<lane>/`
+## Lane directory: `~/Work/.handoffs/<charter>/<lane>/`
 
 `brief.md`, `addendum-N.md`, `run.sh`, `report.md`, `worker.log`,
 `worker.exit`, `resources` (one line per footprint item outside the lane
 root: host, what it is, its teardown command), and `kept/`, where `retire.sh`
 puts what the lane's retirement keeps (its evidence and unpushed work). Agent mail receipts go to
-`~/.handoffs/<charter>/sent.log` on the sending host. Copy the brief and each
+`~/Work/.handoffs/<charter>/sent.log` on the sending host. Copy the brief and each
 addendum to the lane host before launching or pointing the lane at it.
 
 The brief carries: Outcome. Acceptance (evidence to show). Gates: each
@@ -251,7 +251,7 @@ and expire after 7 days.
 
 ## Window agreement
 
-Before an unattended window starts, write `~/.handoffs/<charter>/window-<UTC date>.md`
+Before an unattended window starts, write `~/Work/.handoffs/<charter>/window-<UTC date>.md`
 and add one Standing Grants line in the charter pointing to it. Cite standing grants
 and decisions by their charter line instead of copying them. When the window
 ends, prune the charter (Pruning), delete the window file once its report is

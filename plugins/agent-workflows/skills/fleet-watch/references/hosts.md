@@ -48,4 +48,4 @@ the machine. Launch on the control host with a bare `sox new`, never
 While many coordinators run at once, the fleet watch also starts
 `lane.sh drift --fleet <caps file> --every 300 --stop-at <end>` in a sox shell
 on the control host labeled `role=fleet-check`, and kills it at the end. It
-costs no agent turns; its findings are in `~/.handoffs/fleet-drift.txt`.
+costs no agent turns; its findings are in `~/Work/.handoffs/fleet-drift.txt`.

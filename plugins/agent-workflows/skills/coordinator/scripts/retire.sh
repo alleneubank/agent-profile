@@ -3,7 +3,7 @@
 #   retire.sh --root PATH --delete --charter NAME --lane NAME [--keep RELATIVE_PATH ...]
 # Kept paths (unpushed work, evidence records and bundles) are copied with
 # metadata into the lane directory's kept/ folder under the coordination home,
-# $COORDINATION_HOME/<charter>/<lane>/kept (~/.handoffs by default), then
+# $COORDINATION_HOME/<charter>/<lane>/kept (~/Work/.handoffs by default), then
 # compared before the root is deleted. There is no other destination, so
 # nothing kept stays under ~/Work. Use --keep . for the whole root. Every kept
 # path must exist; on failure the root survives, and a partial kept/ stays for
@@ -43,7 +43,7 @@ root=$(cd "$root" && pwd -P)
 for name in "$charter" "$lane"; do
   case "$name" in ''|.|..|*/*) fail "--charter and --lane must each name one directory" 2 ;; esac
 done
-lane_directory="${COORDINATION_HOME:-$HOME/.handoffs}/$charter/$lane"
+lane_directory="${COORDINATION_HOME:-$HOME/Work/.handoffs}/$charter/$lane"
 [ -d "$lane_directory" ] || fail "no lane directory: $lane_directory" 2
 destination=$(cd "$lane_directory" && pwd -P)/kept
 case "$destination/" in "$root/"*) fail "the lane directory must be outside the root" 2 ;; esac

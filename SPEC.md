@@ -287,7 +287,7 @@ guidance is not counted as universally loaded context.
 
 - 2026-11-01 — A retired lane keeps nothing in its root. `retire.sh` takes
   `--charter` and `--lane` and copies every kept path (evidence and unpushed
-  work) into `~/.handoffs/<charter>/<lane>/kept/`, its only destination,
+  work) into `~/Work/.handoffs/<charter>/<lane>/kept/`, its only destination,
   before deleting the root; it refuses on a missing kept path or an unknown
   lane directory. Large bundles are copied like anything else, not replaced
   by a pointer, since a pointer's target would sit outside the coordination
