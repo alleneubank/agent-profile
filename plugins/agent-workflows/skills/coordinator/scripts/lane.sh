@@ -124,8 +124,10 @@ now() {
 }
 
 # Run sox from /tmp so no directory's .envrc re-points the sox home.
+# SOX_AGENT is dropped: a client carrying SOX_AGENT=none that finds the daemon
+# down starts it with no agent, and every remote host is lost (0xsend/sox#1453).
 sox_pinned() {
-  (cd /tmp && env SOX_HOME="$HOME/.sox" "${SOX_BIN:-sox}" "$@")
+  (cd /tmp && env -u SOX_AGENT SOX_HOME="$HOME/.sox" "${SOX_BIN:-sox}" "$@")
 }
 
 # sox_name <host>: the name sox reaches a fleet host by from here.

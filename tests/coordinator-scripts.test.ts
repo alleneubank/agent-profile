@@ -532,6 +532,7 @@ case "$1" in
     echo '{"kind":"summary","complete":true}' ;;
   new)
     printf '%s\\n' "$*" >> "${home}/launched"
+    [ -z "\${SOX_AGENT+set}" ] || printf '%s\\n' "$SOX_AGENT" >> "${home}/sox-agent"
     id="s$$.g1"
     jq -cn --arg host "$2" --arg id "$id" '{kind:"shell",host:$host,backing_id:$id,status:"live",labels:null}' >> "$rows"
     if [ "$2" = localhost ]; then echo "$id"; else echo "$2/$id"; fi ;;
@@ -594,6 +595,8 @@ exit "$(cat "${home}/pretrust-exit-$where" 2>/dev/null || echo 0)"
       LANE_HOSTNAME: "control",
       LANE_LOCK_WAIT_SECONDS: "2",
       LANE_SSH: ssh,
+      // A caller's SOX_AGENT=none must not reach sox (0xsend/sox#1453).
+      SOX_AGENT: "none",
     };
     if (who) {
       e.CLAUDE_CODE_SESSION_ID = who.session;
@@ -657,6 +660,7 @@ describe("lane.sh", () => {
     expect(first.stdout).toMatch(/^onyx\ts\d+\.g1\t1\t1\n$/);
     expect(f.shells()[0].labels).toEqual({ owner: "demo", charter: "demo", lane: "glyphs", launcher: "yolosonnet" });
     expect(f.launched()).toEqual(["new onyx --no-attach --exec -- /lanes/run.sh"]);
+    expect(existsSync(join(f.home, "sox-agent"))).toBe(false);
 
     const second = await f.run(LANE, f.launch("onyx", "fonts"));
     expect(second.status).toBe(7);
