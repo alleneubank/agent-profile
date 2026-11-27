@@ -421,7 +421,7 @@ The watch changes hands only when the session has ended or the human asks
   as standing until the human rules.
 - **Triage:** a read-only triager lane after each batch of lanes finds what
   the closure and funding grants cover ([triage.md](references/triage.md);
-  grant examples in [files.md](references/files.md#charter-handoffscharterchartermd)).
+  grant examples in [files.md](references/files.md#charter-workhandoffscharterchartermd)).
 - **Hold:** "hold <scope>" stops launching, landing, and relaying in that
   scope until the human lifts it; watching, verifying, and reporting
   continue. Record it in the charter like a grant.
