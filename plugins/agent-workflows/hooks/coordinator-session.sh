@@ -10,7 +10,7 @@
 #     reload its role skill, re-read its charter, and prune it.
 #
 # Scope: the session holds a watch when an unreleased lease under the
-# coordination home ($COORDINATION_HOME, ~/.handoffs by default) records the
+# coordination home ($COORDINATION_HOME, ~/Work/.handoffs by default) records the
 # hook's session_id; lease.sh writes the Claude Code session id there. Every
 # other session (attended work, lanes, released watches) gets no output.
 #
@@ -50,7 +50,7 @@ session="$(printf '%s' "$input" | sed -n -E 's/.*"session_id"[[:space:]]*:[[:spa
 # lease in another charter is left out instead of hiding the ones after it.
 leases=()
 shopt -s nullglob
-for lease in "${COORDINATION_HOME:-$HOME/.handoffs}"/*/lease; do
+for lease in "${COORDINATION_HOME:-$HOME/Work/.handoffs}"/*/lease; do
     [[ -f "$lease" && -r "$lease" ]] && leases+=("$lease")
 done
 shopt -u nullglob

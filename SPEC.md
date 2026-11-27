@@ -637,7 +637,7 @@ fleet-watch, or chief-of-staff): no blocking question while the human is away
 ### Requirements
 
 - REQ-COORD-HOOK-001 — **Scope:** a session holds a watch when an unreleased
-  lease under the coordination home (`$COORDINATION_HOME`, `~/.handoffs` by
+  lease under the coordination home (`$COORDINATION_HOME`, `~/Work/.handoffs` by
   default) records the hook input's `session_id`, as `lease.sh take` writes it.
   Every other session, and a released watch, gets no output from either event.
 - REQ-COORD-HOOK-002 — **Question widget** (`PreToolUse`, matcher
