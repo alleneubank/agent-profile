@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -32,6 +32,7 @@ case "$STUB_PRESENCE:$1 $2" in
   missing:*) echo "sox: unknown command '$1'" >&2; exit 1 ;;
   *:"help presence") exit 0 ;;
   here:"presence --json") echo '{"state":"here","since":"2026-11-27T20:00:00Z"}' ;;
+  nested:"presence --json") echo '{"state":"away","devices":[{"state":"here"}]}' ;;
   away:"presence --json") echo '{"state":"away"}'; exit 1 ;;
   error:"presence --json") echo "presence: daemon unreachable" >&2; exit 3 ;;
   hang:"presence --json") exec sleep 30 ;;
@@ -44,10 +45,18 @@ esac
   function run(
     event: string,
     input: string,
-    options: { presence?: string; sox?: string; quietHours?: string } = {},
+    options: { presence?: string; sox?: string; quietHours?: string; clock?: string } = {},
   ) {
+    // A fixed wall clock: a date that answers the hook's +%H:%M and nothing else.
+    let path = process.env.PATH ?? "/usr/bin:/bin";
+    if (options.clock !== undefined) {
+      const bin = mkdtempSync(join(home, "clock-"));
+      writeFileSync(join(bin, "date"), `#!/bin/bash\n[[ "$1" == "+%H:%M" ]] && echo "${options.clock}" || exec /bin/date "$@"\n`);
+      chmodSync(join(bin, "date"), 0o755);
+      path = `${bin}:${path}`;
+    }
     const env: Record<string, string> = {
-      PATH: process.env.PATH ?? "/usr/bin:/bin",
+      PATH: path,
       HOME: home,
       COORDINATION_HOME: coordination,
       SOX_BIN: options.sox ?? sox,
@@ -168,6 +177,30 @@ describe("coordinator-session hook: the question widget", () => {
       });
       expect(run("PreToolUse", question(COORDINATOR), { sox })).toMatchObject({ status: 0, stdout: "" });
     }
+  });
+
+  it("holds a window across midnight at its edges, start included and end excluded", () => {
+    const { run, missingSox } = fixture();
+    const at = (clock: string, quietHours = "22:00-08:09 America/Chicago") =>
+      run("PreToolUse", question(COORDINATOR), { sox: missingSox, quietHours, clock }).stdout !== "";
+    expect(["22:00", "23:59", "00:00", "08:08"].map((clock) => at(clock))).toEqual([true, true, true, true]);
+    expect(["21:59", "08:09", "09:08", "12:00"].map((clock) => at(clock))).toEqual([false, false, false, false]);
+    expect(at("03:00", "  22:00-08:00 America/Chicago ")).toBe(true);
+  });
+
+  it("finds its lease past an unreadable or dangling lease in another charter", () => {
+    const { coordination, run } = fixture();
+    mkdirSync(join(coordination, "aaa"));
+    symlinkSync(join(coordination, "no-such-file"), join(coordination, "aaa", "lease"));
+    mkdirSync(join(coordination, "aab"));
+    writeFileSync(join(coordination, "aab", "lease"), "charter=aab\n");
+    chmodSync(join(coordination, "aab", "lease"), 0o000);
+    denial(run("PreToolUse", question(COORDINATOR), { presence: "away" }).stdout);
+  });
+
+  it("reads the report's own state, not a nested one", () => {
+    const { run } = fixture();
+    denial(run("PreToolUse", question(COORDINATOR), { presence: "nested" }).stdout);
   });
 
   it("treats malformed quiet hours as none", () => {

@@ -38,14 +38,21 @@ input="$(cat 2>/dev/null)" || input=""
 readonly PRESENCE_TIMEOUT_SECONDS=2
 readonly PRESENCE_HELP_TIMEOUT_SECONDS=1
 readonly EXCEPTION_TAG='[nothing else ready: '
-readonly QUIET_HOURS_FORMAT='^([0-9]{2}):([0-9]{2})-([0-9]{2}):([0-9]{2})[[:space:]]+([A-Za-z0-9_+/-]+)$'
+readonly QUIET_HOURS_FORMAT='^[[:space:]]*([0-9]{2}):([0-9]{2})-([0-9]{2}):([0-9]{2})[[:space:]]+([A-Za-z0-9_+/-]+)[[:space:]]*$'
 
 session="$(printf '%s' "$input" | sed -n -E 's/.*"session_id"[[:space:]]*:[[:space:]]*"([A-Za-z0-9._-]+)".*/\1/p' | head -n 1)"
 [[ -n "$session" ]] || exit 0
+# Without a home there is no coordination home and no sox home to look in.
+[[ -n "${HOME:-}" ]] || exit 0
 
 # The lease file of the first unreleased watch this session holds, if any.
+# awk stops at the first file it cannot open, so an unreadable or dangling
+# lease in another charter is left out instead of hiding the ones after it.
+leases=()
 shopt -s nullglob
-leases=("${COORDINATION_HOME:-$HOME/.handoffs}"/*/lease)
+for lease in "${COORDINATION_HOME:-$HOME/.handoffs}"/*/lease; do
+    [[ -f "$lease" && -r "$lease" ]] && leases+=("$lease")
+done
 shopt -u nullglob
 [[ ${#leases[@]} -gt 0 ]] || exit 0
 held_lease="$(awk -v holder="session=$session" '
@@ -90,7 +97,10 @@ presence() {
         return
     fi
     report="$(run_bounded "$PRESENCE_TIMEOUT_SECONDS" "$sox_bin" presence --json)"
-    state="$(printf '%s' "$report" | sed -n -E 's/.*"state"[[:space:]]*:[[:space:]]*"(here|away)".*/\1/p' | head -n 1)"
+    # The first "state" is the report's own; nested objects come after it.
+    state="$(printf '%s' "$report" | grep -o -E '"state"[[:space:]]*:[[:space:]]*"(here|away)"' | head -n 1)"
+    state="${state%\"}"
+    state="${state##*\"}"
     if [[ -n "$state" ]]; then
         echo "$state"
     elif run_bounded "$PRESENCE_HELP_TIMEOUT_SECONDS" "$sox_bin" help presence >/dev/null; then
